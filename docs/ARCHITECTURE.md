@@ -811,12 +811,10 @@ Eventify/                                     # repo root
 │       └── *.mermaid / *.png
 │
 ├── src/
-│   ├── BuildingBlocks/                       # shared libraries
-│   │   ├── Eventify.BuildingBlocks.Domain/
-│   │   ├── Eventify.BuildingBlocks.Application/
-│   │   ├── Eventify.BuildingBlocks.Infrastructure/
-│   │   ├── Eventify.BuildingBlocks.IntegrationEvents/   # event contracts
-│   │   └── Eventify.BuildingBlocks.IntegrationContracts.Grpc/  # .proto files
+│   ├── BuildingBlocks/                       # shared libraries (folder; projects below)
+│   │   ├── Eventify.SharedKernel/            # Domain/Application/Infrastructure base classes — single consolidated project
+│   │   ├── Eventify.IntegrationEvents/       # cross-service event contracts
+│   │   └── Eventify.IntegrationContracts.Grpc/  # .proto files (added with Catalog gRPC)
 │   │
 │   ├── Services/
 │   │   ├── Identity/
@@ -892,6 +890,18 @@ postgres (single container)
 ```
 
 Each service connects only to its own database with a dedicated user. No `GRANT` across databases.
+
+### Identifiers
+
+- All entity IDs use **UUIDv7** (`Guid.CreateVersion7()`). Timestamp-prefixed Guids preserve B-tree locality on Postgres primary keys, avoiding index fragmentation that random v4 Guids cause on insert.
+- Aggregates use **strongly-typed IDs** as `readonly record struct` (e.g., `public readonly record struct ArtistId(Guid Value)`). Prevents accidental `customerId` ↔ `orderId` mix-ups at compile time; mapped to `uuid` columns via EF Core value converters.
+- `IDomainEvent.EventId` and `IntegrationEvent.Id` also use UUIDv7 — gives stable, time-sortable identifiers for tracing and ordering.
+
+### Audit & domain event dispatch
+
+- `Entity<TId>` carries `CreatedAt` / `UpdatedAt`. Setters are exposed only via the internal `IAuditable` interface (assembly-scoped to `SharedKernel`), so external code cannot mutate audit fields.
+- `AggregateRoot<TId>` exposes `DomainEvents` as read-only collection plus `RaiseDomainEvent` (protected). Clearing happens via the internal `IClearableAggregate` interface — only the SharedKernel infrastructure can clear.
+- Audit population and domain event dispatch are implemented as **EF Core `ISaveChangesInterceptor`** (registered against every service `DbContext`). No `SaveChangesAsync` overrides per service.
 
 ### Migrations
 
