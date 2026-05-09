@@ -72,6 +72,16 @@ Two projects in `src/BuildingBlocks/`:
 
 **MediatR 12.2 pin:** `RequestHandlerDelegate<TResponse>` does not accept `CancellationToken` in 12.2. Pipeline behaviors call `next()` not `next(cancellationToken)`. If bumped to 12.5+, update `LoggingBehavior` and `ValidationBehavior`.
 
+**Error handling:** Application handlers return `ErrorOr<TResult>` (uses `ErrorOr` library). Business errors → `Error.NotFound/Conflict/Validation/Unauthorized/Failure`. `DomainException` only for invariant bugs that should never reach Domain. No try/catch in handlers; endpoints end with `result.Match(success, errs => errs.ToProblemDetails())`. Full rationale in `docs/ARCHITECTURE.md` §8.3.
+
+**Endpoints:** Minimal APIs via **Carter** (`ICarterModule` per aggregate under `Endpoints/`). Thin handlers: parse → `request.ToCommand()` → `sender.Send()` → `result.Match()`. **No MVC controllers anywhere.** No FastEndpoints (conflicts with MediatR philosophy).
+
+**Mapping:** Manual static extension methods (`ToDto`/`ToDomain`/`ToIntegrationEvent`) colocated with the DTO/event. **No mapper libraries** (no AutoMapper / Mapster / Mapperly). Aggregates are small enough that boilerplate is minimal; full IDE refactoring + compile-time safety wins.
+
+**Money:** Value Object `record Money(decimal Amount, string Currency)` in `SharedKernel`. Validates `Amount >= 0` and ISO 4217 `Currency` in constructor. EF `OwnsOne(b => b.Money)` flattens to `*_amount` + `*_currency` columns. All monetary fields use `Money`, never raw `decimal` + `string`.
+
+**API conventions:** URL-segment versioning (`/v1/...`) via `Asp.Versioning.Http`. Offset pagination via `PagedResult<T>` envelope (`Items`, `Page`, `PageSize`, `TotalCount`, `TotalPages`); defaults `pageSize=20`, max `100`.
+
 **Outbox pattern:** All publishing services use MassTransit Transactional Outbox with EF Core. Domain change + outbox row in one DB transaction.
 
 **Booking Saga:** MassTransit Automatonymous StateMachine in the Booking service (orchestrator, not choreography). Full state diagram in `docs/ARCHITECTURE.md` §7.

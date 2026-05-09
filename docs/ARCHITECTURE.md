@@ -334,8 +334,7 @@ classDiagram
       +Guid Id
       +Guid SessionId
       +SectionCategory Category
-      +decimal Amount
-      +string Currency
+      +Money Price
     }
 
     Artist "1" --> "*" Event
@@ -368,7 +367,7 @@ classDiagram
       +Guid Id
       +Guid ReservationId
       +Guid SeatId
-      +decimal Price
+      +Money Price
       +SectionCategory Category
     }
     class Booking {
@@ -376,7 +375,7 @@ classDiagram
       +Guid ReservationId
       +Guid UserId
       +Guid SessionId
-      +decimal TotalAmount
+      +Money TotalAmount
       +BookingStatus Status
       +DateTimeOffset ConfirmedAt
     }
@@ -405,8 +404,7 @@ classDiagram
     class Payment {
       +Guid Id
       +Guid BookingId
-      +decimal Amount
-      +string Currency
+      +Money Amount
       +PaymentStatus Status
       +string StripePaymentIntentId
       +DateTimeOffset CreatedAt
@@ -414,7 +412,7 @@ classDiagram
     class Refund {
       +Guid Id
       +Guid PaymentId
-      +decimal Amount
+      +Money Amount
       +RefundStatus Status
       +string StripeRefundId
       +string Reason
@@ -631,10 +629,22 @@ stateDiagram-v2
 
 ### 8.3 Error handling
 
-- **HTTP errors:** RFC 7807 Problem Details (`Microsoft.AspNetCore.Mvc.ProblemDetails`).
-- **Validation errors:** FluentValidation → 400 Problem Details with field-level errors.
-- **Domain exceptions:** Mapped to HTTP via global exception middleware.
-- **Message handling errors:** MassTransit retry policy → DLQ (`<queue>_error`) after exhausting retries.
+**Two-tier model — explicit separation of business outcomes and bugs.**
+
+- **Business errors → Result pattern (`ErrorOr<T>`).** All Application command/query handlers return `ErrorOr<TResult>`. Errors are typed and categorized (`Error.NotFound`, `Error.Conflict`, `Error.Validation`, `Error.Unauthorized`, `Error.Failure`) and map deterministically to RFC 7807 ProblemDetails (404, 409, 400, 401, 500). No exceptions are thrown for *expected* business outcomes ("seat taken", "session not found", "reservation expired"). Rationale: explicit contract in handler signature, no try/catch in endpoints, cheap on hot paths (no stack-trace capture), composable via `Then` / `Match`.
+- **Exceptions → only for bugs and infrastructure.** `DomainException` for invariant violations (these *should* never reach Domain — caller validation prevents them). `ArgumentNullException` etc. for programming errors. EF Core / Redis / RabbitMQ failures bubble up. Caught by a single global exception middleware → 500 ProblemDetails with `TraceId` (no internal details leaked in production).
+
+**Endpoint pattern (Carter handler):**
+```csharp
+var result = await sender.Send(req.ToCommand(), ct);
+return result.Match(
+    dto => Results.Ok(dto),
+    errors => errors.ToProblemDetails());  // extension in SharedKernel
+```
+
+**Validation:** FluentValidation pipeline behavior in MediatR runs before the handler. Failure short-circuits with `Error.Validation(field, message)` per field — no exception thrown.
+
+**Message handling errors:** MassTransit retry policy with exponential backoff → DLQ (`<queue>_error`) after retries exhausted. Saga compensations are explicit Saga states, never exceptions.
 
 ### 8.4 Idempotency
 
@@ -656,7 +666,8 @@ Every service that publishes integration events uses **MassTransit's Transaction
 
 ### 8.7 Mediation (CQRS-lite)
 
-- **MediatR** in Clean Architecture services for in-process command/query dispatch.
+- **MediatR** in Clean Architecture services for in-process command/query dispatch. All handlers return `ErrorOr<TResult>` (see §8.3).
+- **Pipeline behaviors** (registered in order): `LoggingBehavior` → `ValidationBehavior` (FluentValidation, returns `Error.Validation`) → handler.
 - **VSA services** (Notification, Ticket) use direct handler invocation, no MediatR (less overhead).
 
 ### 8.8 Configuration & Secrets
@@ -672,6 +683,56 @@ Every service that publishes integration events uses **MassTransit's Transaction
 - **Polly** for HTTP/gRPC outbound calls: retry with jitter, circuit breaker, timeout.
 - **MassTransit** built-in retries for message handlers.
 
+### 8.10 Endpoint composition (Carter)
+
+Every service uses **Minimal APIs + Carter** for endpoint organization:
+- One `ICarterModule` per aggregate (`ReservationsModule`, `BookingsModule`, ...) under `Endpoints/`.
+- Modules auto-discovered via `app.MapCarter()`.
+- Each module groups related routes under a shared prefix (`/v1/reservations`) with shared `RequireAuthorization()` / `WithTags()` / `Produces<>()` metadata.
+- Handlers are *thin*: parse request → `request.ToCommand()` → `sender.Send()` → `result.Match(success, errors)`. **No business logic in endpoints.**
+- No MVC controllers anywhere (rejected for ceremony cost; .NET 10 Minimal APIs match controllers in features).
+- No FastEndpoints (rejected for conflicting with MediatR's "endpoint = thin shell" philosophy).
+
+### 8.11 Mapping convention
+
+**No mapping library** — neither AutoMapper, Mapster, nor Mapperly. Mapping between Domain ↔ DTO ↔ IntegrationEvents uses **static extension methods** colocated with the DTO/IntegrationEvent (e.g., `ReservationMappingExtensions.ToDto(this Reservation r)` next to `ReservationDto`).
+
+Rationale: aggregates are small (5–10 properties), full IDE refactoring support ("Find Usages", "Rename" work), compile-time safety, zero runtime cost, no hidden config to debug, no licensing concerns (AutoMapper went commercial in v13/2024). Reviewers see all mapping explicitly in the PR.
+
+### 8.12 Pagination
+
+All list endpoints use **offset-based pagination** with a unified envelope:
+
+```
+GET /v1/events?page=1&pageSize=20&sortBy=startsAt&sortDir=asc
+```
+
+Response envelope (in `SharedKernel`):
+```csharp
+public sealed record PagedResult<T>(
+    IReadOnlyList<T> Items,
+    int Page,
+    int PageSize,
+    int TotalCount,
+    int TotalPages);
+```
+
+Defaults: `page=1`, `pageSize=20`, max `pageSize=100` (enforced server-side). Sort fields are whitelisted per endpoint to prevent injection. Cursor pagination is reserved for future analytics endpoints (Iter 5) where consistent under-load scrolling matters.
+
+### 8.13 API versioning
+
+URL-segment versioning via `Asp.Versioning.Http`:
+
+```
+/v1/events
+/v2/events     ← only when introducing breaking changes
+```
+
+- All endpoints start at `v1`.
+- Breaking changes → introduce `v2`, mark `v1` deprecated with `Sunset` and `Deprecation` HTTP headers (RFC 8594) for 90 days, then remove.
+- Non-breaking additions (new optional field, new endpoint) stay in current version.
+- gRPC services version via package name (`eventify.catalog.v1`).
+
 ---
 
 ## 9. Tech Stack & Decisions
@@ -681,7 +742,7 @@ Every service that publishes integration events uses **MassTransit's Transaction
 | Layer | Choice | Rationale |
 |---|---|---|
 | Runtime | **.NET 10 (LTS)** | Latest stable LTS (support until ~Nov 2028), fresh EF Core 10, best for portfolio |
-| Web framework | **ASP.NET Core 9 Minimal APIs** for thin endpoints; **MVC controllers** for complex ones | Mix per service complexity |
+| Web framework | **ASP.NET Core 10 Minimal APIs** + **Carter** modules per aggregate | One model across all services; thin endpoints, MediatR handlers (see §8.10) |
 | ORM | **EF Core 9** with **Npgsql** | Learning goal (work uses MSSQL without EF Core); migrations included |
 | Auth | **Duende IdentityServer 7** | Industry-standard OIDC; portfolio impact |
 | Messaging | **RabbitMQ 3.13** + **MassTransit 8.5** | Already familiar; first-class Saga support |
@@ -690,12 +751,15 @@ Every service that publishes integration events uses **MassTransit's Transaction
 | Gateway | **YARP** | Microsoft's modern reverse proxy; Ocelot is in maintenance mode |
 | Mediator | **MediatR** | Standard in Clean Arch .NET; note: paid for commercial use post-v12, free for non-commercial pet projects |
 | Validation | **FluentValidation** | De facto standard |
-| Mapping | **Mapster** | Faster than AutoMapper, simpler API |
+| Mapping | **Manual extension methods** (no mapper library) | Compile-time safety, full IDE refactoring, zero runtime cost; aggregates small enough not to justify magic (see §8.11) |
 | Logging | **Serilog** | Structured logging standard |
 | Telemetry | **OpenTelemetry .NET SDK** | Vendor-neutral; works with Jaeger and Prometheus |
 | HTTP resilience | **Polly v8 / Microsoft.Extensions.Http.Resilience** | Built-in policies |
 | Testing | **xUnit + FluentAssertions + NSubstitute + Testcontainers + NetArchTest** | Industry standard combo |
-| API docs | **Swashbuckle** + Scalar UI (modern alternative to Swagger UI) | Self-documenting |
+| API docs | **Microsoft.AspNetCore.OpenApi** + **Scalar.AspNetCore** | Built-in OpenAPI in .NET 10; Scalar replaces Swagger UI with modern interactive doc |
+| Error model | **ErrorOr** | Typed Result pattern; categorized errors map to RFC 7807 (see §8.3); replaces exception-based control flow for business errors |
+| API versioning | **Asp.Versioning.Http** | URL-segment versioning (`/v1/...`); industry standard (see §8.13) |
+| Domain primitives | `DateTimeOffset` (UTC) + `Money` Value Object (`decimal Amount` + ISO 4217 `Currency`) | Native EF Core / JSON / Postgres support; type-safe currency; rejects USD+EUR mismatches at compile/runtime |
 
 ### Frontend
 
@@ -997,6 +1061,13 @@ Branch protection on `main`: require all checks green.
 - **Integration tests** spin up real Postgres + Rabbit via Testcontainers, exercise endpoints + saga + DB round-trip.
 - **Architecture tests** (NetArchTest) enforce layering rules.
 
+### Discipline (when to write what)
+
+- **Domain layer → TDD** (red-green-refactor). Aggregate invariants, value objects (incl. `Money`), and domain event raising are pure logic with no external dependencies. Tests drive the API. Write failing test → implement → refactor.
+- **Application / Infrastructure / Api → tests-after**, in the same PR as the production code. Faster initial flow when shape is uncertain; tests required before merge for regression protection.
+- **Integration tests** appear in **Iter 2** alongside the Saga (no point earlier — there's nothing meaningful to integrate). Real Postgres + RabbitMQ via Testcontainers; never mocked.
+- **Strict TDD everywhere is rejected**: architecture is still forming, would force constant test rewrites on Application/Api as endpoints evolve.
+
 ### Coverage target
 
 - Domain & Application: 80%+
@@ -1117,6 +1188,12 @@ ADRs live in `docs/adr/`. Format: short markdown using [MADR template](https://a
 | 0008 | Real Stripe integration (test mode) over pure mock | TBD | Iter 2 |
 | 0009 | SignalR with Redis backplane | TBD | Iter 1 |
 | 0010 | Monorepo (backend + frontend in single repo) | TBD | Iter 1 |
+| 0011 | Result pattern (ErrorOr) over exceptions for business errors | TBD | Iter 1 |
+| 0012 | Manual extension methods over mapper libraries | TBD | Iter 1 |
+| 0013 | Minimal APIs + Carter modules over MVC Controllers / FastEndpoints | TBD | Iter 1 |
+| 0014 | URL-segment API versioning | TBD | Iter 1 |
+| 0015 | `Money` Value Object + `DateTimeOffset` (UTC) for domain primitives | TBD | Iter 1 |
+| 0016 | Offset-based pagination with `PagedResult<T>` envelope | TBD | Iter 1 |
 
 ---
 
