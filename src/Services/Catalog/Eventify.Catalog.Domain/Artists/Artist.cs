@@ -26,7 +26,7 @@ public class Artist : AggregateRoot<ArtistId>
         return artist;
     }
 
-    public void Update(ArtistName artistName, string bio, string imageUrl)
+    public void Update(ArtistName artistName, string? bio, string? imageUrl)
     {
         Name = artistName;
         Bio = bio;
