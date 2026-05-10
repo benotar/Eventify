@@ -1,11 +1,13 @@
+using ErrorOr;
+using Eventify.SharedKernel.Extensions;
 using FluentValidation;
 using MediatR;
-using ValidationException = Eventify.SharedKernel.Application.Exceptions.ValidationException;
 
 namespace Eventify.SharedKernel.Application.Behaviors;
 
 public sealed class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
+    where TResponse : IErrorOr
 {
     private readonly IEnumerable<IValidator<TRequest>> _validators;
 
@@ -17,22 +19,27 @@ public sealed class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken)
     {
-        if (!_validators.Any())
+        if (_validators.IsEmpty)
+        {
             return await next();
+        }
 
         var context = new ValidationContext<TRequest>(request);
 
-        var validationResults = await Task.WhenAll(
-            _validators.Select(v => v.ValidateAsync(context, cancellationToken)));
+        var validationResults = await Task.WhenAll(_validators.Select(v =>
+            v.ValidateAsync(context, cancellationToken)));
 
-        var failures = validationResults
+        var errors = validationResults
             .SelectMany(r => r.Errors)
             .Where(f => f is not null)
+            .Select(f => Error.Validation(f.PropertyName, f.ErrorMessage))
             .ToList();
 
-        if (failures.Count != 0)
-            throw new ValidationException(failures);
+        if (errors.IsEmpty)
+        {
+            return await next();
+        }
 
-        return await next();
+        return (TResponse)(dynamic)errors;
     }
 }
