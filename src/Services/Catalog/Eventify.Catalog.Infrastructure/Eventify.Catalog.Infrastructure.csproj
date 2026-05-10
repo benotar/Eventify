@@ -1,0 +1,7 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    
+    <ItemGroup>
+        <ProjectReference Include="..\Eventify.Catalog.Application\Eventify.Catalog.Application.csproj"/>
+    </ItemGroup>
+
+</Project>

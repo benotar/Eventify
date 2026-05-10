@@ -190,6 +190,20 @@ graph TB
 
 Each service follows the same template: responsibility, ownership, public APIs (sync and async), dependencies, scaling notes.
 
+### Port assignments (local development)
+
+| Service | Port | Notes |
+|---|---|---|
+| **Gateway (YARP)** | **5050** | Only public-facing entry point; all SPA traffic goes through here |
+| Catalog | 5051 | |
+| Booking | 5052 | |
+| Payment | 5053 | |
+| Ticket | 5054 | |
+| Notification | 5055 | |
+| Identity | 5060 | Slightly separate range — browser navigates directly to it during OIDC flows |
+
+In Docker Compose only the Gateway exposes a host port (5050). All other services communicate over the internal Docker network by service name (e.g., `catalog-api:5051`). Identity is also directly accessible from the browser in development for OIDC redirects.
+
 ### 4.1 Identity Service
 
 | Property | Value |

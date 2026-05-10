@@ -3,6 +3,13 @@
     <Project Path="src/BuildingBlocks/Eventify.IntegrationEvents/Eventify.IntegrationEvents.csproj" />
     <Project Path="src/BuildingBlocks/Eventify.SharedKernel/Eventify.SharedKernel.csproj" />
   </Folder>
+  <Folder Name="/Services/" />
+  <Folder Name="/Services/Catalog/">
+    <Project Path="src/Services/Catalog/Eventify.Catalog.Api/Eventify.Catalog.Api.csproj" />
+    <Project Path="src/Services/Catalog/Eventify.Catalog.Application/Eventify.Catalog.Application.csproj" />
+    <Project Path="src/Services/Catalog/Eventify.Catalog.Domain/Eventify.Catalog.Domain.csproj" />
+    <Project Path="src/Services/Catalog/Eventify.Catalog.Infrastructure/Eventify.Catalog.Infrastructure.csproj" />
+  </Folder>
   <Folder Name="/Solution-Items/">
     <File Path="CLAUDE.md" />
     <File Path="Directory.Build.props" />

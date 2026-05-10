@@ -4,7 +4,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Collaboration model
 
-The user writes all code. Claude's role is **advisory only**: present options, reasoning, and trade-offs; show code examples in chat for the user to evaluate. Do **not** use Edit/Write on project source files unless the user explicitly says "edit", "write", "implement", or "apply". Reading files (Read, Grep, Glob) is always fine.
+**Reading** (Read, Grep, Glob, Bash reads): always allowed, no permission needed.
+
+**Code changes** (Edit, Write on project source files): always ask the user before running.
+
+**Git commands** (commit, push, branch, reset, etc.): always ask the user before running.
+
+**Teaching approach for new services/features:**
+1. Claude explains the flow and architectural reasoning first (why, trade-offs, microservices context).
+2. User writes the code independently.
+3. User shares the result; Claude reviews and gives feedback.
+Claude does **not** show the full ready implementation upfront — the goal is skill-building, not copy-pasting.
 
 ## Commands
 
