@@ -1,6 +1,6 @@
 namespace Eventify.SharedKernel.Domain;
 
-public abstract class Entity<TId> : IEntity, IAuditable
+public abstract class Entity<TId> : IAuditable
     where TId : notnull
 {
     public TId Id { get; protected init; } = default!;
