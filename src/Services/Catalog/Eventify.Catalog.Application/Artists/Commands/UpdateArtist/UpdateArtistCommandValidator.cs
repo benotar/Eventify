@@ -1,12 +1,16 @@
 ﻿using Eventify.SharedKernel.Extensions;
 using FluentValidation;
 
-namespace Eventify.Catalog.Application.Artists.Commands.CreateArtist;
+namespace Eventify.Catalog.Application.Artists.Commands.UpdateArtist;
 
-public sealed class CreateArtistCommandValidator : AbstractValidator<CreateArtistCommand>
+public sealed class UpdateArtistCommandValidator : AbstractValidator<UpdateArtistCommand>
 {
-    public CreateArtistCommandValidator()
+    public UpdateArtistCommandValidator()
     {
+        RuleFor(command => command.Id)
+            .NotEmpty()
+            .WithMessage(CatalogConstants.ArtistIdIsRequired);
+
         RuleFor(command => command.Name)
             .ArtistName();
 
