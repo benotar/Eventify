@@ -5,7 +5,7 @@ using Eventify.Catalog.Domain.Artists.ValueObjects;
 using Eventify.SharedKernel.Application.CQRS;
 using Eventify.SharedKernel.Extensions;
 
-namespace Eventify.Catalog.Application.Artists.Queries;
+namespace Eventify.Catalog.Application.Artists.Queries.GetArtistById;
 
 public sealed class GetArtistByIdQueryHandler : IQueryHandler<GetArtistByIdQuery, ArtistResponse>
 {
