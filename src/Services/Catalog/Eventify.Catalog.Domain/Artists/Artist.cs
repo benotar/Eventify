@@ -28,6 +28,11 @@ public class Artist : AggregateRoot<ArtistId>
 
     public void Update(ArtistName artistName, string? bio, string? imageUrl)
     {
+        if (Name == artistName && Bio == bio && ImageUrl == imageUrl)
+        {
+            return;
+        }
+
         Name = artistName;
         Bio = bio;
         ImageUrl = imageUrl;

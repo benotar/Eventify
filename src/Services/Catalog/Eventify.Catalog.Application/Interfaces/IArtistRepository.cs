@@ -9,6 +9,8 @@ public interface IArtistRepository
 
     Task<IReadOnlyList<Artist>> GetAllAsync(int page, int pageSize, CancellationToken ct = default);
 
+    Task<int> CountAsync(CancellationToken ct = default);
+
     void Add(Artist artist);
 
     void Remove(Artist artist);
