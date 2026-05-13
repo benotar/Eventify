@@ -23,7 +23,7 @@ public sealed class GetArtistByIdQueryHandler : IQueryHandler<GetArtistByIdQuery
 
         if (artist is null)
         {
-            return Error.NotFound(description: ArtistConstants.ArtistNotFound);
+            return Error.NotFound(description: CatalogConstants.ArtistNotFound);
         }
 
         return artist.ToResponse();

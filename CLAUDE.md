@@ -68,7 +68,7 @@ Two projects in `src/BuildingBlocks/`:
 - **`Eventify.SharedKernel`** — Domain + Application + Infrastructure base classes consolidated:
   - Domain: `Entity<TId>`, `AggregateRoot<TId>`, `ValueObject`, `DomainEvent` (abstract record), interfaces (`IEntity`, `IAggregateRoot`, `IAuditable`, `IClearableAggregate`, `IDomainEvent`), `DomainException`
   - Application: `ICommand`, `IQuery<T>`, `ICommandHandler`, `IQueryHandler`, `LoggingBehavior`, `ValidationBehavior`, `NotFoundException`, `ValidationException`
-  - Infrastructure (pending): `BaseDbContext`, `AuditInterceptor`, `DispatchDomainEventsInterceptor`
+  - Infrastructure: `BaseDbContext`, `UpdateAuditableInterceptor`, `PublishDomainEventsInterceptor`
 
 - **`Eventify.IntegrationEvents`** — cross-service event contracts; no deps; `IntegrationEvent` abstract record (UUIDv7)
 
@@ -76,9 +76,9 @@ Two projects in `src/BuildingBlocks/`:
 
 **IDs:** All entity IDs use `Guid.CreateVersion7()` (UUIDv7 — time-sortable, B-tree friendly). Aggregates use strongly-typed IDs as `readonly record struct ArtistId(Guid Value)`.
 
-**Audit fields:** `CreatedAt`/`UpdatedAt` on `Entity<TId>` are mutated only via the internal `IAuditable` interface. Populated by `AuditInterceptor` (EF Core `ISaveChangesInterceptor`) — never override `SaveChangesAsync` per service.
+**Audit fields:** `CreatedAt`/`UpdatedAt` on `Entity<TId>` are mutated only via the internal `IAuditable` interface. Populated by `UpdateAuditableInterceptor` (EF Core `ISaveChangesInterceptor`) — never override `SaveChangesAsync` per service.
 
-**Domain events:** `AggregateRoot<TId>.RaiseDomainEvent` is protected. Clearing happens only via internal `IClearableAggregate`. Dispatch by `DispatchDomainEventsInterceptor` (after-save, via MediatR `IPublisher`).
+**Domain events:** `AggregateRoot<TId>.RaiseDomainEvent` is protected. Clearing happens only via internal `IClearableAggregate`. Dispatch by `PublishDomainEventsInterceptor` (**pre-save**, `SavingChangesAsync`, via MediatR `IPublisher`). Pre-save is required for two reasons: (1) EF Core detaches deleted entities from the ChangeTracker after `SaveChanges`, so post-save dispatch would silently lose `*DeletedDomainEvent`s; (2) domain event handlers that write to the Outbox table must participate in the same DB transaction as the aggregate change — pre-save guarantees this. Events are materialized with `.ToList()` before `ClearDomainEvents()` to avoid the live-wrapper trap (`AsReadOnly()` wraps the underlying list, not a copy).
 
 **MediatR 12.2 pin:** `RequestHandlerDelegate<TResponse>` does not accept `CancellationToken` in 12.2. Pipeline behaviors call `next()` not `next(cancellationToken)`. If bumped to 12.5+, update `LoggingBehavior` and `ValidationBehavior`.
 

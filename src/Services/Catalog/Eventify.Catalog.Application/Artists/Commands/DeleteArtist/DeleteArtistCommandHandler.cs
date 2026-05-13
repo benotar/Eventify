@@ -3,20 +3,20 @@ using Eventify.Catalog.Application.Interfaces;
 using Eventify.Catalog.Domain.Artists.ValueObjects;
 using Eventify.SharedKernel.Application.CQRS;
 
-namespace Eventify.Catalog.Application.Artists.Commands.UpdateArtist;
+namespace Eventify.Catalog.Application.Artists.Commands.DeleteArtist;
 
-public sealed class UpdateArtistCommandHandler : ICommandHandler<UpdateArtistCommand>
+public sealed class DeleteArtistCommandHandler : ICommandHandler<DeleteArtistCommand>
 {
     private readonly IArtistRepository _artistRepository;
     private readonly IApplicationDbContext _dbContext;
 
-    public UpdateArtistCommandHandler(IArtistRepository artistRepository, IApplicationDbContext dbContext)
+    public DeleteArtistCommandHandler(IArtistRepository artistRepository, IApplicationDbContext dbContext)
     {
         _artistRepository = artistRepository;
         _dbContext = dbContext;
     }
 
-    public async Task<ErrorOr<Success>> Handle(UpdateArtistCommand command, CancellationToken ct)
+    public async Task<ErrorOr<Success>> Handle(DeleteArtistCommand command, CancellationToken ct)
     {
         var artistId = ArtistId.Of(command.Id);
 
@@ -27,9 +27,9 @@ public sealed class UpdateArtistCommandHandler : ICommandHandler<UpdateArtistCom
             return Error.NotFound(description: CatalogConstants.ArtistNotFound);
         }
 
-        var artistName = ArtistName.Of(command.Name);
+        artist.Delete();
 
-        artist.Update(artistName, command.Bio, command.ImageUrl);
+        _artistRepository.Remove(artist);
 
         await _dbContext.SaveChangesAsync(ct);
 
