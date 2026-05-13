@@ -44,7 +44,6 @@ public sealed class DispatchDomainEventsInterceptor : SaveChangesInterceptor
             .SelectMany(a => a.DomainEvents)
             .ToList();
 
-
         foreach (var aggregate in aggregates)
         {
             if (aggregate is IClearableAggregate clearable)

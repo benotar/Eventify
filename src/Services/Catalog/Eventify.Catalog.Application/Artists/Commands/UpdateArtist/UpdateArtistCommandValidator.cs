@@ -9,7 +9,7 @@ public sealed class UpdateArtistCommandValidator : AbstractValidator<UpdateArtis
     {
         RuleFor(command => command.Id)
             .NotEmpty()
-            .WithMessage(CatalogConstants.ArtistIdIsRequired);
+            .WithMessage(ArtistConstants.ArtistIdIsRequired);
 
         RuleFor(command => command.Name)
             .ArtistName();

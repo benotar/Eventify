@@ -24,7 +24,7 @@ public sealed class UpdateArtistCommandHandler : ICommandHandler<UpdateArtistCom
 
         if (artist is null)
         {
-            return Error.NotFound(description: CatalogConstants.ArtistNotFound);
+            return Error.NotFound(description: ArtistConstants.ArtistNotFound);
         }
 
         var artistName = ArtistName.Of(command.Name);

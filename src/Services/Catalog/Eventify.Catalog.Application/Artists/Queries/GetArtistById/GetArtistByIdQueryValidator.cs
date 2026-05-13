@@ -8,6 +8,6 @@ public sealed class GetArtistByIdQueryValidator : AbstractValidator<GetArtistByI
     {
         RuleFor(x => x.Id)
             .NotEmpty()
-            .WithMessage(CatalogConstants.ArtistIdIsRequired);
+            .WithMessage(ArtistConstants.ArtistIdIsRequired);
     }
 }
