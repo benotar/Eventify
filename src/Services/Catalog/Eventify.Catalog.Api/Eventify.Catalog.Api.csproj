@@ -1,7 +1,17 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
-    
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+    <PropertyGroup>
+        <UserSecretsId>a67e3689-f2a0-44a2-ab24-abce04cbafbd</UserSecretsId>
+    </PropertyGroup>
+
     <ItemGroup>
-        <ProjectReference Include="..\Eventify.Catalog.Infrastructure\Eventify.Catalog.Infrastructure.csproj"/>
+        <ProjectReference Include="..\Eventify.Catalog.Infrastructure\Eventify.Catalog.Infrastructure.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
     </ItemGroup>
 
 </Project>

@@ -14,5 +14,6 @@
     <File Path="CLAUDE.md" />
     <File Path="Directory.Build.props" />
     <File Path="Directory.Packages.props" />
+    <File Path="migrations.txt" />
   </Folder>
 </Solution>
