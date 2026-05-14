@@ -979,7 +979,9 @@ Each service connects only to its own database with a dedicated user. No `GRANT`
 
 - `Entity<TId>` carries `CreatedAt` / `UpdatedAt`. Setters are exposed only via the internal `IAuditable` interface (assembly-scoped to `SharedKernel`), so external code cannot mutate audit fields.
 - `AggregateRoot<TId>` exposes `DomainEvents` as read-only collection plus `RaiseDomainEvent` (protected). Clearing happens via the internal `IClearableAggregate` interface — only the SharedKernel infrastructure can clear.
-- Audit population and domain event dispatch are implemented as **EF Core `ISaveChangesInterceptor`** (registered against every service `DbContext`). No `SaveChangesAsync` overrides per service.
+- Two interceptors registered against every service `DbContext`. No `SaveChangesAsync` overrides per service:
+  - **`UpdateAuditableInterceptor`** (`SavingChangesAsync`): populates `CreatedAt`/`UpdatedAt` on `Added`/`Modified` entries and owned entities with changed state.
+  - **`PublishDomainEventsInterceptor`** (`SavingChangesAsync`): materializes domain events from all tracked aggregates (`.ToList()` before clearing — `AsReadOnly()` is a live wrapper, not a copy), clears them via `IClearableAggregate`, then publishes via MediatR `IPublisher`. **Must run pre-save** for two reasons: (1) EF Core detaches `Deleted` entities from the ChangeTracker after commit, so post-save dispatch silently loses `*DeletedDomainEvent`s; (2) handlers that write integration events to the Outbox table must share the same transaction as the aggregate change — pre-save guarantees atomicity.
 
 ### Migrations
 

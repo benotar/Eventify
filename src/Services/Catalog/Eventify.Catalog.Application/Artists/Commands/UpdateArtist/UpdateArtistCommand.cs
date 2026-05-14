@@ -2,4 +2,4 @@
 
 namespace Eventify.Catalog.Application.Artists.Commands.UpdateArtist;
 
-public record UpdateArtistCommand(Guid Id, string Name, string? Bio, string? ImageUrl) : ICommand;
+public sealed record UpdateArtistCommand(Guid Id, string Name, string? Bio, string? ImageUrl) : ICommand;

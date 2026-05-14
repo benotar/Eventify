@@ -6,29 +6,22 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Eventify.SharedKernel.Infrastructure.Interceptor;
 
-public sealed class AuditInterceptor : SaveChangesInterceptor
+public sealed class UpdateAuditableInterceptor : SaveChangesInterceptor
 {
-    public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
-    {
-        UpdateEntities(eventData.Context);
-        return base.SavingChanges(eventData, result);
-    }
-
     public override ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData,
         InterceptionResult<int> result,
-        CancellationToken cancellationToken = default)
+        CancellationToken ct = default)
     {
-        UpdateEntities(eventData.Context);
-        return base.SavingChangesAsync(eventData, result, cancellationToken);
-    }
-
-    private static void UpdateEntities(DbContext? context)
-    {
-        if (context is null)
+        if (eventData.Context is not null)
         {
-            return;
+            UpdateEntities(eventData.Context);
         }
 
+        return base.SavingChangesAsync(eventData, result, ct);
+    }
+
+    private static void UpdateEntities(DbContext context)
+    {
         var now = DateTimeOffset.UtcNow;
 
         var entries = context.ChangeTracker

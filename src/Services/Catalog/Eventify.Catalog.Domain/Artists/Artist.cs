@@ -39,4 +39,9 @@ public class Artist : AggregateRoot<ArtistId>
 
         RaiseDomainEvent(new ArtistUpdatedDomainEvent(Id));
     }
+
+    public void Delete()
+    {
+        RaiseDomainEvent(new ArtistDeletedDomainEvent(Id));
+    }
 }
