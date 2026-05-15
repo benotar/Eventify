@@ -1,7 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    
+
     <ItemGroup>
-        <ProjectReference Include="..\Eventify.Catalog.Domain\Eventify.Catalog.Domain.csproj"/>
+        <ProjectReference Include="..\Eventify.Catalog.Domain\Eventify.Catalog.Domain.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
     </ItemGroup>
 
 </Project>
