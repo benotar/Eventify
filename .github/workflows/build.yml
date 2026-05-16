@@ -1,0 +1,30 @@
+name: build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ '**' ]
+  pull_request:
+    branches: [ main ]
+
+jobs: 
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+      
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+        with: 
+          global-json-file: global.json
+      
+      - name: Install dependencies
+        run: dotnet restore
+      
+      - name: Build
+        run: dotnet build --no-restore
+        
+      - name: Test with the dotnet CLI
+        run: dotnet test --no-build --filter "Category=UnitTests"

@@ -769,7 +769,7 @@ URL-segment versioning via `Asp.Versioning.Http`:
 | Logging | **Serilog** | Structured logging standard |
 | Telemetry | **OpenTelemetry .NET SDK** | Vendor-neutral; works with Jaeger and Prometheus |
 | HTTP resilience | **Polly v8 / Microsoft.Extensions.Http.Resilience** | Built-in policies |
-| Testing | **xUnit + FluentAssertions + NSubstitute + Testcontainers + NetArchTest** | Industry standard combo |
+| Testing | **xUnit + FluentAssertions + Moq + Testcontainers + NetArchTest** | Industry standard combo |
 | API docs | **Microsoft.AspNetCore.OpenApi** + **Scalar.AspNetCore** | Built-in OpenAPI in .NET 10; Scalar replaces Swagger UI with modern interactive doc |
 | Error model | **ErrorOr** | Typed Result pattern; categorized errors map to RFC 7807 (see §8.3); replaces exception-based control flow for business errors |
 | API versioning | **Asp.Versioning.Http** | URL-segment versioning (`/v1/...`); industry standard (see §8.13) |
@@ -1067,7 +1067,7 @@ Branch protection on `main`: require all checks green.
      /----\
     /      \  Integration (Testcontainers: real Postgres + Rabbit)
    /--------\
-  /          \  Unit (xUnit + FluentAssertions + NSubstitute)
+  /          \  Unit (xUnit + FluentAssertions + Moq)
  /____________\
 ```
 
@@ -1079,10 +1079,9 @@ Branch protection on `main`: require all checks green.
 
 ### Discipline (when to write what)
 
-- **Domain layer → TDD** (red-green-refactor). Aggregate invariants, value objects (incl. `Money`), and domain event raising are pure logic with no external dependencies. Tests drive the API. Write failing test → implement → refactor.
-- **Application / Infrastructure / Api → tests-after**, in the same PR as the production code. Faster initial flow when shape is uncertain; tests required before merge for regression protection.
+- **All layers (Domain, Application, Infrastructure, Api) → tests-after**, in the same PR as the production code. Write the aggregate/handler first, then cover it with tests before merge.
 - **Integration tests** appear in **Iter 2** alongside the Saga (no point earlier — there's nothing meaningful to integrate). Real Postgres + RabbitMQ via Testcontainers; never mocked.
-- **Strict TDD everywhere is rejected**: architecture is still forming, would force constant test rewrites on Application/Api as endpoints evolve.
+- **TDD is rejected**: architecture is still forming; writing tests first would force constant rewrites as aggregates and endpoints evolve.
 
 ### Coverage target
 

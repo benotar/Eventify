@@ -115,7 +115,7 @@ Two projects in `src/BuildingBlocks/`:
 
 ## Testing
 
-- xUnit + FluentAssertions + NSubstitute + Testcontainers + NetArchTest.
+- xUnit + FluentAssertions + Moq + Testcontainers + NetArchTest.
 - Unit tests: Domain invariants + Application handlers (mocked deps).
 - Integration tests: real Postgres + RabbitMQ via Testcontainers.
 - Architecture tests: `Eventify.ArchitectureTests/` project enforces layering.
