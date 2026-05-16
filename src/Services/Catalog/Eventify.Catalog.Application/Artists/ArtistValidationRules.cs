@@ -12,9 +12,9 @@ static internal class ArtistValidationRules
 
     extension<T>(IRuleBuilder<T, string> ruleBuilder)
     {
-        public IRuleBuilderOptions<T, string> ArtistName()
+        public void ArtistName()
         {
-            return ruleBuilder
+            ruleBuilder
                 .NotEmpty()
                 .WithMessage("Name is required.")
                 .MinimumLength(CatalogConstants.MinNameLength)
