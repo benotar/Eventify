@@ -10,6 +10,12 @@
     <Project Path="src/Services/Catalog/Eventify.Catalog.Domain/Eventify.Catalog.Domain.csproj" />
     <Project Path="src/Services/Catalog/Eventify.Catalog.Infrastructure/Eventify.Catalog.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/Services/Identity/">
+    <Project Path="src/Services/Identity/Eventify.Identity.Api/Eventify.Identity.Api.csproj" />
+    <Project Path="src/Services/Identity/Eventify.Identity.Application/Eventify.Identity.Application.csproj" />
+    <Project Path="src/Services/Identity/Eventify.Identity.Domain/Eventify.Identity.Domain.csproj" />
+    <Project Path="src/Services/Identity/Eventify.Identity.Infrastructure/Eventify.Identity.Infrastructure.csproj" />
+  </Folder>
   <Folder Name="/Solution-Items/">
     <File Path=".github/workflows/build.yml" />
     <File Path="CLAUDE.md" />

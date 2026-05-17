@@ -1,0 +1,7 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <ProjectReference Include="..\Eventify.Identity.Domain\Eventify.Identity.Domain.csproj" />
+    </ItemGroup>
+
+</Project>
