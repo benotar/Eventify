@@ -28,4 +28,9 @@
       <ProjectReference Include="..\..\src\Services\Catalog\Eventify.Catalog.Domain\Eventify.Catalog.Domain.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Application\Artists\Queries\" />
+      <Folder Include="Application\Artists\Validators\" />
+    </ItemGroup>
+
 </Project>
