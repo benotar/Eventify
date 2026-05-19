@@ -22,7 +22,7 @@ builder.Services.AddApiVersioning(options =>
 
 builder.Services.AddCarter();
 
-builder.Services.AddApplication(builder.Configuration);
+builder.Services.AddApplication();
 
 builder.Services.AddInfrastructure(builder.Configuration);
 

@@ -7,18 +7,34 @@ namespace Eventify.SharedKernel.Extensions;
 
 public static class OptionExtensions
 {
-    public static IServiceCollection AddOption<TOption>(this IServiceCollection services, IConfiguration configuration)
-        where TOption : class, IOption
+    extension(IServiceCollection services)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(TOption.SectionName);
+        public IServiceCollection AddOption<TOption>(IConfiguration configuration, bool isAddSingleton = false)
+            where TOption : class, IOption
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(TOption.SectionName);
 
-        services.AddOptions<TOption>()
-            .Bind(configuration.GetSection(TOption.SectionName))
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
+            services.AddOptions<TOption>()
+                .Bind(configuration.GetSection(TOption.SectionName))
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
 
-        services.AddSingleton(sp => sp.GetRequiredService<IOptions<TOption>>().Value);
+            if (isAddSingleton)
+            {
+                services.AddSingleton(sp => sp.GetRequiredService<IOptions<TOption>>().Value);
+            }
 
-        return services;
+            return services;
+        }
+
+        public TOption AddOption<TOption>(IConfiguration configuration, out TOption option)
+            where TOption : class, IOption
+        {
+            services.AddOption<TOption>(configuration);
+
+            option = configuration.GetSection(TOption.SectionName).Get<TOption>()!;
+
+            return option;
+        }
     }
 }

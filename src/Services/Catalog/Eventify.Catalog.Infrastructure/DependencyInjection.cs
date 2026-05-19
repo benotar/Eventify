@@ -13,27 +13,26 @@ namespace Eventify.Catalog.Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    extension(IServiceCollection services)
     {
-        // Options
-        services.AddOption<DatabaseOptions>(configuration);
-
-        // DbContext
-        services.AddScoped<ISaveChangesInterceptor, UpdateAuditableInterceptor>();
-        services.AddScoped<ISaveChangesInterceptor, PublishDomainEventsInterceptor>();
-        services.AddDbContext<CatalogDbContext>((sp, options) =>
+        public IServiceCollection AddInfrastructure(IConfiguration configuration)
         {
-            var dbConfiguration = sp
-                .GetRequiredService<DatabaseOptions>();
+            services.AddOption<DatabaseOptions>(configuration, out var dbOption);
 
-            options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
-            options.UseNpgsql(dbConfiguration.ConnectionString);
-        });
-        services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<CatalogDbContext>());
+            services.AddScoped<ISaveChangesInterceptor, UpdateAuditableInterceptor>();
+            services.AddScoped<ISaveChangesInterceptor, PublishDomainEventsInterceptor>();
 
-        // Repositories
-        services.AddScoped<IArtistRepository, ArtistRepository>();
+            services.AddDbContext<CatalogDbContext>((sp, options) =>
+            {
+                options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
+                options.UseNpgsql(dbOption.ConnectionString);
+            });
 
-        return services;
+            services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<CatalogDbContext>());
+
+            services.AddScoped<IArtistRepository, ArtistRepository>();
+
+            return services;
+        }
     }
 }

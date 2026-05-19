@@ -15,7 +15,26 @@ services:
       timeout: 5s
       retries: 5
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - catalogdb_pgdata:/var/lib/postgresql/data
+  
+  eventify_identitydb:
+    image: postgres:17-alpine
+    container_name: eventify_identitydb
+    ports:
+      - '5433:5432'
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=EventifyIdentityDb
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - identitydb_pgdata:/var/lib/postgresql/data
 
 volumes:
-  pgdata:
+  catalogdb_pgdata:
+  identitydb_pgdata:
