@@ -1,28 +1,33 @@
 using Duende.IdentityServer.EntityFramework.DbContexts;
+using Eventify.Identity.Application;
 using Eventify.Identity.Infrastructure;
 using Eventify.Identity.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
+using Eventify.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// DI
+builder.AddServiceDefaults();
+
+builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+// Middleware + routing
+if (app.Environment.IsDevelopment())
 {
-    var sp = scope.ServiceProvider;
-
-    await sp.GetRequiredService<ApplicationDbContext>().Database.MigrateAsync();
-    await sp.GetRequiredService<ConfigurationDbContext>().Database.MigrateAsync();
-    await sp.GetRequiredService<PersistedGrantDbContext>().Database.MigrateAsync();
+    await app.MigrateDatabaseAsync<ApplicationDbContext>();
+    await app.MigrateDatabaseAsync<ConfigurationDbContext>();
+    await app.MigrateDatabaseAsync<PersistedGrantDbContext>();
 }
+
+app.MapDefaultEndpoints();
 
 app.UseIdentityServer();
 
 app.UseAuthentication();
-app.UseAuthorization();
 
-app.MapGet("/", () => "Hello World!");
+app.UseAuthorization();
 
 app.Run();

@@ -1,4 +1,5 @@
-﻿using Carter;
+﻿using Asp.Versioning.Conventions;
+using Carter;
 using Eventify.Catalog.Api.Extensions;
 using Eventify.Catalog.Application.Artists.Commands.DeleteArtist;
 using Eventify.Catalog.Application.Artists.Queries.GetArtistById;
@@ -10,7 +11,14 @@ public sealed class ArtistModule : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/v1/artists").WithTags("Artists");
+        var versionSet = app.NewApiVersionSet()
+            .HasApiVersion(1, 0)
+            .Build();
+
+        var group = app.MapGroup("/v1/artists")
+            .WithTags("Artists")
+            .WithApiVersionSet(versionSet)
+            .HasApiVersion(1, 0);
 
         // Commands
         group.MapPost("/", async (CreateArtistRequest request, ISender sender, CancellationToken ct) =>

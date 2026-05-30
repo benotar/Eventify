@@ -3,7 +3,7 @@ using Eventify.SharedKernel.Application;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Eventify.Catalog.Application;
+namespace Eventify.Identity.Application;
 
 public static class DependencyInjection
 {

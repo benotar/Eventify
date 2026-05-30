@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/BuildingBlocks/">
     <Project Path="src/BuildingBlocks/Eventify.IntegrationEvents/Eventify.IntegrationEvents.csproj" />
+    <Project Path="src/BuildingBlocks/Eventify.ServiceDefaults/Eventify.ServiceDefaults.csproj" />
     <Project Path="src/BuildingBlocks/Eventify.SharedKernel/Eventify.SharedKernel.csproj" />
   </Folder>
   <Folder Name="/Services/" />

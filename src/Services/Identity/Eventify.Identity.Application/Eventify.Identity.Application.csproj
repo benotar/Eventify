@@ -4,4 +4,8 @@
         <ProjectReference Include="..\Eventify.Identity.Domain\Eventify.Identity.Domain.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+    </ItemGroup>
+
 </Project>

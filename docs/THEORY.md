@@ -2697,7 +2697,7 @@ await conn.start();
 
 Single entry point for the SPA. Responsibilities:
 
-- **Routing** — `/api/catalog/*` → `catalog-api:5051`.
+- **Routing** — `/api/catalog/*` → `catalog-api:5002`.
 - **Auth** — validate JWT once at the edge, forward.
 - **CORS** — single origin policy.
 - **Rate limiting** — per-IP / per-user throttling.
@@ -2731,7 +2731,7 @@ Microsoft's modern reverse proxy library. Configuration-driven, hosted in an ASP
     "Clusters": {
       "catalog-cluster": {
         "Destinations": {
-          "primary": { "Address": "http://catalog-api:5051" }
+          "primary": { "Address": "http://catalog-api:5002" }
         },
         "HealthCheck": {
           "Active": {
@@ -4613,7 +4613,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 COPY --from=build /app/publish .
 
-EXPOSE 5051
+EXPOSE 5002
 USER $APP_UID
 ENTRYPOINT ["dotnet", "Eventify.Catalog.Api.dll"]
 ```
@@ -4628,7 +4628,7 @@ Key practices:
 
 ```bash
 docker build -t eventify-catalog:1.0 -f deploy/docker/catalog.Dockerfile .
-docker run --rm -p 5051:5051 -e ConnectionStrings__Db="..." eventify-catalog:1.0
+docker run --rm -p 5002:5002 -e ConnectionStrings__Db="..." eventify-catalog:1.0
 docker images
 docker ps
 docker logs <container>
@@ -4778,7 +4778,7 @@ spec:
       - name: catalog-api
         image: ghcr.io/<user>/eventify-catalog:1.0
         ports:
-        - containerPort: 5051
+        - containerPort: 5002
         env:
         - name: ConnectionStrings__Db
           valueFrom:
@@ -4786,10 +4786,10 @@ spec:
               name: catalog-db
               key: connection-string
         livenessProbe:
-          httpGet: { path: /health/live, port: 5051 }
+          httpGet: { path: /health/live, port: 5002 }
           initialDelaySeconds: 10
         readinessProbe:
-          httpGet: { path: /health/ready, port: 5051 }
+          httpGet: { path: /health/ready, port: 5002 }
           initialDelaySeconds: 5
         resources:
           requests: { cpu: "100m", memory: "256Mi" }
@@ -4802,8 +4802,8 @@ metadata:
 spec:
   selector: { app: catalog-api }
   ports:
-  - port: 5051
-    targetPort: 5051
+  - port: 5002
+    targetPort: 5002
 ```
 
 ### 61.4 Kustomize
