@@ -9,7 +9,7 @@ public static class OptionExtensions
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection AddOption<TOption>(IConfiguration configuration, bool isAddSingleton = false)
+        public IServiceCollection AddOption<TOption>(IConfiguration configuration, bool skipSingleton = false)
             where TOption : class, IOption
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(TOption.SectionName);
@@ -19,10 +19,12 @@ public static class OptionExtensions
                 .ValidateDataAnnotations()
                 .ValidateOnStart();
 
-            if (isAddSingleton)
+            if (skipSingleton)
             {
-                services.AddSingleton(sp => sp.GetRequiredService<IOptions<TOption>>().Value);
+                return services;
             }
+
+            services.AddSingleton(sp => sp.GetRequiredService<IOptions<TOption>>().Value);
 
             return services;
         }
@@ -30,7 +32,7 @@ public static class OptionExtensions
         public TOption AddOption<TOption>(IConfiguration configuration, out TOption option)
             where TOption : class, IOption
         {
-            services.AddOption<TOption>(configuration);
+            services.AddOption<TOption>(configuration, true);
 
             option = configuration.GetSection(TOption.SectionName).Get<TOption>()!;
 

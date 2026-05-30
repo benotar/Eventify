@@ -27,7 +27,7 @@ public sealed class PublishDomainEventsInterceptor : SaveChangesInterceptor
         return result;
     }
 
-    private async Task PublishDomainEventsAsync(DbContext context, CancellationToken cancellationToken)
+    private async Task PublishDomainEventsAsync(DbContext context, CancellationToken ct)
     {
         var domainEvents = context.ChangeTracker
             .Entries<IAggregateRoot>()
@@ -48,7 +48,7 @@ public sealed class PublishDomainEventsInterceptor : SaveChangesInterceptor
 
         foreach (var domainEvent in domainEvents)
         {
-            await _publisher.Publish(domainEvent, cancellationToken);
+            await _publisher.Publish(domainEvent, ct);
         }
     }
 }

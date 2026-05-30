@@ -1,5 +1,8 @@
 ﻿using Eventify.Identity.Domain.Entities;
+using Eventify.Identity.Infrastructure.Options;
 using Eventify.Identity.Infrastructure.Persistence;
+using Eventify.Identity.Infrastructure.Persistence.Seed;
+using Eventify.Identity.Infrastructure.Services;
 using Eventify.SharedKernel.Extensions;
 using Eventify.SharedKernel.Options;
 using Microsoft.AspNetCore.Hosting;
@@ -17,8 +20,25 @@ public static class DependencyInjection
     {
         public IServiceCollection AddInfrastructure(IConfiguration configuration, IWebHostEnvironment environment)
         {
-            services.AddOption<DatabaseOptions>(configuration, out var dbOption);
+            services.AddOptions(configuration);
 
+            services.AddDatabase(configuration, environment);
+
+            services.AddHostedService<IdentityServerSeeder>();
+            services.AddHostedService<IdentityDataSeeder>();
+
+            return services;
+        }
+
+        private void AddOptions(IConfiguration configuration)
+        {
+            services.AddOption<ServicesOptions>(configuration);
+            services.AddOption<AdminCredentialsOptions>(configuration);
+        }
+
+        private void AddDatabase(IConfiguration configuration, IWebHostEnvironment environment)
+        {
+            services.AddOption<DatabaseOptions>(configuration, out var dbOption);
             var migrationsAssembly = typeof(DependencyInjection).Assembly.GetName().Name;
 
             services.AddDbContext<ApplicationDbContext>(options =>
@@ -38,7 +58,7 @@ public static class DependencyInjection
 
             services.AddAuthorization();
 
-            var identityServerBuilder = services.AddIdentityServer(options =>
+            services.AddIdentityServer(options =>
                 {
                     if (environment.IsDevelopment())
                     {
@@ -59,14 +79,9 @@ public static class DependencyInjection
                     options.ConfigureDbContext = builder =>
                         builder.UseNpgsql(dbOption.ConnectionString, sql => sql.MigrationsAssembly(migrationsAssembly));
                 })
-                .AddAspNetIdentity<ApplicationUser>();
-
-            if (environment.IsDevelopment())
-            {
-                identityServerBuilder.AddDeveloperSigningCredential();
-            }
-
-            return services;
+                .AddDeveloperSigningCredential()
+                .AddAspNetIdentity<ApplicationUser>()
+                .AddProfileService<IdentityProfileService>();
         }
     }
 }
