@@ -194,15 +194,15 @@ Each service follows the same template: responsibility, ownership, public APIs (
 
 | Service | Port | Notes |
 |---|---|---|
-| **Gateway (YARP)** | **5050** | Only public-facing entry point; all SPA traffic goes through here |
-| Catalog | 5051 | |
-| Booking | 5052 | |
-| Payment | 5053 | |
-| Ticket | 5054 | |
-| Notification | 5055 | |
-| Identity | 5060 | Slightly separate range — browser navigates directly to it during OIDC flows |
+| **Gateway (YARP)** | **5000** | Only public-facing entry point; all SPA traffic goes through here |
+| Identity | 5001 | Browser navigates directly during OIDC flows |
+| Catalog | 5002 | |
+| Booking | 5003 | |
+| Payment | 5004 | |
+| Ticket | 5005 | |
+| Notification | 5006 | |
 
-In Docker Compose only the Gateway exposes a host port (5050). All other services communicate over the internal Docker network by service name (e.g., `catalog-api:5051`). Identity is also directly accessible from the browser in development for OIDC redirects.
+In Docker Compose only the Gateway exposes a host port (5000). All other services communicate over the internal Docker network by service name (e.g., `catalog-api:5002`). Identity is also directly accessible from the browser in development for OIDC redirects.
 
 ### 4.1 Identity Service
 

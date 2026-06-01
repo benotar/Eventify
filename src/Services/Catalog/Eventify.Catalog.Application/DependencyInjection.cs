@@ -1,26 +1,23 @@
 ﻿using System.Reflection;
-using Eventify.SharedKernel.Application.Behaviors;
+using Eventify.SharedKernel.Application;
 using FluentValidation;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Eventify.Catalog.Application;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration configuration)
+    extension(IServiceCollection services)
     {
-        var assembly = Assembly.GetExecutingAssembly();
-
-        services.AddValidatorsFromAssembly(assembly);
-
-        services.AddMediatR(cfg =>
+        public IServiceCollection AddApplication()
         {
-            cfg.RegisterServicesFromAssembly(assembly);
-            cfg.AddOpenBehavior(typeof(LoggingBehavior<,>));
-            cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
-        });
+            var assembly = Assembly.GetExecutingAssembly();
 
-        return services;
+            services.AddValidatorsFromAssembly(assembly);
+
+            services.AddMediatrWithBehavior(assembly);
+
+            return services;
+        }
     }
 }

@@ -6,6 +6,9 @@
 # dotenv files
 .env
 
+# Duende IdentityServer dev signing key
+tempkey.jwk
+
 # User-specific files
 *.rsuser
 *.suo

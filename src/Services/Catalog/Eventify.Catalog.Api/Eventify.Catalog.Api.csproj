@@ -4,18 +4,15 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\..\BuildingBlocks\Eventify.ServiceDefaults\Eventify.ServiceDefaults.csproj" />
         <ProjectReference Include="..\Eventify.Catalog.Infrastructure\Eventify.Catalog.Infrastructure.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Asp.Versioning.Http" />
-        <PackageReference Include="Carter" />
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Scalar.AspNetCore" />
     </ItemGroup>
 
 </Project>

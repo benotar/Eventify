@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/BuildingBlocks/">
     <Project Path="src/BuildingBlocks/Eventify.IntegrationEvents/Eventify.IntegrationEvents.csproj" />
+    <Project Path="src/BuildingBlocks/Eventify.ServiceDefaults/Eventify.ServiceDefaults.csproj" />
     <Project Path="src/BuildingBlocks/Eventify.SharedKernel/Eventify.SharedKernel.csproj" />
   </Folder>
   <Folder Name="/Services/" />
@@ -22,6 +23,8 @@
     <File Path="deploy/docker/compose.yml" />
     <File Path="Directory.Build.props" />
     <File Path="Directory.Packages.props" />
+    <File Path="docs/ARCHITECTURE.md" />
+    <File Path="docs/THEORY.md" />
     <File Path="migrations.txt" />
   </Folder>
   <Folder Name="/Tests/">

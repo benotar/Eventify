@@ -1,6 +1,7 @@
 ﻿using Eventify.Catalog.Application;
 using Eventify.Catalog.Domain.Artists;
 using Eventify.Catalog.Domain.Artists.ValueObjects;
+using Eventify.SharedKernel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -21,15 +22,15 @@ public class ArtistConfiguration : IEntityTypeConfiguration<Artist>
         {
             propertyBuilder.Property(n => n.Value)
                 .HasColumnName(nameof(Artist.Name))
-                .HasMaxLength(CatalogConstants.MaxNameLength)
+                .HasMaxLength(SharedConstants.MaxNameLength)
                 .IsRequired();
         });
 
         builder.Property(prop => prop.Bio)
-            .HasMaxLength(CatalogConstants.MaxBioLength);
+            .HasMaxLength(SharedConstants.MaxBioLength);
 
         builder.Property(prop => prop.ImageUrl)
-            .HasMaxLength(CatalogConstants.MaxImageUrlLength)
+            .HasMaxLength(SharedConstants.MaxImageUrlLength)
             .HasDefaultValue("https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png");
     }
 }

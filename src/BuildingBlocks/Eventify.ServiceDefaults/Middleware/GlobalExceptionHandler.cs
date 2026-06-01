@@ -1,8 +1,10 @@
 ﻿using Eventify.SharedKernel.Domain.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
-namespace Eventify.Catalog.Api.Middleware;
+namespace Eventify.ServiceDefaults.Middleware;
 
 public class GlobalExceptionHandler : IExceptionHandler
 {

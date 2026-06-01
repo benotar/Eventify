@@ -4,4 +4,8 @@
         <ProjectReference Include="..\..\..\BuildingBlocks\Eventify.SharedKernel\Eventify.SharedKernel.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
+    </ItemGroup>
+
 </Project>

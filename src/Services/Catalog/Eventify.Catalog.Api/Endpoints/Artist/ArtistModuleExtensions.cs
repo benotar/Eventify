@@ -2,7 +2,7 @@
 using Eventify.Catalog.Application.Artists.Commands.UpdateArtist;
 using Eventify.Catalog.Application.Artists.Queries.GetArtists;
 
-namespace Eventify.Catalog.Api.Endpoints;
+namespace Eventify.Catalog.Api.Endpoints.Artist;
 
 public static class ArtistModuleExtensions
 {

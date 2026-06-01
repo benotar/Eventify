@@ -4,4 +4,12 @@
         <ProjectReference Include="..\Eventify.Identity.Application\Eventify.Identity.Application.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <PackageReference Include="Duende.IdentityServer" />
+        <PackageReference Include="Duende.IdentityServer.AspNetIdentity" />
+        <PackageReference Include="Duende.IdentityServer.EntityFramework" />
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+    </ItemGroup>
+
 </Project>
