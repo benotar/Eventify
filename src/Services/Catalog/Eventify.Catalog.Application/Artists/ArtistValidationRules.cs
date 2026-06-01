@@ -1,4 +1,5 @@
-﻿using Eventify.SharedKernel.Extensions;
+﻿using Eventify.SharedKernel;
+using Eventify.SharedKernel.Extensions;
 using FluentValidation;
 
 namespace Eventify.Catalog.Application.Artists;
@@ -17,10 +18,10 @@ static internal class ArtistValidationRules
             ruleBuilder
                 .NotEmpty()
                 .WithMessage("Name is required.")
-                .MinimumLength(CatalogConstants.MinNameLength)
-                .WithMessage($"Name must be at least {CatalogConstants.MinNameLength} characters.")
-                .MaximumLength(CatalogConstants.MaxNameLength)
-                .WithMessage($"Name must not exceed {CatalogConstants.MaxNameLength} characters.")
+                .MinimumLength(SharedConstants.MinNameLength)
+                .WithMessage($"Name must be at least {SharedConstants.MinNameLength} characters.")
+                .MaximumLength(SharedConstants.MaxNameLength)
+                .WithMessage($"Name must not exceed {SharedConstants.MaxNameLength} characters.")
                 .Matches(NameRegex)
                 .WithMessage("Name can only contain letters, numbers, spaces, hyphens, and apostrophes")
                 .Must(name => name.IsNotBlank)
@@ -33,8 +34,8 @@ static internal class ArtistValidationRules
         public IRuleBuilderOptions<T, string?> ArtistBio()
         {
             return ruleBuilder
-                .MaximumLength(CatalogConstants.MaxBioLength)
-                .WithMessage($"Bio must not exceed {CatalogConstants.MaxBioLength} characters")
+                .MaximumLength(SharedConstants.MaxBioLength)
+                .WithMessage($"Bio must not exceed {SharedConstants.MaxBioLength} characters")
                 .Must(bio => bio.IsEmpty || bio.IsNotBlank)
                 .WithMessage("Bio cannot be only whitespace");
         }
@@ -42,8 +43,8 @@ static internal class ArtistValidationRules
         public IRuleBuilderOptions<T, string?> ArtistImageUrl()
         {
             return ruleBuilder
-                .MaximumLength(CatalogConstants.MaxImageUrlLength)
-                .WithMessage($"Image URL must not exceed {CatalogConstants.MaxImageUrlLength} characters")
+                .MaximumLength(SharedConstants.MaxImageUrlLength)
+                .WithMessage($"Image URL must not exceed {SharedConstants.MaxImageUrlLength} characters")
                 .Must(BeAValidHttpUrl)
                 .WithMessage("Image URL must be a valid HTTP or HTTPS URL")
                 .Must(BeAnImageUrl)

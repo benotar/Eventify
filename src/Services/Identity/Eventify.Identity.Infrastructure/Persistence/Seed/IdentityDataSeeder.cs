@@ -30,7 +30,7 @@ public sealed class IdentityDataSeeder : IHostedService
 
     private static async Task SeedRolesAsync(RoleManager<IdentityRole<Guid>> roleManager)
     {
-        string[] roles = [Constants.Admin, Constants.Customer];
+        string[] roles = [SharedConstants.Admin, SharedConstants.Customer];
 
         foreach (var role in roles)
         {
@@ -66,7 +66,7 @@ public sealed class IdentityDataSeeder : IHostedService
                 $"Failed to create admin user: {string.Join(", ", createUserResult.Errors.Select(e => e.Description))}");
         }
 
-        var addToRoleResult = await userManager.AddToRoleAsync(admin, Constants.Admin);
+        var addToRoleResult = await userManager.AddToRoleAsync(admin, SharedConstants.Admin);
 
         if (!addToRoleResult.Succeeded)
         {

@@ -1,8 +1,9 @@
 ﻿using ErrorOr;
 using Eventify.SharedKernel.Extensions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace Eventify.Catalog.Api.Extensions;
+namespace Eventify.ServiceDefaults;
 
 public static class ErrorOrExtensions
 {

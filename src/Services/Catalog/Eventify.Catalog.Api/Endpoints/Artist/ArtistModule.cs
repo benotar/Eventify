@@ -1,11 +1,11 @@
 ﻿using Asp.Versioning.Conventions;
 using Carter;
-using Eventify.Catalog.Api.Extensions;
 using Eventify.Catalog.Application.Artists.Commands.DeleteArtist;
 using Eventify.Catalog.Application.Artists.Queries.GetArtistById;
+using Eventify.ServiceDefaults;
 using MediatR;
 
-namespace Eventify.Catalog.Api.Endpoints;
+namespace Eventify.Catalog.Api.Endpoints.Artist;
 
 public sealed class ArtistModule : ICarterModule
 {

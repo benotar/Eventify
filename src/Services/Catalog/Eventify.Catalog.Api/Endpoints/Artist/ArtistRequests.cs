@@ -1,4 +1,4 @@
-﻿namespace Eventify.Catalog.Api.Endpoints;
+﻿namespace Eventify.Catalog.Api.Endpoints.Artist;
 
 public sealed record CreateArtistRequest(string Name, string? Bio, string? ImageUrl);
 

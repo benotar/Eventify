@@ -8,8 +8,8 @@ public interface IOption
     {
         var name = typeof(TOption).Name;
 
-        return name.EndsWith(Constants.Options)
-            ? name[..^Constants.Options.Length]
+        return name.EndsWith(SharedConstants.Options)
+            ? name[..^SharedConstants.Options.Length]
             : name;
     }
 }
