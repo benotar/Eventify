@@ -24,8 +24,8 @@ public sealed class RegisterUserCommandValidator : AbstractValidator<RegisterUse
 
         RuleFor(command => command.Password)
             .NotEmpty()
-            .MinimumLength(8)
-            .MaximumLength(100)
+            .MinimumLength(SharedConstants.MinPasswordLength)
+            .MaximumLength(SharedConstants.MaxPasswordLength)
             .Matches("[A-Z]").WithMessage("Password must contain at least one uppercase letter.")
             .Matches("[a-z]").WithMessage("Password must contain at least one lowercase letter.")
             .Matches("[0-9]").WithMessage("Password must contain at least one digit.")

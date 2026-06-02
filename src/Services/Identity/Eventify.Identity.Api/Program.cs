@@ -9,7 +9,10 @@ var builder = WebApplication.CreateBuilder(args);
 // DI
 builder.AddServiceDefaults();
 
+builder.Services.AddRazorPages();
+
 builder.Services.AddApplication();
+
 builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 
 var app = builder.Build();
@@ -24,10 +27,13 @@ if (app.Environment.IsDevelopment())
 
 app.MapDefaultEndpoints();
 
+app.UseStaticFiles(); // TODO Remove if there are not any static files
+app.UseRouting();
+
 app.UseIdentityServer();
-
 app.UseAuthentication();
-
 app.UseAuthorization();
+
+app.MapRazorPages();
 
 app.Run();

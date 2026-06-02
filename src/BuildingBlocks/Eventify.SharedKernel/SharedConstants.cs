@@ -16,11 +16,14 @@ public static class SharedConstants
 
     // Length constraints
     public const int MinNameLength = 2;
+    public const int MinPasswordLength = 8;
+
 
     public const int MaxNameLength = 200;
     public const int MaxBioLength = 2000;
     public const int MaxImageUrlLength = 500;
     public const int MaxEmailLength = 256;
+    public const int MaxPasswordLength = 100;
 
     // Pagination
     public const int MinPageSize = 1;
