@@ -12,4 +12,18 @@
         <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
         <PackageReference Include="Scalar.AspNetCore" />
     </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Update="Resources\Captions.resx">
+            <Generator>PublicResXFileCodeGenerator</Generator>
+            <LastGenOutput>Captions.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+        <EmbeddedResource Update="Resources\Captions.uk-UA.resx" />
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Update="Resources\Captions.Designer.cs">
+            <DesignTime>True</DesignTime>
+            <AutoGen>True</AutoGen>
+            <DependentUpon>Captions.resx</DependentUpon>
+        </Compile>
+    </ItemGroup>
 </Project>

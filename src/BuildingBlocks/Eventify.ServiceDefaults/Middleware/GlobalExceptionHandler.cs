@@ -19,6 +19,15 @@ public class GlobalExceptionHandler : IExceptionHandler
     {
         _logger.LogError(exception, "Unhandled exception: {Message}", exception.Message);
 
+        var acceptsHtml = httpContext.Request.Headers.Accept
+            .ToString()
+            .Contains("text/html", StringComparison.OrdinalIgnoreCase);
+
+        if (acceptsHtml)
+        {
+            return false;
+        }
+
         var (title, status) = exception switch
         {
             DomainException => ("A domain invariant was violated.", StatusCodes.Status500InternalServerError),

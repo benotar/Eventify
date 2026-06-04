@@ -56,6 +56,14 @@ public static class DependencyInjection
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
+            // Explicit UI contract the application cookie
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/Account/Login";
+                options.LogoutPath = "/Account/Logout";
+                options.AccessDeniedPath = "/Account/AccessDenied";
+            });
+
             services.AddAuthorization();
 
             services.AddIdentityServer(options =>
@@ -68,6 +76,10 @@ public static class DependencyInjection
                     options.Events.RaiseSuccessEvents = true;
                     options.Events.RaiseFailureEvents = true;
                     options.EmitStaticAudienceClaim = true;
+
+                    // Protocol errors (bad client_id / redirect_uri) render our HTML error page
+                    options.UserInteraction.ErrorUrl = "/Error";
+                    options.UserInteraction.ErrorIdParameter = "errorId";
                 })
                 .AddConfigurationStore((options) =>
                 {

@@ -1,5 +1,6 @@
 ﻿using Duende.IdentityServer.Services;
 using Eventify.Identity.Domain.Entities;
+using Eventify.ServiceDefaults.Resources;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -33,13 +34,13 @@ public class Index : PageModel
 
         if (result.IsLockedOut)
         {
-            ModelState.AddModelError(string.Empty, "Account is locked out.");
+            ModelState.AddModelError(string.Empty, Captions.AccountLockedOut);
             return Page();
         }
 
         if (!result.Succeeded)
         {
-            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+            ModelState.AddModelError(string.Empty, Captions.InvalidLogin);
             return Page();
         }
 
