@@ -25,6 +25,7 @@ public static class DependencyInjection
             services.AddDatabase(configuration, environment);
 
             services.AddHostedService<IdentityServerSeeder>();
+
             services.AddHostedService<IdentityDataSeeder>();
 
             return services;
