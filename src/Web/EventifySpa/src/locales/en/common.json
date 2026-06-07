@@ -1,0 +1,11 @@
+﻿{
+  "nav": {
+    "events": "Events",
+    "myTickets": "My Tickets",
+    "signIn": "Sign In",
+    "signOut": "Sign Out"
+  },
+  "common": {
+    "loading": "Loading..."
+  }
+}

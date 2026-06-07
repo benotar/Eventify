@@ -133,3 +133,14 @@ Two projects in `src/BuildingBlocks/`:
 - **Styling:** Tailwind CSS v4 — utility classes in JSX, no CSS Modules, no styled-components.
 - **Quotes:** double quotes `"` everywhere — imports, strings, JSX attributes.
 - **Semicolons:** always at end of statements.
+- **Localization:** never hardcode UI strings — always use i18next keys. `en` and `uk` locale files are added together every time a new key appears.
+
+## SPA teaching approach
+
+The user is returning to TypeScript/React after a break and needs active guidance:
+
+1. **Before each file:** explain every piece it must contain — imports, types, logic, JSX structure, Tailwind classes. Do not assume the user will fill in omitted parts.
+2. **Layout/markup is the hardest part** for this user — explain JSX structure and Tailwind utility classes explicitly (what each class does visually).
+3. **Logic and handlers** are easier but still need explanation of the "why" — especially TypeScript-specific patterns (generics, type narrowing, `PropsWithChildren`, etc.).
+4. **After the user writes a file**, review it and give concrete, specific feedback.
+5. Do **not** show a full ready implementation to copy — explain what to write and let the user write it. See the general teaching approach above.
