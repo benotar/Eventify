@@ -1,0 +1,37 @@
+﻿@using System.Globalization
+@{
+    var currentCulture = CultureInfo.CurrentUICulture.Name;
+    var returnUrl = Uri.EscapeDataString(Context.Request.Path + Context.Request.QueryString);
+}
+<!doctype html>
+<html lang="@CultureInfo.CurrentUICulture.TwoLetterISOLanguageName">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"] — Eventify</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+</head>
+<body>
+
+<partial name="_Background" />
+
+<div class="lang-switch">
+    <div class="lang-pill">
+        <a href="/culture/set?culture=en-US&redirectUri=@returnUrl"
+           class="lang-link @(currentCulture.StartsWith("en") ? "lang-link-active" : "")">
+            EN
+        </a>
+        <a href="/culture/set?culture=uk-UA&redirectUri=@returnUrl"
+           class="lang-link @(currentCulture.StartsWith("uk") ? "lang-link-active" : "")">
+            UA
+        </a>
+    </div>
+</div>
+
+<div class="page-shell">
+    @RenderBody()
+</div>
+
+</body>
+</html>

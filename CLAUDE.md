@@ -53,6 +53,12 @@ Full source-of-truth: `docs/ARCHITECTURE.md`.
 | Ticket | VSA (single project) | QR-coded tickets; validation endpoint |
 | Notification | VSA (single project) | MailHog/SendGrid; Outbox-driven consumers |
 
+**SPA:** `src/Web/EventifySpa` — Vite + React 19 + TypeScript; `oidc-client-ts` for Authorization Code + PKCE flow; `react-router-dom` for routing; Tailwind CSS v4.
+
+**Orchestration:** No .NET Aspire — services run independently via `launchSettings.json` profiles.
+
+**Dev URLs:** Identity `https://localhost:5001`; Catalog `http://localhost:5002`; SPA `https://localhost:5173`.
+
 **Communication:**
 - **REST** (external, via YARP): all SPA → service traffic
 - **gRPC** (internal sync): Booking → Catalog, Ticket → Catalog
@@ -120,3 +126,21 @@ Two projects in `src/BuildingBlocks/`:
 - Integration tests: real Postgres + RabbitMQ via Testcontainers.
 - Architecture tests: `Eventify.ArchitectureTests/` project enforces layering.
 - Run integration tests against a real database — do not mock the database in integration tests.
+
+## SPA code style (`src/Web/EventifySpa`)
+
+- **Component declaration:** `const Foo: FC = () => { ... }` with `import type { FC } from "react"`.
+- **Styling:** Tailwind CSS v4 — utility classes in JSX, no CSS Modules, no styled-components.
+- **Quotes:** double quotes `"` everywhere — imports, strings, JSX attributes.
+- **Semicolons:** always at end of statements.
+- **Localization:** never hardcode UI strings — always use i18next keys. `en` and `uk` locale files are added together every time a new key appears.
+
+## SPA teaching approach
+
+The user is returning to TypeScript/React after a break and needs active guidance:
+
+1. **Before each file:** explain every piece it must contain — imports, types, logic, JSX structure, Tailwind classes. Do not assume the user will fill in omitted parts.
+2. **Layout/markup is the hardest part** for this user — explain JSX structure and Tailwind utility classes explicitly (what each class does visually).
+3. **Logic and handlers** are easier but still need explanation of the "why" — especially TypeScript-specific patterns (generics, type narrowing, `PropsWithChildren`, etc.).
+4. **After the user writes a file**, review it and give concrete, specific feedback.
+5. Do **not** show a full ready implementation to copy — explain what to write and let the user write it. See the general teaching approach above.

@@ -1,8 +1,12 @@
-﻿using System.Reflection;
+﻿using System.Globalization;
+using System.Reflection;
 using Asp.Versioning;
 using Carter;
 using Eventify.ServiceDefaults.Middleware;
+using Eventify.SharedKernel.Languages;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -47,6 +51,33 @@ public static class Extensions
             using var scope = app.Services.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<TContext>();
             await context.Database.MigrateAsync();
+        }
+    }
+
+    extension(RequestLocalizationOptions localizationOptions)
+    {
+        public void ConfigureLocalizationOptions()
+        {
+            var supportedCultures = CultureManager.CultureNames.Select(item => new CultureInfo(item.Value))
+                .ToList();
+
+            localizationOptions.DefaultRequestCulture = new RequestCulture(CultureManager.CultureNames[Languages.En]);
+            localizationOptions.SupportedCultures = supportedCultures;
+            localizationOptions.SupportedUICultures = supportedCultures;
+        }
+    }
+
+    extension(HttpContext ctx)
+    {
+        public IResult ActionSetCulture(string? culture, string redirectUri)
+        {
+            if (culture != null)
+            {
+                ctx.Response.Cookies.Append(CookieRequestCultureProvider.DefaultCookieName,
+                    CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture, culture)));
+            }
+
+            return Results.Redirect(redirectUri);
         }
     }
 }
