@@ -2,19 +2,142 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Communication rules
+
+### Critical thinking
+
+Do not automatically agree with everything I write or suggest just because I asked for it.
+
+- If my idea, architecture, or implementation is weak, incorrect, risky, or overengineered — explain why.
+- Suggest a better approach when appropriate.
+- Prioritize correctness, maintainability, scalability, and simplicity over agreement.
+- Challenge poor assumptions and bad design decisions.
+- Be direct, constructive, and technically honest.
+
+### Engineering Mindset
+
+- Think like a senior engineer and software architect.
+- Prefer production-ready solutions over quick hacks.
+- Avoid unnecessary abstractions and overengineering.
+- Explain tradeoffs between different approaches.
+- Focus on readability, maintainability, and long-term scalability.
+
+## Response Structure
+
+Structure every response using the following sections when applicable:
+
+### What was done
+
+Describe what was implemented, changed, analyzed, or fixed.
+
+### What I need to do
+
+Describe actions required from me:
+
+- commands to run,
+- validations to perform,
+- decisions to make,
+- files to check,
+- configurations to update.
+
+### Next Step
+
+Suggest the next logical implementation or improvement step.
+
+---
+
+## Continuous Improvement
+
+When a task is completed:
+
+- Suggest improvements and refactoring opportunities.
+- Point out technical debt and architectural concerns.
+- Mention possible edge cases.
+- Recommend performance, security, testing, and scalability improvements.
+- Suggest better patterns or approaches if they exist.
+
+### APIs
+
+- Design APIs consistently and predictably.
+- Validate inputs properly.
+- Handle errors explicitly.
+- Use proper HTTP status codes and meaningful error responses.
+
+### Database
+
+- Optimize database queries when needed.
+- Avoid unnecessary database roundtrips.
+- Think about indexing and query scalability.
+- Consider transaction boundaries carefully.
+
+### Testing
+
+- Suggest unit and integration tests when relevant.
+- Cover critical business logic and edge cases.
+- Avoid fragile tests.
+
+## Solving problems
+
+When solving problems:
+
+1. Analyze the root cause first.
+2. Explain why the issue happens.
+3. Suggest the simplest reliable solution.
+4. Mention alternative approaches if relevant.
+5. Explain tradeoffs and risks.
+
+### Decision Validation
+
+Before suggesting a solution:
+
+- Evaluate whether the solution is actually appropriate for the current project scale and complexity.
+- Prefer the simplest solution that satisfies the requirements.
+- Explicitly warn when a solution introduces unnecessary complexity.
+- Distinguish between “good for learning” and “good for production”.
+
+---
+
+## Output Preferences
+
+When generating code:
+
+- Include only necessary code.
+- Avoid unnecessary comments.
+- Keep naming consistent.
+- Follow existing project conventions when possible.
+
+When reviewing code:
+
+- Point out bugs, bad practices, scalability issues, and maintainability concerns.
+- Suggest concrete improvements instead of generic criticism.
+
+When planning features:
+
+- Think about scalability, monitoring, security, and future maintenance.
+
+## Accuracy Rules
+
+- Do not invent APIs, methods, package capabilities, framework behavior, or configuration options.
+- If uncertain, explicitly say so instead of guessing.
+- Verify assumptions against the existing architecture and codebase.
+- Do not pretend code was tested if it was not.
+
 ## Collaboration model
 
 **Reading** (Read, Grep, Glob, Bash reads): always allowed, no permission needed.
 
 **Code changes** (Edit, Write on project source files): always ask the user before running.
 
+- Never overwrite existing files without explicitly warning about it.
+
 **Git commands** (commit, push, branch, reset, etc.): always ask the user before running.
 
 **Teaching approach for new services/features:**
+
 1. Claude explains the flow and architectural reasoning first (why, trade-offs, microservices context).
 2. User writes the code independently.
 3. User shares the result; Claude reviews and gives feedback.
-Claude does **not** show the full ready implementation upfront — the goal is skill-building, not copy-pasting.
+   Claude does **not** show the full ready implementation upfront — the goal is skill-building, not copy-pasting.
 
 ## Commands
 
@@ -44,22 +167,24 @@ Full source-of-truth: `docs/ARCHITECTURE.md`.
 
 **6 microservices + YARP gateway + React SPA:**
 
-| Service | Architecture style | Role |
-|---|---|---|
-| Identity | Clean Arch | Duende IdentityServer 7 + ASP.NET Identity; OAuth2/OIDC |
-| Catalog | Clean Arch | Artists, Events, Venues, Sessions, PriceTiers; gRPC for inter-service reads |
-| Booking | Clean Arch | Reservations (Redis RedLock + TTL), Bookings, MassTransit Saga, SignalR |
-| Payment | Clean Arch | Stripe PaymentIntent + webhook; Outbox |
-| Ticket | VSA (single project) | QR-coded tickets; validation endpoint |
-| Notification | VSA (single project) | MailHog/SendGrid; Outbox-driven consumers |
+| Service      | Architecture style   | Role                                                                        |
+|--------------|----------------------|-----------------------------------------------------------------------------|
+| Identity     | Clean Arch           | Duende IdentityServer 7 + ASP.NET Identity; OAuth2/OIDC                     |
+| Catalog      | Clean Arch           | Artists, Events, Venues, Sessions, PriceTiers; gRPC for inter-service reads |
+| Booking      | Clean Arch           | Reservations (Redis RedLock + TTL), Bookings, MassTransit Saga, SignalR     |
+| Payment      | Clean Arch           | Stripe PaymentIntent + webhook; Outbox                                      |
+| Ticket       | VSA (single project) | QR-coded tickets; validation endpoint                                       |
+| Notification | VSA (single project) | MailHog/SendGrid; Outbox-driven consumers                                   |
 
-**SPA:** `src/Web/EventifySpa` — Vite + React 19 + TypeScript; `oidc-client-ts` for Authorization Code + PKCE flow; `react-router-dom` for routing; Tailwind CSS v4.
+**SPA:** `src/Web/EventifySpa` — Vite + React 19 + TypeScript; `oidc-client-ts` for Authorization Code + PKCE flow;
+`react-router-dom` for routing; Tailwind CSS v4.
 
 **Orchestration:** No .NET Aspire — services run independently via `launchSettings.json` profiles.
 
 **Dev URLs:** Identity `https://localhost:5001`; Catalog `http://localhost:5002`; SPA `https://localhost:5173`.
 
 **Communication:**
+
 - **REST** (external, via YARP): all SPA → service traffic
 - **gRPC** (internal sync): Booking → Catalog, Ticket → Catalog
 - **RabbitMQ + MassTransit 8.5** (async): integration events + Saga commands
@@ -72,41 +197,68 @@ Full source-of-truth: `docs/ARCHITECTURE.md`.
 Two projects in `src/BuildingBlocks/`:
 
 - **`Eventify.SharedKernel`** — Domain + Application + Infrastructure base classes consolidated:
-  - Domain: `Entity<TId>`, `AggregateRoot<TId>`, `ValueObject`, `DomainEvent` (abstract record), interfaces (`IEntity`, `IAggregateRoot`, `IAuditable`, `IClearableAggregate`, `IDomainEvent`), `DomainException`
-  - Application: `ICommand`, `IQuery<T>`, `ICommandHandler`, `IQueryHandler`, `LoggingBehavior`, `ValidationBehavior`, `NotFoundException`, `ValidationException`
-  - Infrastructure: `BaseDbContext`, `UpdateAuditableInterceptor`, `PublishDomainEventsInterceptor`
+    - Domain: `Entity<TId>`, `AggregateRoot<TId>`, `ValueObject`, `DomainEvent` (abstract record), interfaces (
+      `IEntity`, `IAggregateRoot`, `IAuditable`, `IClearableAggregate`, `IDomainEvent`), `DomainException`
+    - Application: `ICommand`, `IQuery<T>`, `ICommandHandler`, `IQueryHandler`, `LoggingBehavior`, `ValidationBehavior`,
+      `NotFoundException`, `ValidationException`
+    - Infrastructure: `BaseDbContext`, `UpdateAuditableInterceptor`, `PublishDomainEventsInterceptor`
 
 - **`Eventify.IntegrationEvents`** — cross-service event contracts; no deps; `IntegrationEvent` abstract record (UUIDv7)
 
 ## Key design decisions
 
-**IDs:** All entity IDs use `Guid.CreateVersion7()` (UUIDv7 — time-sortable, B-tree friendly). Aggregates use strongly-typed IDs as `readonly record struct ArtistId(Guid Value)`.
+**IDs:** All entity IDs use `Guid.CreateVersion7()` (UUIDv7 — time-sortable, B-tree friendly). Aggregates use
+strongly-typed IDs as `readonly record struct ArtistId(Guid Value)`.
 
-**Audit fields:** `CreatedAt`/`UpdatedAt` on `Entity<TId>` are mutated only via the internal `IAuditable` interface. Populated by `UpdateAuditableInterceptor` (EF Core `ISaveChangesInterceptor`) — never override `SaveChangesAsync` per service.
+**Audit fields:** `CreatedAt`/`UpdatedAt` on `Entity<TId>` are mutated only via the internal `IAuditable` interface.
+Populated by `UpdateAuditableInterceptor` (EF Core `ISaveChangesInterceptor`) — never override `SaveChangesAsync` per
+service.
 
-**Domain events:** `AggregateRoot<TId>.RaiseDomainEvent` is protected. Clearing happens only via internal `IClearableAggregate`. Dispatch by `PublishDomainEventsInterceptor` (**pre-save**, `SavingChangesAsync`, via MediatR `IPublisher`). Pre-save is required for two reasons: (1) EF Core detaches deleted entities from the ChangeTracker after `SaveChanges`, so post-save dispatch would silently lose `*DeletedDomainEvent`s; (2) domain event handlers that write to the Outbox table must participate in the same DB transaction as the aggregate change — pre-save guarantees this. Events are materialized with `.ToList()` before `ClearDomainEvents()` to avoid the live-wrapper trap (`AsReadOnly()` wraps the underlying list, not a copy).
+**Domain events:** `AggregateRoot<TId>.RaiseDomainEvent` is protected. Clearing happens only via internal
+`IClearableAggregate`. Dispatch by `PublishDomainEventsInterceptor` (**pre-save**, `SavingChangesAsync`, via MediatR
+`IPublisher`). Pre-save is required for two reasons: (1) EF Core detaches deleted entities from the ChangeTracker after
+`SaveChanges`, so post-save dispatch would silently lose `*DeletedDomainEvent`s; (2) domain event handlers that write to
+the Outbox table must participate in the same DB transaction as the aggregate change — pre-save guarantees this. Events
+are materialized with `.ToList()` before `ClearDomainEvents()` to avoid the live-wrapper trap (`AsReadOnly()` wraps the
+underlying list, not a copy).
 
-**MediatR 12.2 pin:** `RequestHandlerDelegate<TResponse>` does not accept `CancellationToken` in 12.2. Pipeline behaviors call `next()` not `next(cancellationToken)`. If bumped to 12.5+, update `LoggingBehavior` and `ValidationBehavior`.
+**MediatR 12.2 pin:** `RequestHandlerDelegate<TResponse>` does not accept `CancellationToken` in 12.2. Pipeline
+behaviors call `next()` not `next(cancellationToken)`. If bumped to 12.5+, update `LoggingBehavior` and
+`ValidationBehavior`.
 
-**Error handling:** Application handlers return `ErrorOr<TResult>` (uses `ErrorOr` library). Business errors → `Error.NotFound/Conflict/Validation/Unauthorized/Failure`. `DomainException` only for invariant bugs that should never reach Domain. No try/catch in handlers; endpoints end with `result.Match(success, errs => errs.ToProblemDetails())`. Full rationale in `docs/ARCHITECTURE.md` §8.3.
+**Error handling:** Application handlers return `ErrorOr<TResult>` (uses `ErrorOr` library). Business errors →
+`Error.NotFound/Conflict/Validation/Unauthorized/Failure`. `DomainException` only for invariant bugs that should never
+reach Domain. No try/catch in handlers; endpoints end with `result.Match(success, errs => errs.ToProblemDetails())`.
+Full rationale in `docs/ARCHITECTURE.md` §8.3.
 
-**Endpoints:** Minimal APIs via **Carter** (`ICarterModule` per aggregate under `Endpoints/`). Thin handlers: parse → `request.ToCommand()` → `sender.Send()` → `result.Match()`. **No MVC controllers anywhere.** No FastEndpoints (conflicts with MediatR philosophy).
+**Endpoints:** Minimal APIs via **Carter** (`ICarterModule` per aggregate under `Endpoints/`). Thin handlers: parse →
+`request.ToCommand()` → `sender.Send()` → `result.Match()`. **No MVC controllers anywhere.** No FastEndpoints (conflicts
+with MediatR philosophy).
 
-**Mapping:** Manual static extension methods (`ToDto`/`ToDomain`/`ToIntegrationEvent`) colocated with the DTO/event. **No mapper libraries** (no AutoMapper / Mapster / Mapperly). Aggregates are small enough that boilerplate is minimal; full IDE refactoring + compile-time safety wins.
+**Mapping:** Manual static extension methods (`ToDto`/`ToDomain`/`ToIntegrationEvent`) colocated with the DTO/event. *
+*No mapper libraries** (no AutoMapper / Mapster / Mapperly). Aggregates are small enough that boilerplate is minimal;
+full IDE refactoring + compile-time safety wins.
 
-**Money:** Value Object `record Money(decimal Amount, string Currency)` in `SharedKernel`. Validates `Amount >= 0` and ISO 4217 `Currency` in constructor. EF `OwnsOne(b => b.Money)` flattens to `*_amount` + `*_currency` columns. All monetary fields use `Money`, never raw `decimal` + `string`.
+**Money:** Value Object `record Money(decimal Amount, string Currency)` in `SharedKernel`. Validates `Amount >= 0` and
+ISO 4217 `Currency` in constructor. EF `OwnsOne(b => b.Money)` flattens to `*_amount` + `*_currency` columns. All
+monetary fields use `Money`, never raw `decimal` + `string`.
 
-**API conventions:** URL-segment versioning (`/v1/...`) via `Asp.Versioning.Http`. Offset pagination via `PagedResult<T>` envelope (`Items`, `Page`, `PageSize`, `TotalCount`, `TotalPages`); defaults `pageSize=20`, max `100`.
+**API conventions:** URL-segment versioning (`/v1/...`) via `Asp.Versioning.Http`. Offset pagination via
+`PagedResult<T>` envelope (`Items`, `Page`, `PageSize`, `TotalCount`, `TotalPages`); defaults `pageSize=20`, max `100`.
 
-**Outbox pattern:** All publishing services use MassTransit Transactional Outbox with EF Core. Domain change + outbox row in one DB transaction.
+**Outbox pattern:** All publishing services use MassTransit Transactional Outbox with EF Core. Domain change + outbox
+row in one DB transaction.
 
-**Booking Saga:** MassTransit Automatonymous StateMachine in the Booking service (orchestrator, not choreography). Full state diagram in `docs/ARCHITECTURE.md` §7.
+**Booking Saga:** MassTransit Automatonymous StateMachine in the Booking service (orchestrator, not choreography). Full
+state diagram in `docs/ARCHITECTURE.md` §7.
 
-**VSA vs Clean Architecture:** Ticket and Notification are VSA single-project services (less complexity). Identity, Catalog, Booking, Payment are 4-project Clean Architecture (`Domain`, `Application`, `Infrastructure`, `Api`).
+**VSA vs Clean Architecture:** Ticket and Notification are VSA single-project services (less complexity). Identity,
+Catalog, Booking, Payment are 4-project Clean Architecture (`Domain`, `Application`, `Infrastructure`, `Api`).
 
 ## C# code style
 
-- **Classic constructors only** — never primary constructors on classes. Use explicit `private readonly` fields assigned in constructor body. Positional record syntax (e.g., `record struct ArtistId(Guid Value)`) is fine.
+- **Classic constructors only** — never primary constructors on classes. Use explicit `private readonly` fields assigned
+  in constructor body. Positional record syntax (e.g., `record struct ArtistId(Guid Value)`) is fine.
 - Nullable reference types enabled (`<Nullable>enable`).
 - Implicit usings enabled.
 - `LangVersion` set to `latest`.
@@ -117,7 +269,8 @@ Two projects in `src/BuildingBlocks/`:
 - Projects: `Eventify.{ServiceName}.{Layer}` (e.g., `Eventify.Booking.Domain`).
 - Namespace = folder path.
 - One aggregate per folder in Domain; one handler per file in Application.
-- Dependency rule: `Domain` has zero deps; `Application` → Domain only; `Infrastructure` → Domain + Application; `Api` → all three. Enforced by NetArchTest in CI.
+- Dependency rule: `Domain` has zero deps; `Application` → Domain only; `Infrastructure` → Domain + Application; `Api` →
+  all three. Enforced by NetArchTest in CI.
 
 ## Testing
 
@@ -133,14 +286,19 @@ Two projects in `src/BuildingBlocks/`:
 - **Styling:** Tailwind CSS v4 — utility classes in JSX, no CSS Modules, no styled-components.
 - **Quotes:** double quotes `"` everywhere — imports, strings, JSX attributes.
 - **Semicolons:** always at end of statements.
-- **Localization:** never hardcode UI strings — always use i18next keys. `en` and `uk` locale files are added together every time a new key appears.
+- **Localization:** never hardcode UI strings — always use i18next keys. `en` and `uk` locale files are added together
+  every time a new key appears.
 
 ## SPA teaching approach
 
 The user is returning to TypeScript/React after a break and needs active guidance:
 
-1. **Before each file:** explain every piece it must contain — imports, types, logic, JSX structure, Tailwind classes. Do not assume the user will fill in omitted parts.
-2. **Layout/markup is the hardest part** for this user — explain JSX structure and Tailwind utility classes explicitly (what each class does visually).
-3. **Logic and handlers** are easier but still need explanation of the "why" — especially TypeScript-specific patterns (generics, type narrowing, `PropsWithChildren`, etc.).
+1. **Before each file:** explain every piece it must contain — imports, types, logic, JSX structure, Tailwind classes.
+   Do not assume the user will fill in omitted parts.
+2. **Layout/markup is the hardest part** for this user — explain JSX structure and Tailwind utility classes explicitly (
+   what each class does visually).
+3. **Logic and handlers** are easier but still need explanation of the "why" — especially TypeScript-specific patterns (
+   generics, type narrowing, `PropsWithChildren`, etc.).
 4. **After the user writes a file**, review it and give concrete, specific feedback.
-5. Do **not** show a full ready implementation to copy — explain what to write and let the user write it. See the general teaching approach above.
+5. Do **not** show a full ready implementation to copy — explain what to write and let the user write it. See the
+   general teaching approach above.
