@@ -2,14 +2,15 @@
 
 @theme inline {
     --font-sans: "Plus Jakarta Sans", sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
     --color-bg: var(--bg);
     --color-surface: var(--surface);
     --color-surface-2: var(--surface-2);
     --color-fg: var(--fg);
     --color-fg-muted: var(--fg-muted);
     --color-border: var(--border);
-    --color-brand: #FF3366;
-    --color-brand-2: #8B5CF6;
+    --color-brand: #6366F1;
+    --color-brand-2: #8b5cf6;
 }
 
 :root {
@@ -22,10 +23,46 @@
 }
 
 .dark {
-    --bg: #0A0A0F;
-    --surface: #13131F;
-    --surface-2: #1C1C2E;
-    --fg: #F1F1F3;
-    --fg-muted: rgba(241, 241, 243, 0.5);
-    --border: rgba(255, 255, 255, 0.08);
+    --bg: #08080F;
+    --surface: rgba(255, 255, 255, 0.055);
+    --surface-2: rgba(255, 255, 255, 0.09);
+    --fg: #FFFFFF;
+    --fg-muted: rgba(255, 255, 255, 0.45);
+    --border: rgba(255, 255, 255, 0.09);
+}
+
+@keyframes bgDrift {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes orbFloat {
+    0%   { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(18px, -18px) scale(1.04); }
+}
+
+.bg-animated {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(-45deg, #08080f, #130820, #08111f, #180828, #08080f);
+    background-size: 400% 400%;
+    animation: bgDrift 22s ease infinite;
+}
+
+.orb {
+    position: fixed;
+    z-index: -1;
+    border-radius: 50%;
+    filter: blur(90px);
+    pointer-events: none;
+    animation: orbFloat 12s ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bg-animated,
+    .orb {
+        animation: none;
+    }
 }

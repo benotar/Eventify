@@ -9,11 +9,7 @@ const useTheme = () => {
         if (storedTheme === "light" || storedTheme === "dark")
             return storedTheme;
 
-        const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-
-        return systemPrefersDark
-            ? "dark"
-            : "light";
+        return "dark";
     });
 
     useEffect(() => {
