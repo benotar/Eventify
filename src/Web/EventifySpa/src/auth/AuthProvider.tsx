@@ -1,16 +1,7 @@
-﻿import type {User} from "oidc-client-ts";
-import {createContext, type FC, type PropsWithChildren, useContext, useEffect, useState} from "react";
+﻿import {type FC, type PropsWithChildren, useCallback, useEffect, useMemo, useState} from "react";
+import type {User} from "oidc-client-ts";
 import userManager from "./userManager.ts";
-
-interface AuthContextValue {
-    user: User | null;
-    isLoading: boolean;
-    isAuthenticated: boolean;
-    login: () => Promise<void>;
-    logout: () => Promise<void>;
-}
-
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+import {AuthContext, type AuthContextValue} from "./useAuth.ts";
 
 const AuthProvider: FC<PropsWithChildren> = ({children}) => {
     const [user, setUser] = useState<User | null>(null);
@@ -34,29 +25,22 @@ const AuthProvider: FC<PropsWithChildren> = ({children}) => {
         };
     }, []);
 
-    const value: AuthContextValue = {
+    const login = useCallback(() => userManager.signinRedirect(), []);
+    const logout = useCallback(() => userManager.signoutRedirect(), []);
+
+    const value = useMemo<AuthContextValue>(() => ({
         user,
         isLoading,
         isAuthenticated: user !== null && !user.expired,
-        login: () => userManager.signinRedirect(),
-        logout: () => userManager.signoutRedirect(),
-    };
+        login,
+        logout
+    }), [user, isLoading, login, logout]);
 
     return (
         <AuthContext.Provider value={value}>
             {children}
         </AuthContext.Provider>
     );
-};
-
-export const useAuth = (): AuthContextValue => {
-    const context = useContext(AuthContext);
-
-    if (context === undefined) {
-        throw new Error("useAuth must be used within an AuthProvider");
-    }
-
-    return context;
 };
 
 export default AuthProvider;

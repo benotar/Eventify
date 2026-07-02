@@ -6,14 +6,17 @@ import {BrowserRouter} from "react-router-dom";
 import "./i18n.ts";
 import "./index.css";
 import AnimatedBackground from "./components/AnimatedBackground.tsx";
+import ThemeProvider from "./theme/ThemeProvider.tsx";
 
 createRoot(document.getElementById("root")!).render(
     <StrictMode>
         <BrowserRouter>
-            <AuthProvider>
-                <AnimatedBackground />
-                <App/>
-            </AuthProvider>
+            <ThemeProvider>
+                <AuthProvider>
+                    <AnimatedBackground/>
+                    <App/>
+                </AuthProvider>
+            </ThemeProvider>
         </BrowserRouter>
     </StrictMode>
 );

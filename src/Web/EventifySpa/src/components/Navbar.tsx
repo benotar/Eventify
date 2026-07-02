@@ -1,10 +1,10 @@
 ﻿import type {FC} from "react";
 import {Link} from "react-router-dom";
 import {useTranslation} from "react-i18next";
-import {useAuth} from "../auth/AuthProvider.tsx";
-import useTheme from "../theme/useTheme.ts";
+import {useTheme} from "../theme/useTheme.ts";
 import {Moon, Sun} from "lucide-react";
 import LanguageSwitcher from "./LanguageSwitcher.tsx";
+import {useAuth} from "../auth/useAuth.ts";
 
 const Navbar: FC = () => {
     const {isAuthenticated, isLoading, login, logout} = useAuth();
@@ -59,16 +59,14 @@ const Navbar: FC = () => {
                         isAuthenticated ? (
                             <button
                                 onClick={logout}
-                                className="cursor-pointer rounded-lg bg-surface-2 px-4 py-1.5 text-sm font-medium text-fg
-  transition-opacity hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-brand"
+                                className="cursor-pointer rounded-lg bg-surface-2 px-4 py-1.5 text-sm font-medium text-fg transition-opacity hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-brand"
                             >
                                 {t("nav.signOut")}
                             </button>
                         ) : (
                             <button
                                 onClick={login}
-                                className="cursor-pointer rounded-lg bg-brand px-4 py-1.5 text-sm font-medium text-white
-  transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
+                                className="cursor-pointer rounded-lg bg-brand px-4 py-1.5 text-sm font-medium text-white transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
                             >
                                 {t("nav.signIn")}
                             </button>

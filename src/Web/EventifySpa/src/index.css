@@ -20,6 +20,7 @@
     --fg: #0A0A0F;
     --fg-muted: rgba(10, 10, 15, 0.5);
     --border: rgba(0, 0, 0, 0.08);
+    --bg-gradient: linear-gradient(-45deg, #F4F4F8, #ECECF5, #F0EEFB, #EAF0FB, #F4F4F8);
 }
 
 .dark {
@@ -29,6 +30,7 @@
     --fg: #FFFFFF;
     --fg-muted: rgba(255, 255, 255, 0.45);
     --border: rgba(255, 255, 255, 0.09);
+    --bg-gradient: linear-gradient(-45deg, #08080f, #130820, #08111f, #180828, #08080f);
 }
 
 @keyframes bgDrift {
@@ -46,7 +48,7 @@
     position: fixed;
     inset: 0;
     z-index: -1;
-    background: linear-gradient(-45deg, #08080f, #130820, #08111f, #180828, #08080f);
+    background: var(--bg-gradient);
     background-size: 400% 400%;
     animation: bgDrift 22s ease infinite;
 }
