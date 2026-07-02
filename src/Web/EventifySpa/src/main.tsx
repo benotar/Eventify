@@ -1,9 +1,22 @@
-import {StrictMode} from 'react'
-import {createRoot} from 'react-dom/client'
-import App from './App.tsx'
+import {StrictMode} from "react";
+import {createRoot} from "react-dom/client";
+import App from "./App.tsx";
+import AuthProvider from "./auth/AuthProvider.tsx";
+import {BrowserRouter} from "react-router-dom";
+import "./i18n.ts";
+import "./index.css";
+import AnimatedBackground from "./components/AnimatedBackground.tsx";
+import ThemeProvider from "./theme/ThemeProvider.tsx";
 
-createRoot(document.getElementById('root')!).render(
+createRoot(document.getElementById("root")!).render(
     <StrictMode>
-        <App/>
-    </StrictMode>,
+        <BrowserRouter>
+            <ThemeProvider>
+                <AuthProvider>
+                    <AnimatedBackground/>
+                    <App/>
+                </AuthProvider>
+            </ThemeProvider>
+        </BrowserRouter>
+    </StrictMode>
 );

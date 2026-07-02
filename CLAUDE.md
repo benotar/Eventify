@@ -302,3 +302,40 @@ The user is returning to TypeScript/React after a break and needs active guidanc
 4. **After the user writes a file**, review it and give concrete, specific feedback.
 5. Do **not** show a full ready implementation to copy — explain what to write and let the user write it. See the
    general teaching approach above.
+
+## SPA design system (locked decisions)
+
+The SPA and the Identity Server Razor Pages must share one visual language. Identity Server's `auth.css` (dark
+glassmorphism) is the reference. Locked decisions:
+
+- **Brand color:** `--color-brand` is indigo `#6366F1`, paired with violet `--color-brand-2: #8B5CF6`. The old rose
+  `#FF3366` is retired. Identity Server already uses indigo→violet — never reintroduce a second brand hue.
+- **Language switcher:** label Ukrainian as **UK** (ISO 639-1 language code), English as **EN**. Never "UA" (that is a
+  country code). Applies to both SPA and Identity Server `_Layout.cshtml`.
+- **Theme:** SPA keeps the light/dark toggle but **defaults to dark** (matches the always-dark Identity Server). New
+  visitors land on dark.
+- **Animated background:** the gradient drift + blurred orbs from Identity Server's `_Background.cshtml` are ported
+  globally into the SPA (`AnimatedBackground` component + `.bg-animated`/`.orb` in `index.css`). Always guard with
+  `@media (prefers-reduced-motion: reduce) { animation: none }` in both projects.
+- **Navbar / surfaces:** glassmorphism via `bg-surface/70 backdrop-blur-xl` (theme-aware through the `--surface` CSS
+  var), not flat `bg-surface`.
+- **Typography:** hybrid. **JetBrains Mono** (`font-mono`) for brand wordmark, headings, prices, dates, ticket codes,
+  and uppercase caps-labels; **Plus Jakarta Sans** (`font-sans`, default) for body and long-form text. JetBrains Mono is
+  the only freely available JetBrains face (monospace) — never use it for paragraph/body text. Both fonts load via Google
+  Fonts: SPA in `index.html`, Identity Server in `_Layout.cshtml`. Identity Server applies `font-mono` to `.brand-title`,
+  `.card-title`, `.label-caps`, `.status-code`.
+- **Language switcher:** a glass **pill** identical to Identity Server's `.lang-pill`/`.lang-link`/`.lang-link-active`
+  (rounded-full container, active item = solid `--fg` background with `--bg` text). In the SPA it lives inside the
+  Navbar (right side) as a dedicated `LanguageSwitcher` component, not loose buttons.
+- **Dark-mode tokens (SPA `.dark`) mirror Identity Server exactly:** `--bg: #08080F`, glass surfaces
+  `--surface: rgba(255,255,255,0.055)` / `--surface-2: rgba(255,255,255,0.09)`, `--fg: #FFFFFF`,
+  `--fg-muted: rgba(255,255,255,0.45)`, `--border: rgba(255,255,255,0.09)`. Because `--surface` is translucent in dark,
+  the Navbar uses `bg-surface backdrop-blur-xl` (no extra `/opacity`). Light-mode tokens stay solid.
+- **Icons:** `lucide-react` in the SPA; inline SVG (Heroicons-style) in Razor Pages. Never emoji as icons.
+
+### SPA / Identity Server tech debt
+
+- **Tailwind via CDN in Identity Server:** `_Layout.cshtml` loads `https://cdn.tailwindcss.com` (dev-only). The Razor
+  auth pages rely on a handful of Tailwind utility classes (`w-full`, `max-w-md`, `mb-8`, `space-y-5`, `text-center`)
+  served by that CDN. Before any production deploy of Identity Server: either build Tailwind into a static bundle or move
+  those few classes into `auth.css`. The CDN must not ship to production.

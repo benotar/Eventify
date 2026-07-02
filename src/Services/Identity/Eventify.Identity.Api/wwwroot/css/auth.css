@@ -7,7 +7,7 @@ body {
     min-height: 100vh;
     margin: 0;
     background: #08080f;
-    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
 /* ===== Animated background ===== */
@@ -21,15 +21,9 @@ body {
 }
 
 @keyframes bgDrift {
-    0% {
-        background-position: 0% 50%;
-    }
-    50% {
-        background-position: 100% 50%;
-    }
-    100% {
-        background-position: 0% 50%;
-    }
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 .orb {
@@ -42,12 +36,8 @@ body {
 }
 
 @keyframes orbFloat {
-    0% {
-        transform: translate(0, 0) scale(1);
-    }
-    100% {
-        transform: translate(18px, -18px) scale(1.04);
-    }
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(18px, -18px) scale(1.04); }
 }
 
 /* ===== Shell ===== */
@@ -98,6 +88,7 @@ body {
 }
 
 .brand-title {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
     font-size: 1.875rem;
     font-weight: 700;
     color: #fff;
@@ -113,6 +104,7 @@ body {
 
 /* ===== Card text ===== */
 .card-title {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
     font-size: 1.25rem;
     font-weight: 700;
     color: #fff;
@@ -127,6 +119,7 @@ body {
 
 /* ===== Inputs ===== */
 .label-caps {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
     display: block;
     font-size: 0.68rem;
     font-weight: 700;
@@ -245,6 +238,7 @@ body {
 
 /* ===== Status (Error / AccessDenied) ===== */
 .status-code {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
     font-size: 3.75rem;
     font-weight: 900;
     line-height: 1;
@@ -340,4 +334,14 @@ body {
 
 .lang-link-active:hover {
     color: #0f172a;
+}
+
+/* ===== Reduced motion ===== */
+@media (prefers-reduced-motion: reduce) {
+    .bg-animated,
+    .orb,
+    .btn {
+        animation: none;
+        transition: none;
+    }
 }
