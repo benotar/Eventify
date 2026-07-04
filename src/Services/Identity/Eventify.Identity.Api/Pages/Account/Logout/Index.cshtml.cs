@@ -1,6 +1,6 @@
 ﻿using Duende.IdentityServer.Services;
 using Eventify.Identity.Domain.Entities;
-using Eventify.SharedKernel.Extensions;
+using Eventify.Identity.Infrastructure.Options;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -11,13 +11,17 @@ public class Index : PageModel
 {
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IIdentityServerInteractionService _interaction;
+    private readonly ServicesOptions _servicesOptions;
 
     [BindProperty(SupportsGet = true)] public string? LogoutId { get; set; }
+    public string? CancelUrl { get; private set; }
 
-    public Index(SignInManager<ApplicationUser> signInManager, IIdentityServerInteractionService interaction)
+    public Index(SignInManager<ApplicationUser> signInManager, IIdentityServerInteractionService interaction,
+        ServicesOptions servicesOptions)
     {
         _signInManager = signInManager;
         _interaction = interaction;
+        _servicesOptions = servicesOptions;
     }
 
     public async Task<IActionResult> OnPostAsync()
@@ -28,12 +32,17 @@ public class Index : PageModel
 
         var postLogoutUri = context.PostLogoutRedirectUri;
 
-        return Redirect(postLogoutUri!.IsNotEmpty ? postLogoutUri : "/");
+        return Redirect(postLogoutUri ?? _servicesOptions.Spa);
     }
 
-    public IActionResult OnGet(string? logoutId)
+    public async Task<IActionResult> OnGetAsync(string? logoutId)
     {
         LogoutId = logoutId;
+
+        var context = await _interaction.GetLogoutContextAsync(logoutId);
+
+        CancelUrl = context.PostLogoutRedirectUri ?? _servicesOptions.Spa;
+
         return Page();
     }
 }

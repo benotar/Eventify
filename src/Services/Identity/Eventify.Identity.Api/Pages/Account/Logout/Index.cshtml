@@ -44,8 +44,8 @@
         </h2>
         <p
             class="card-text"
-            style="margin-bottom: 2rem;">
-
+            style="margin-bottom: 2rem;"
+        >
             @Captions.LogoutConfirm
         </p>
 
@@ -55,14 +55,15 @@
                 asp-for="LogoutId"/>
             <button
                 type="submit"
-                class="btn btn-danger">
-
+                class="btn btn-danger"
+            >
                 @Captions.LogoutButton
             </button>
         </form>
         <a
-            href="/"
-            class="link-muted">
+            href="@Model.CancelUrl"
+            class="link-muted"
+        >
             @Captions.Cancel
         </a>
     </div>
