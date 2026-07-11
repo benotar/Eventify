@@ -12,7 +12,7 @@ public class Index : PageModel
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IIdentityServerInteractionService _interaction;
 
-    [BindProperty] public InputModel Input { get; set; } = default!;
+    [BindProperty] public LoginModel Model { get; set; } = default!;
 
     [BindProperty(SupportsGet = true)] public string? ReturnUrl { get; set; }
 
@@ -29,7 +29,7 @@ public class Index : PageModel
             return Page();
         }
 
-        var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, isPersistent: false,
+        var result = await _signInManager.PasswordSignInAsync(Model.Email, Model.Password, isPersistent: false,
             lockoutOnFailure: true);
 
         if (result.IsLockedOut)

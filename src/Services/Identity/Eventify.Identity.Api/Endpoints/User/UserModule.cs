@@ -1,6 +1,7 @@
 ﻿using Asp.Versioning.Conventions;
 using Carter;
 using Eventify.ServiceDefaults;
+using Eventify.SharedKernel;
 using MediatR;
 
 namespace Eventify.Identity.Api.Endpoints.User;
@@ -20,11 +21,12 @@ public sealed class UserModule : ICarterModule
 
         // Commands
         group.MapPost("/", async (RegisterUserRequest request, ISender sender, CancellationToken ct) =>
-        {
-            var result = await sender.Send(request.ToCommand(), ct);
+            {
+                var result = await sender.Send(request.ToCommand(), ct);
 
-            return result.Match(id => Results.Created($"/v1/users/{id}", id),
-                errors => errors.ToProblemDetails());
-        });
+                return result.Match(id => Results.Created($"/v1/users/{id}", id),
+                    errors => errors.ToProblemDetails());
+            })
+            .RequireAuthorization(policyBuilder => policyBuilder.RequireRole(SharedConstants.Admin));
     }
 }

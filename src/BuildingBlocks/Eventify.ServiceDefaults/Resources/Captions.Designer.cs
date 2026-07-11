@@ -105,6 +105,33 @@ namespace Eventify.ServiceDefaults.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Confirm Password.
+        /// </summary>
+        public static string ConfirmPassword {
+            get {
+                return ResourceManager.GetString("ConfirmPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Email.
+        /// </summary>
+        public static string Email {
+            get {
+                return ResourceManager.GetString("Email", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The {0} field is not a valid e-mail address.
+        /// </summary>
+        public static string EmailAddressValidation {
+            get {
+                return ResourceManager.GetString("EmailAddressValidation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to An unexpected error occurred. Please try again later.
         /// </summary>
         public static string ErrorMessage {
@@ -123,6 +150,15 @@ namespace Eventify.ServiceDefaults.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to First Name.
+        /// </summary>
+        public static string FirstName {
+            get {
+                return ResourceManager.GetString("FirstName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Go to home page.
         /// </summary>
         public static string GoHome {
@@ -132,11 +168,29 @@ namespace Eventify.ServiceDefaults.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Already have an account.
+        /// </summary>
+        public static string HaveAccount {
+            get {
+                return ResourceManager.GetString("HaveAccount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid login attempt.
         /// </summary>
         public static string InvalidLogin {
             get {
                 return ResourceManager.GetString("InvalidLogin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Last Name.
+        /// </summary>
+        public static string LastName {
+            get {
+                return ResourceManager.GetString("LastName", resourceCulture);
             }
         }
         
@@ -200,6 +254,87 @@ namespace Eventify.ServiceDefaults.Resources {
         public static string LogoutTitle {
             get {
                 return ResourceManager.GetString("LogoutTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The {0} field must contain no more than {1} character.
+        /// </summary>
+        public static string MaxLengthValidation {
+            get {
+                return ResourceManager.GetString("MaxLengthValidation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The {0} field must be at least {1} characters.
+        /// </summary>
+        public static string MinLengthValidaion {
+            get {
+                return ResourceManager.GetString("MinLengthValidaion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Don&apos;t have an account?.
+        /// </summary>
+        public static string NoAccount {
+            get {
+                return ResourceManager.GetString("NoAccount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Password.
+        /// </summary>
+        public static string Password {
+            get {
+                return ResourceManager.GetString("Password", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sign up.
+        /// </summary>
+        public static string RegisterButton {
+            get {
+                return ResourceManager.GetString("RegisterButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Create your account.
+        /// </summary>
+        public static string RegisterSubtitle {
+            get {
+                return ResourceManager.GetString("RegisterSubtitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sigh Up.
+        /// </summary>
+        public static string RegisterTitle {
+            get {
+                return ResourceManager.GetString("RegisterTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The {0} field is required.
+        /// </summary>
+        public static string RequiredValidation {
+            get {
+                return ResourceManager.GetString("RequiredValidation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Username.
+        /// </summary>
+        public static string UserName {
+            get {
+                return ResourceManager.GetString("UserName", resourceCulture);
             }
         }
     }
