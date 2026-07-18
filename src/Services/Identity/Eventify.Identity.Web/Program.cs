@@ -15,7 +15,8 @@ builder.Services.Configure<RequestLocalizationOptions>(options => options.Config
 // Browser requests that throw are re-executed onto the HTML /Error page (see GlobalExceptionHandler).
 builder.Services.Configure<ExceptionHandlerOptions>(options => options.ExceptionHandlingPath = "/Error");
 
-builder.Services.AddRazorPages();
+builder.Services.AddRazorPages()
+    .AddMvcOptions(options => options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true);
 
 builder.Services.AddApplication();
 

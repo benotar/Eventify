@@ -2,7 +2,7 @@
 using Eventify.Identity.Infrastructure.Options;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Eventify.Identity.Api.Pages;
+namespace Eventify.Identity.Web.Pages;
 
 public class Error : PageModel
 {

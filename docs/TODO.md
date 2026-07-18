@@ -224,6 +224,13 @@ Goal: the SPA works through a single entry point and covers the full user flow.
     - Ticket list with QR codes (replace the `MyTicketsPage.tsx` placeholder)
 - [ ] **6.6 Localization**
     - All new screens: keys added to `en/common.json` and `uk/common.json` at the same time
+- [ ] **6.7 Structured validation-error contract (metadata)**
+    - When the SPA starts consuming Identity/Catalog validation endpoints, upgrade `ValidationBehavior` to carry
+      `f.FormattedMessagePlaceholderValues` into `Error.Validation(..., metadata)`
+    - API returns stable code + parameters (e.g. `{ maxLength: 255 }`); each client localizes itself
+      (Razor via `Captions`, SPA via i18next interpolation `{{maxLength}}`)
+    - Deferred from Phase 1: validation messages currently drop placeholders because errors render under each
+      field, so field/number context was redundant for the Razor-only flow
 
 ---
 

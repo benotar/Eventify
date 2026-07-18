@@ -1,9 +1,11 @@
 ﻿using Eventify.Identity.Application.User.RegisterUser;
+using Eventify.ServiceDefaults.Resources;
+using Eventify.SharedKernel.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Eventify.Identity.Api.Pages.Account.Register;
+namespace Eventify.Identity.Web.Pages.Account.Register;
 
 public class Index : PageModel
 {
@@ -19,11 +21,6 @@ public class Index : PageModel
 
     public async Task<IActionResult> OnPostAsync(CancellationToken ct)
     {
-        if (!ModelState.IsValid)
-        {
-            return Page();
-        }
-
         var result = await _sender.Send(new RegisterUserCommand(Model.Email, Model.FirstName, Model.LastName, Model.Password),
             ct);
 
@@ -34,7 +31,9 @@ public class Index : PageModel
 
         foreach (var error in result.Errors)
         {
-            ModelState.AddModelError(string.Empty, error.Description);
+            var message = Captions.ResourceManager.GetString(error.Description) ?? error.Description;
+
+            ModelState.AddModelError($"{nameof(Model)}.{error.Code}", message);
         }
 
         return Page();

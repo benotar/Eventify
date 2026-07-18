@@ -1,6 +1,6 @@
 ﻿using Eventify.Identity.Application.User.RegisterUser;
 
-namespace Eventify.Identity.Api.Endpoints.User;
+namespace Eventify.Identity.Web.Endpoints.User;
 
 public static class UserModuleExtensions
 {

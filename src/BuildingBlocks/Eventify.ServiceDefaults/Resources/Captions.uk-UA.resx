@@ -105,15 +105,27 @@
         <value>Підтвердження пароля</value>
     </data>
     <data name="RequiredValidation" xml:space="preserve">
-        <value>Поле "{0}" є обов'язковим</value>
+        <value>Це поле є обов'язковим</value>
     </data>
     <data name="EmailAddressValidation" xml:space="preserve">
-        <value>Поле "{0}" повинно містити коректну адресу електронної пошти</value>
+        <value>Введіть коректну адресу електронної пошти</value>
     </data>
-    <data name="MinLengthValidaion" xml:space="preserve">
-        <value>Поле "{0}" повинно містити щонайменше {1} символів</value>
+    <data name="MinLengthValidation" xml:space="preserve">
+        <value>Це поле занадто коротке</value>
     </data>
     <data name="MaxLengthValidation" xml:space="preserve">
-        <value>Поле "{0}" не може містити більше {1} символів</value>
+        <value>Це поле занадто довге</value>
+    </data>
+    <data name="PasswordValidation" xml:space="preserve">
+        <value>Пароль повинен містити щонайменше один спеціальний символ</value>
+    </data>
+    <data name="PasswordUppercase" xml:space="preserve">
+        <value>Пароль повинен містити щонайменше одну велику літеру</value>
+    </data>
+    <data name="PasswordLowercase" xml:space="preserve">
+        <value>Пароль повинен містити щонайменше одну малу літеру</value>
+    </data>
+    <data name="PasswordDigit" xml:space="preserve">
+        <value>Пароль повинен містити щонайменше одну цифру</value>
     </data>
 </root>

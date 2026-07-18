@@ -105,15 +105,27 @@
         <value>Confirm Password</value>
     </data>
     <data name="RequiredValidation" xml:space="preserve">
-        <value>The {0} field is required</value>
+        <value>This field is required</value>
     </data>
     <data name="EmailAddressValidation" xml:space="preserve">
-        <value>The {0} field is not a valid e-mail address</value>
+        <value>Please enter a valid e-mail address</value>
     </data>
-    <data name="MinLengthValidaion" xml:space="preserve">
-        <value>The {0} field must be at least {1} characters</value>
+    <data name="MinLengthValidation" xml:space="preserve">
+        <value>This field is too short</value>
     </data>
     <data name="MaxLengthValidation" xml:space="preserve">
-        <value>The {0} field must contain no more than {1} character</value>
+        <value>This field is too long</value>
+    </data>
+    <data name="PasswordValidation" xml:space="preserve">
+        <value>Password must contain at least one special character</value>
+    </data>
+    <data name="PasswordUppercase" xml:space="preserve">
+        <value>Password must contain at least one uppercase letter</value>
+    </data>
+    <data name="PasswordLowercase" xml:space="preserve">
+        <value>Password must contain at least one lowercase letter</value>
+    </data>
+    <data name="PasswordDigit" xml:space="preserve">
+        <value>Password must contain at least one digit</value>
     </data>
 </root>

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Eventify.Identity.Api.Pages.Account;
+namespace Eventify.Identity.Web.Pages.Account;
 
 public class AccessDenied : PageModel
 {

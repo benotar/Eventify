@@ -4,7 +4,7 @@ using Eventify.ServiceDefaults;
 using Eventify.SharedKernel;
 using MediatR;
 
-namespace Eventify.Identity.Api.Endpoints.User;
+namespace Eventify.Identity.Web.Endpoints.User;
 
 public sealed class UserModule : ICarterModule
 {

@@ -2,7 +2,7 @@
 using Eventify.ServiceDefaults.Resources;
 using Eventify.SharedKernel;
 
-namespace Eventify.Identity.Api.Pages.Account.Login;
+namespace Eventify.Identity.Web.Pages.Account.Login;
 
 public class LoginModel
 {
@@ -17,7 +17,7 @@ public class LoginModel
     [Display(Name = nameof(Captions.Password), ResourceType = typeof(Captions))]
     [Required(ErrorMessageResourceType = typeof(Captions), ErrorMessageResourceName = nameof(Captions.RequiredValidation))]
     [MinLength(SharedConstants.MinPasswordLength, ErrorMessageResourceType = typeof(Captions),
-        ErrorMessageResourceName = nameof(Captions.MinLengthValidaion))]
+        ErrorMessageResourceName = nameof(Captions.MinLengthValidation))]
     [MaxLength(SharedConstants.MaxPasswordLength, ErrorMessageResourceType = typeof(Captions),
         ErrorMessageResourceName = nameof(Captions.MaxLengthValidation))]
     [DataType(DataType.Password)]

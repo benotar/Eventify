@@ -1,4 +1,5 @@
-﻿using Eventify.SharedKernel;
+﻿using Eventify.Identity.Domain.Enums;
+using Eventify.SharedKernel;
 using FluentValidation;
 
 namespace Eventify.Identity.Application.User.RegisterUser;
@@ -8,27 +9,27 @@ public sealed class RegisterUserCommandValidator : AbstractValidator<RegisterUse
     public RegisterUserCommandValidator()
     {
         RuleFor(command => command.Email)
-            .NotEmpty()
-            .EmailAddress()
-            .MaximumLength(SharedConstants.MaxEmailLength);
+            .NotEmpty().WithMessage(nameof(CaptionCode.RequiredValidation))
+            .EmailAddress().WithMessage(nameof(CaptionCode.EmailAddressValidation))
+            .MaximumLength(SharedConstants.MaxEmailLength).WithMessage(nameof(CaptionCode.MaxLengthValidation));
 
         RuleFor(command => command.FirstName)
-            .NotEmpty()
-            .MinimumLength(SharedConstants.MinNameLength)
-            .MaximumLength(SharedConstants.MaxNameLength);
+            .NotEmpty().WithMessage(nameof(CaptionCode.RequiredValidation))
+            .MinimumLength(SharedConstants.MinNameLength).WithMessage(nameof(CaptionCode.MinLengthValidation))
+            .MaximumLength(SharedConstants.MaxNameLength).WithMessage(nameof(CaptionCode.MaxLengthValidation));
 
         RuleFor(command => command.LastName)
-            .NotEmpty()
-            .MinimumLength(SharedConstants.MinNameLength)
-            .MaximumLength(SharedConstants.MaxNameLength);
+            .NotEmpty().WithMessage(nameof(CaptionCode.RequiredValidation))
+            .MinimumLength(SharedConstants.MinNameLength).WithMessage(nameof(CaptionCode.MinLengthValidation))
+            .MaximumLength(SharedConstants.MaxNameLength).WithMessage(nameof(CaptionCode.MaxLengthValidation));
 
         RuleFor(command => command.Password)
-            .NotEmpty()
-            .MinimumLength(SharedConstants.MinPasswordLength)
-            .MaximumLength(SharedConstants.MaxPasswordLength)
-            .Matches("[A-Z]").WithMessage("Password must contain at least one uppercase letter.")
-            .Matches("[a-z]").WithMessage("Password must contain at least one lowercase letter.")
-            .Matches("[0-9]").WithMessage("Password must contain at least one digit.")
-            .Matches("[^a-zA-Z0-9]").WithMessage("Password must contain at least one special character.");
+            .NotEmpty().WithMessage(nameof(CaptionCode.RequiredValidation))
+            .MinimumLength(SharedConstants.MinPasswordLength).WithMessage(nameof(CaptionCode.MinLengthValidation))
+            .MaximumLength(SharedConstants.MaxPasswordLength).WithMessage(nameof(CaptionCode.MaxLengthValidation))
+            .Matches("[A-Z]").WithMessage(nameof(CaptionCode.PasswordUppercase))
+            .Matches("[a-z]").WithMessage(nameof(CaptionCode.PasswordLowercase))
+            .Matches("[0-9]").WithMessage(nameof(CaptionCode.PasswordDigit))
+            .Matches("[^a-zA-Z0-9]").WithMessage(nameof(CaptionCode.PasswordValidation));
     }
 }

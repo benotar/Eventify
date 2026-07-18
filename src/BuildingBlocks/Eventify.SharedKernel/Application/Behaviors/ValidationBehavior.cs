@@ -32,7 +32,7 @@ public sealed class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<
         var errors = validationResults
             .SelectMany(r => r.Errors)
             .Where(f => f is not null)
-            .Select(f => Error.Validation(f.PropertyName, f.ErrorMessage))
+            .Select(f => Error.Validation(f.PropertyName, f.ErrorMessage, f.FormattedMessagePlaceholderValues))
             .ToList();
 
         if (errors.IsEmpty)

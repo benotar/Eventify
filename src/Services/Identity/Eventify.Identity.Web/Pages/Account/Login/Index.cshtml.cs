@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Eventify.Identity.Api.Pages.Account.Login;
+namespace Eventify.Identity.Web.Pages.Account.Login;
 
 public class Index : PageModel
 {

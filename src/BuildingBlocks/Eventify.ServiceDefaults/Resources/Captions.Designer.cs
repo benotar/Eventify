@@ -269,9 +269,9 @@ namespace Eventify.ServiceDefaults.Resources {
         /// <summary>
         ///   Looks up a localized string similar to The {0} field must be at least {1} characters.
         /// </summary>
-        public static string MinLengthValidaion {
+        public static string MinLengthValidation {
             get {
-                return ResourceManager.GetString("MinLengthValidaion", resourceCulture);
+                return ResourceManager.GetString("MinLengthValidation", resourceCulture);
             }
         }
         
@@ -290,6 +290,15 @@ namespace Eventify.ServiceDefaults.Resources {
         public static string Password {
             get {
                 return ResourceManager.GetString("Password", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Password must contain at least one special character.
+        /// </summary>
+        public static string PasswordValidation {
+            get {
+                return ResourceManager.GetString("PasswordValidation", resourceCulture);
             }
         }
         
