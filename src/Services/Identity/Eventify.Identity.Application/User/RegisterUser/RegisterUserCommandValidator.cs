@@ -1,4 +1,4 @@
-﻿using Eventify.Identity.Domain.Enums;
+﻿using Eventify.Localization;
 using Eventify.SharedKernel;
 using FluentValidation;
 
@@ -9,27 +9,27 @@ public sealed class RegisterUserCommandValidator : AbstractValidator<RegisterUse
     public RegisterUserCommandValidator()
     {
         RuleFor(command => command.Email)
-            .NotEmpty().WithMessage(nameof(CaptionCode.RequiredValidation))
-            .EmailAddress().WithMessage(nameof(CaptionCode.EmailAddressValidation))
-            .MaximumLength(SharedConstants.MaxEmailLength).WithMessage(nameof(CaptionCode.MaxLengthValidation));
+            .NotEmpty().WithMessage(Captions.RequiredValidation)
+            .EmailAddress().WithMessage(Captions.EmailAddressValidation)
+            .MaximumLength(SharedConstants.MaxEmailLength).WithMessage(Captions.MaxLengthValidation);
 
         RuleFor(command => command.FirstName)
-            .NotEmpty().WithMessage(nameof(CaptionCode.RequiredValidation))
-            .MinimumLength(SharedConstants.MinNameLength).WithMessage(nameof(CaptionCode.MinLengthValidation))
-            .MaximumLength(SharedConstants.MaxNameLength).WithMessage(nameof(CaptionCode.MaxLengthValidation));
+            .NotEmpty().WithMessage(Captions.RequiredValidation)
+            .MinimumLength(SharedConstants.MinNameLength).WithMessage(Captions.MinLengthValidation)
+            .MaximumLength(SharedConstants.MaxNameLength).WithMessage(Captions.MaxLengthValidation);
 
         RuleFor(command => command.LastName)
-            .NotEmpty().WithMessage(nameof(CaptionCode.RequiredValidation))
-            .MinimumLength(SharedConstants.MinNameLength).WithMessage(nameof(CaptionCode.MinLengthValidation))
-            .MaximumLength(SharedConstants.MaxNameLength).WithMessage(nameof(CaptionCode.MaxLengthValidation));
+            .NotEmpty().WithMessage(Captions.RequiredValidation)
+            .MinimumLength(SharedConstants.MinNameLength).WithMessage(Captions.MinLengthValidation)
+            .MaximumLength(SharedConstants.MaxNameLength).WithMessage(Captions.MaxLengthValidation);
 
         RuleFor(command => command.Password)
-            .NotEmpty().WithMessage(nameof(CaptionCode.RequiredValidation))
-            .MinimumLength(SharedConstants.MinPasswordLength).WithMessage(nameof(CaptionCode.MinLengthValidation))
-            .MaximumLength(SharedConstants.MaxPasswordLength).WithMessage(nameof(CaptionCode.MaxLengthValidation))
-            .Matches("[A-Z]").WithMessage(nameof(CaptionCode.PasswordUppercase))
-            .Matches("[a-z]").WithMessage(nameof(CaptionCode.PasswordLowercase))
-            .Matches("[0-9]").WithMessage(nameof(CaptionCode.PasswordDigit))
-            .Matches("[^a-zA-Z0-9]").WithMessage(nameof(CaptionCode.PasswordValidation));
+            .NotEmpty().WithMessage(Captions.RequiredValidation)
+            .MinimumLength(SharedConstants.MinPasswordLength).WithMessage(Captions.MinLengthValidation)
+            .MaximumLength(SharedConstants.MaxPasswordLength).WithMessage(Captions.MaxLengthValidation)
+            .Matches("[A-Z]").WithMessage(Captions.PasswordUppercase)
+            .Matches("[a-z]").WithMessage(Captions.PasswordLowercase)
+            .Matches("[0-9]").WithMessage(Captions.PasswordDigit)
+            .Matches("[^a-zA-Z0-9]").WithMessage(Captions.PasswordValidation);
     }
 }

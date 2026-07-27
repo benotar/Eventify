@@ -1,6 +1,4 @@
 ﻿using Eventify.Identity.Application.User.RegisterUser;
-using Eventify.ServiceDefaults.Resources;
-using Eventify.SharedKernel.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -31,9 +29,7 @@ public class Index : PageModel
 
         foreach (var error in result.Errors)
         {
-            var message = Captions.ResourceManager.GetString(error.Description) ?? error.Description;
-
-            ModelState.AddModelError($"{nameof(Model)}.{error.Code}", message);
+            ModelState.AddModelError($"{nameof(Model)}.{error.Code}", error.Description);
         }
 
         return Page();

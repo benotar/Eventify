@@ -120,12 +120,15 @@
         <value>Password must contain at least one special character</value>
     </data>
     <data name="PasswordUppercase" xml:space="preserve">
-        <value>Password must contain at least one uppercase letter</value>
+        <value>Password must contain at least one special character</value>
     </data>
     <data name="PasswordLowercase" xml:space="preserve">
         <value>Password must contain at least one lowercase letter</value>
     </data>
     <data name="PasswordDigit" xml:space="preserve">
         <value>Password must contain at least one digit</value>
+    </data>
+    <data name="AlreadyExistsValidation" xml:space="preserve">
+        <value>This value already exists</value>
     </data>
 </root>

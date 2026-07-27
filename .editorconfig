@@ -1,0 +1,109 @@
+﻿# EditorConfig — стиль коду Eventify.
+# Правила віддзеркалюють розділ "C# code style" у CLAUDE.md.
+# Свідомо мінімальний набір: тут лише те, що зафіксовано в CLAUDE.md,
+# плюс базове форматування. Правила, яких документ не регламентує
+# (var, expression-bodied members, порядок модифікаторів), навмисно відсутні.
+# https://editorconfig.org
+
+root = true
+
+# ──────────────────────────────────────────────────────────────
+# Базове форматування
+# ──────────────────────────────────────────────────────────────
+[*]
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+# У Markdown два пробіли в кінці рядка — значущий розрив рядка.
+[*.md]
+trim_trailing_whitespace = false
+
+[*.{yml,yaml}]
+indent_size = 2
+
+[*.slnx]
+indent_size = 2
+
+# SPA (Vite + React + TypeScript)
+[*.{js,jsx,ts,tsx,json,css,html}]
+indent_size = 2
+
+# ──────────────────────────────────────────────────────────────
+# C#
+# ──────────────────────────────────────────────────────────────
+[*.cs]
+charset = utf-8-bom
+
+# Namespace = шлях до папки, file-scoped (IDE0161).
+csharp_style_namespace_declarations = file_scoped:warning
+
+# using поза namespace, System — першим.
+csharp_using_directive_placement = outside_namespace:warning
+dotnet_sort_system_directives_first = true
+
+# Без "this." — код цієї конвенції вже дотримується (IDE0003).
+dotnet_style_qualification_for_field = false:warning
+dotnet_style_qualification_for_property = false:warning
+dotnet_style_qualification_for_method = false:warning
+dotnet_style_qualification_for_event = false:warning
+
+# CLAUDE.md: "Classic constructors only — never primary constructors on classes."
+#
+# УВАГА: це НЕ форсує заборону. Roslyn не має діагностики "використано primary
+# constructor". Опція працює лише в один бік — вимикає підказку IDE
+# "сконвертуй класичний конструктор у primary", тобто захищає від випадкового
+# введення primary ctor через Alt+Enter. Саму заборону тримає code review.
+# Виняток за вашим правилом (нащадки DbContext) окремо кодувати не потрібно:
+# правило все одно нічого не діагностує.
+csharp_style_prefer_primary_constructors = false:silent
+
+# ── Іменування полів ────────────────────────────────────────
+# Порядок правил має значення: перемагає перше, що збіглося.
+# Тому const і static readonly йдуть ПЕРЕД загальним правилом.
+
+# private const → PascalCase
+dotnet_naming_rule.private_const_pascal.severity = warning
+dotnet_naming_rule.private_const_pascal.symbols = private_const_fields
+dotnet_naming_rule.private_const_pascal.style = pascal_case
+
+dotnet_naming_symbols.private_const_fields.applicable_kinds = field
+dotnet_naming_symbols.private_const_fields.applicable_accessibilities = private
+dotnet_naming_symbols.private_const_fields.required_modifiers = const
+
+# private static readonly → PascalCase
+dotnet_naming_rule.private_static_readonly_pascal.severity = warning
+dotnet_naming_rule.private_static_readonly_pascal.symbols = private_static_readonly_fields
+dotnet_naming_rule.private_static_readonly_pascal.style = pascal_case
+
+dotnet_naming_symbols.private_static_readonly_fields.applicable_kinds = field
+dotnet_naming_symbols.private_static_readonly_fields.applicable_accessibilities = private
+dotnet_naming_symbols.private_static_readonly_fields.required_modifiers = static, readonly
+
+# решта приватних полів (екземплярні) → _camelCase
+dotnet_naming_rule.private_fields_underscore.severity = warning
+dotnet_naming_rule.private_fields_underscore.symbols = private_fields
+dotnet_naming_rule.private_fields_underscore.style = underscore_camel_case
+
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+
+dotnet_naming_style.pascal_case.capitalization = pascal_case
+
+dotnet_naming_style.underscore_camel_case.capitalization = camel_case
+dotnet_naming_style.underscore_camel_case.required_prefix = _
+
+# ──────────────────────────────────────────────────────────────
+# Згенерований код — аналізатори не застосовуються.
+# EF Core міграції лежать на різній глибині, тому два патерни.
+# ──────────────────────────────────────────────────────────────
+[*.Designer.cs]
+generated_code = true
+
+[**/Migrations/*.cs]
+generated_code = true
+
+[**/Migrations/**/*.cs]
+generated_code = true

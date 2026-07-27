@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <Compile Update="Captions.Designer.cs">
+            <AutoGen>True</AutoGen>
+            <DesignTime>True</DesignTime>
+            <DependentUpon>Captions.resx</DependentUpon>
+        </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Update="Captions.resx">
+            <DependentUpon>Captions.Designer.cs</DependentUpon>
+            <Generator>ResXFileCodeGenerator</Generator>
+        </EmbeddedResource>
+
+        <EmbeddedResource Update="Captions.uk-UA.resx">
+            <DependentUpon>Captions.resx</DependentUpon>
+        </EmbeddedResource>
+    </ItemGroup>
+
+</Project>

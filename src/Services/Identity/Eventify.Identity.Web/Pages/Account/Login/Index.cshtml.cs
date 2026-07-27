@@ -1,6 +1,6 @@
 ﻿using Duende.IdentityServer.Services;
 using Eventify.Identity.Domain.Entities;
-using Eventify.ServiceDefaults.Resources;
+using Eventify.Localization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;

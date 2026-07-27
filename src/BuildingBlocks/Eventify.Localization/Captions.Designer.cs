@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Eventify.ServiceDefaults.Resources {
+namespace Eventify.Localization {
     using System;
     
     
@@ -38,7 +38,7 @@ namespace Eventify.ServiceDefaults.Resources {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Eventify.ServiceDefaults.Resources.Captions", typeof(Captions).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Eventify.Localization.Captions", typeof(Captions).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -87,6 +87,15 @@ namespace Eventify.ServiceDefaults.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to This value already exists.
+        /// </summary>
+        public static string AlreadyExistsValidation {
+            get {
+                return ResourceManager.GetString("AlreadyExistsValidation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Eventify.
         /// </summary>
         public static string ApplicationTitle {
@@ -123,7 +132,7 @@ namespace Eventify.ServiceDefaults.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The {0} field is not a valid e-mail address.
+        ///   Looks up a localized string similar to Please enter a valid e-mail address.
         /// </summary>
         public static string EmailAddressValidation {
             get {
@@ -258,7 +267,7 @@ namespace Eventify.ServiceDefaults.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The {0} field must contain no more than {1} character.
+        ///   Looks up a localized string similar to This field is too long.
         /// </summary>
         public static string MaxLengthValidation {
             get {
@@ -267,7 +276,7 @@ namespace Eventify.ServiceDefaults.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The {0} field must be at least {1} characters.
+        ///   Looks up a localized string similar to This field is too short.
         /// </summary>
         public static string MinLengthValidation {
             get {
@@ -290,6 +299,33 @@ namespace Eventify.ServiceDefaults.Resources {
         public static string Password {
             get {
                 return ResourceManager.GetString("Password", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Password must contain at least one digit.
+        /// </summary>
+        public static string PasswordDigit {
+            get {
+                return ResourceManager.GetString("PasswordDigit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Password must contain at least one lowercase letter.
+        /// </summary>
+        public static string PasswordLowercase {
+            get {
+                return ResourceManager.GetString("PasswordLowercase", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Password must contain at least one special character.
+        /// </summary>
+        public static string PasswordUppercase {
+            get {
+                return ResourceManager.GetString("PasswordUppercase", resourceCulture);
             }
         }
         
@@ -330,7 +366,7 @@ namespace Eventify.ServiceDefaults.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The {0} field is required.
+        ///   Looks up a localized string similar to This field is required.
         /// </summary>
         public static string RequiredValidation {
             get {

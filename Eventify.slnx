@@ -1,35 +1,51 @@
 <Solution>
-  <Folder Name="/BuildingBlocks/">
-    <Project Path="src/BuildingBlocks/Eventify.IntegrationEvents/Eventify.IntegrationEvents.csproj" />
-    <Project Path="src/BuildingBlocks/Eventify.ServiceDefaults/Eventify.ServiceDefaults.csproj" />
-    <Project Path="src/BuildingBlocks/Eventify.SharedKernel/Eventify.SharedKernel.csproj" />
-  </Folder>
-  <Folder Name="/Services/" />
-  <Folder Name="/Services/Catalog/">
-    <Project Path="src/Services/Catalog/Eventify.Catalog.Api/Eventify.Catalog.Api.csproj" />
-    <Project Path="src/Services/Catalog/Eventify.Catalog.Application/Eventify.Catalog.Application.csproj" />
-    <Project Path="src/Services/Catalog/Eventify.Catalog.Domain/Eventify.Catalog.Domain.csproj" />
-    <Project Path="src/Services/Catalog/Eventify.Catalog.Infrastructure/Eventify.Catalog.Infrastructure.csproj" />
-  </Folder>
-  <Folder Name="/Services/Identity/">
-    <Project Path="src/Services/Identity/Eventify.Identity.Application/Eventify.Identity.Application.csproj" />
-    <Project Path="src/Services/Identity/Eventify.Identity.Domain/Eventify.Identity.Domain.csproj" />
-    <Project Path="src/Services/Identity/Eventify.Identity.Infrastructure/Eventify.Identity.Infrastructure.csproj" />
-    <Project Path="src/Services/Identity/Eventify.Identity.Web/Eventify.Identity.Web.csproj" />
-  </Folder>
-  <Folder Name="/Solution-Items/">
-    <File Path=".github/workflows/build.yml" />
-    <File Path="CLAUDE.md" />
-    <File Path="deploy/docker/compose.yml" />
-    <File Path="Directory.Build.props" />
-    <File Path="Directory.Packages.props" />
-    <File Path="docs/ARCHITECTURE.md" />
-    <File Path="docs/OIDC_AUTH_FLOW.md" />
-    <File Path="docs/THEORY.md" />
-    <File Path="docs/TODO.md" />
-    <File Path="migrations.txt" />
-  </Folder>
-  <Folder Name="/Tests/">
-    <Project Path="tests/Eventify.Catalog.UnitTests/Eventify.Catalog.UnitTests.csproj" />
-  </Folder>
+    <Folder Name="/BuildingBlocks/">
+        <Project Path="src/BuildingBlocks/Eventify.IntegrationEvents/Eventify.IntegrationEvents.csproj" />
+        <Project Path="src/BuildingBlocks/Eventify.Localization/Eventify.Localization.csproj" />
+        <Project Path="src/BuildingBlocks/Eventify.ServiceDefaults/Eventify.ServiceDefaults.csproj" />
+        <Project Path="src/BuildingBlocks/Eventify.SharedKernel/Eventify.SharedKernel.csproj" />
+    </Folder>
+    <Folder Name="/Services/" />
+    <Folder Name="/Services/Catalog/">
+        <Project Path="src/Services/Catalog/Eventify.Catalog.Api/Eventify.Catalog.Api.csproj" />
+        <Project Path="src/Services/Catalog/Eventify.Catalog.Application/Eventify.Catalog.Application.csproj" />
+        <Project Path="src/Services/Catalog/Eventify.Catalog.Domain/Eventify.Catalog.Domain.csproj" />
+        <Project Path="src/Services/Catalog/Eventify.Catalog.Infrastructure/Eventify.Catalog.Infrastructure.csproj" />
+    </Folder>
+    <Folder Name="/Services/Identity/">
+        <Project Path="src/Services/Identity/Eventify.Identity.Application/Eventify.Identity.Application.csproj" />
+        <Project Path="src/Services/Identity/Eventify.Identity.Domain/Eventify.Identity.Domain.csproj" />
+        <Project Path="src/Services/Identity/Eventify.Identity.Infrastructure/Eventify.Identity.Infrastructure.csproj" />
+        <Project Path="src/Services/Identity/Eventify.Identity.Web/Eventify.Identity.Web.csproj" />
+    </Folder>
+    <Folder Name="/Solution-Items/">
+        <File Path="CLAUDE.md" />
+    </Folder>
+    <Folder Name="/Solution-Items/Build/">
+        <File Path=".editorconfig" />
+        <File Path="Directory.Build.props" />
+        <File Path="Directory.Packages.props" />
+        <File Path="global.json" />
+    </Folder>
+    <Folder Name="/Solution-Items/DevOps/">
+        <File Path=".github/workflows/build.yml" />
+        <File Path=".gitignore" />
+        <File Path="deploy/docker/compose.yml" />
+    </Folder>
+    <Folder Name="/Solution-Items/Docs/">
+        <File Path="README.md" />
+        <File Path="docs/ARCHITECTURE.md" />
+        <File Path="docs/OIDC_AUTH_FLOW.md" />
+        <File Path="docs/TASKS.md" />
+        <File Path="docs/THEORY.md" />
+        <File Path="migrations.txt" />
+    </Folder>
+    <Folder Name="/Tests/">
+        <Project Path="tests/Eventify.Catalog.UnitTests/Eventify.Catalog.UnitTests.csproj" />
+    </Folder>
+    <Folder Name="/Tools/" />
+    <Folder Name="/Tools/tasks-board/">
+        <File Path="tools/tasks-board/README.md" />
+        <File Path="tools/tasks-board/index.html" />
+    </Folder>
 </Solution>

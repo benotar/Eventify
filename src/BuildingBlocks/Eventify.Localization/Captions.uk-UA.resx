@@ -128,4 +128,7 @@
     <data name="PasswordDigit" xml:space="preserve">
         <value>Пароль повинен містити щонайменше одну цифру</value>
     </data>
+    <data name="AlreadyExistsValidation" xml:space="preserve">
+        <value>Це значення вже існує</value>
+    </data>
 </root>

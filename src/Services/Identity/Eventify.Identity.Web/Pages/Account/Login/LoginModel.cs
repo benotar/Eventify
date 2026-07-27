@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Eventify.ServiceDefaults.Resources;
+using Eventify.Localization;
 using Eventify.SharedKernel;
 
 namespace Eventify.Identity.Web.Pages.Account.Login;
