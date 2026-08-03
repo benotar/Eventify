@@ -1,4 +1,4 @@
-namespace Eventify.IntegrationEvents;
+﻿namespace Eventify.IntegrationEvents;
 
 public abstract record IntegrationEvent
 {

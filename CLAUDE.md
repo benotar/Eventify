@@ -275,8 +275,13 @@ Catalog, Booking, Payment are 4-project Clean Architecture (`Domain`, `Applicati
 
 ## C# code style
 
-- **Classic constructors only** — never primary constructors on classes. Use explicit `private readonly` fields assigned
-  in constructor body. Positional record syntax (e.g., `record struct ArtistId(Guid Value)`) is fine.
+- **Classic constructors only** — never primary constructors on classes, with one exception: classes that directly
+  inherit `DbContext` (e.g., `BaseDbContext`, `CatalogDbContext`, `ApplicationDbContext`) may use a primary constructor
+  for the `DbContextOptions` parameter. Everywhere else, use explicit `private readonly` fields assigned in constructor
+  body. Positional record syntax (e.g., `record struct ArtistId(Guid Value)`) is fine.
+  **Not tool-enforced:** Roslyn's `IDE0290` only suggests converting classic → primary constructors; it has no
+  diagnostic for an existing primary constructor, so `.editorconfig` cannot flag a violation of this rule (including
+  the exception boundary). This is a code-review convention, not a build-time gate.
 - Nullable reference types enabled (`<Nullable>enable`).
 - Implicit usings enabled.
 - `LangVersion` set to `latest`.

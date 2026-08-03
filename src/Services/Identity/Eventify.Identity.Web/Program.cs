@@ -1,4 +1,4 @@
-using Duende.IdentityServer.EntityFramework.DbContexts;
+﻿using Duende.IdentityServer.EntityFramework.DbContexts;
 using Eventify.Identity.Application;
 using Eventify.Identity.Infrastructure;
 using Eventify.Identity.Infrastructure.Persistence;

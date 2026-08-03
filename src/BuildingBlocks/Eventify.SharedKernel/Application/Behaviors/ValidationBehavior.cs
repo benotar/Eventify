@@ -1,4 +1,4 @@
-using ErrorOr;
+﻿using ErrorOr;
 using Eventify.SharedKernel.Extensions;
 using FluentValidation;
 using MediatR;

@@ -1,4 +1,4 @@
-using Eventify.SharedKernel.Extensions;
+﻿using Eventify.SharedKernel.Extensions;
 
 namespace Eventify.SharedKernel.Domain.Exceptions;
 

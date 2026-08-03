@@ -1,4 +1,4 @@
-namespace Eventify.SharedKernel.Domain;
+﻿namespace Eventify.SharedKernel.Domain;
 
 public abstract class Entity<TId> : IAuditable
     where TId : notnull
