@@ -1,0 +1,100 @@
+# EditorConfig — Eventify code style.
+# Rules mirror the "C# code style" section of CLAUDE.md.
+# Deliberately minimal: only what CLAUDE.md documents, plus basic formatting.
+# Rules the document doesn't regulate (var, expression-bodied members,
+# modifier order) are intentionally absent.
+# https://editorconfig.org
+
+root = true
+
+# ──────────────────────────────────────────────────────────────
+# Basic formatting
+# ──────────────────────────────────────────────────────────────
+[*]
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+# In Markdown, two trailing spaces are a meaningful line break.
+[*.md]
+trim_trailing_whitespace = false
+
+[*.{yml,yaml}]
+indent_size = 2
+
+[*.slnx]
+indent_size = 2
+
+# SPA (Vite + React + TypeScript)
+[*.{js,jsx,ts,tsx,json,css,html}]
+indent_size = 2
+
+# ──────────────────────────────────────────────────────────────
+# C#
+# ──────────────────────────────────────────────────────────────
+[*.cs]
+charset = utf-8-bom
+
+# Namespace = folder path, file-scoped (IDE0161).
+csharp_style_namespace_declarations = file_scoped:warning
+
+# using outside namespace, System first.
+csharp_using_directive_placement = outside_namespace:warning
+dotnet_sort_system_directives_first = true
+
+# No "this." — the codebase already follows this convention (IDE0003).
+dotnet_style_qualification_for_field = false:warning
+dotnet_style_qualification_for_property = false:warning
+dotnet_style_qualification_for_method = false:warning
+dotnet_style_qualification_for_event = false:warning
+
+
+# ── Field naming ────────────────────────────────────────────
+# Rule order matters: the first match wins.
+# That's why const and static readonly come BEFORE the general rule.
+
+# private const → PascalCase
+dotnet_naming_rule.private_const_pascal.severity = warning
+dotnet_naming_rule.private_const_pascal.symbols = private_const_fields
+dotnet_naming_rule.private_const_pascal.style = pascal_case
+
+dotnet_naming_symbols.private_const_fields.applicable_kinds = field
+dotnet_naming_symbols.private_const_fields.applicable_accessibilities = private
+dotnet_naming_symbols.private_const_fields.required_modifiers = const
+
+# private static readonly → PascalCase
+dotnet_naming_rule.private_static_readonly_pascal.severity = warning
+dotnet_naming_rule.private_static_readonly_pascal.symbols = private_static_readonly_fields
+dotnet_naming_rule.private_static_readonly_pascal.style = pascal_case
+
+dotnet_naming_symbols.private_static_readonly_fields.applicable_kinds = field
+dotnet_naming_symbols.private_static_readonly_fields.applicable_accessibilities = private
+dotnet_naming_symbols.private_static_readonly_fields.required_modifiers = static, readonly
+
+# remaining private (instance) fields → _camelCase
+dotnet_naming_rule.private_fields_underscore.severity = warning
+dotnet_naming_rule.private_fields_underscore.symbols = private_fields
+dotnet_naming_rule.private_fields_underscore.style = underscore_camel_case
+
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+
+dotnet_naming_style.pascal_case.capitalization = pascal_case
+
+dotnet_naming_style.underscore_camel_case.capitalization = camel_case
+dotnet_naming_style.underscore_camel_case.required_prefix = _
+
+# ──────────────────────────────────────────────────────────────
+# Generated code — analyzers don't apply.
+# EF Core migrations live at different depths, hence two patterns.
+# ──────────────────────────────────────────────────────────────
+[*.Designer.cs]
+generated_code = true
+
+[**/Migrations/*.cs]
+generated_code = true
+
+[**/Migrations/**/*.cs]
+generated_code = true

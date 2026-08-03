@@ -1,4 +1,4 @@
-namespace Eventify.SharedKernel.Domain;
+﻿namespace Eventify.SharedKernel.Domain;
 
 public abstract class AggregateRoot<TId> : Entity<TId>, IAggregateRoot, IClearableAggregate
     where TId : notnull

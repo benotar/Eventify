@@ -78,9 +78,30 @@ This is **not** a system designed for production scale. Architectural decisions 
 | Reviews / ratings | Pure CRUD, no architectural value |
 | Wishlists / favorites | Same |
 | ML recommendations | Separate domain unrelated to messaging/saga focus |
-| Multi-language UI | English only |
 | Multi-currency | USD only |
 | Mobile apps | Web-only |
+
+### In scope: bilingual UI (EN + UK)
+
+The user-facing surfaces are localized in **English and Ukrainian**. This is not deferred polish —
+`en` and `uk` keys ship in the **same PR** as the feature that introduces them.
+
+| Surface | Mechanism |
+|---|---|
+| React SPA | i18next; `en/common.json` + `uk/common.json` |
+| Identity Server Razor Pages | ASP.NET Core localization; `Captions.resx` + `Captions.uk-UA.resx` via `IStringLocalizer` |
+
+Ukrainian is labelled **UK** (ISO 639-1 language code) in every switcher — never "UA", which is a
+country code.
+
+**Known gap:** server-side validation errors currently return pre-formatted English strings, so the
+SPA cannot localize them independently. Carrying machine-readable codes + placeholder values
+through `ValidationBehavior` is tracked as US-8.6 in `TASKS.md` — it was deferred from Phase 1
+because Razor Pages render validation messages under each field, where the English string was
+sufficient.
+
+Localization applies to **UI text only**. Domain data (event titles, artist names, venue names)
+remains single-language as entered by the Admin; multi-language *content* is out of scope.
 
 ---
 
@@ -1106,7 +1127,7 @@ All test projects run on every PR. Integration tests gated to PR-to-main to keep
 | Secrets in K8s | Kubernetes Secrets (sealed-secrets stretch goal) |
 | Stripe keys | `.env` (gitignored); rotated via Stripe dashboard |
 | SQL injection | EF Core parameterizes all queries |
-| Mass assignment | DTOs separate from entities; AutoMapper config explicit |
+| Mass assignment | DTOs separate from entities; mapping is explicit via manual extension methods (see §8.11 — no mapper library) |
 | CORS | Whitelist only frontend origin in Gateway |
 | Rate limiting | `AspNetCoreRateLimit` on Gateway (Iter 4) |
 | Webhook signature | Stripe webhook signature verification mandatory |

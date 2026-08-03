@@ -1,0 +1,1374 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Eventify Backlog Board</title>
+  <style>
+    /* T004 — design tokens, copied literally from the locked design system (FR-011) */
+    :root {
+      /* Without this, Chrome draws native form-control chrome (the <select>
+         popup list, scrollbars) using the OS light theme regardless of any
+         author CSS on the control itself — the popup background stays white
+         while our text color stays white too, so it's invisible until a
+         list item is hovered/selected and gets a system highlight color. */
+      color-scheme: dark;
+
+      --bg: #08080F;
+      --brand: #6366F1;
+      --brand-2: #8B5CF6;
+      --surface: rgba(255, 255, 255, 0.055);
+      --surface-2: rgba(255, 255, 255, 0.09);
+      --fg: #FFFFFF;
+      --fg-muted: rgba(255, 255, 255, 0.45);
+      --border: rgba(255, 255, 255, 0.09);
+      --danger: #F87171;
+      --success: #34D399;
+
+      /* T005 — local-first font stacks; never loaded over the network (FR-018) */
+      --font-mono: ui-monospace, "JetBrains Mono", Consolas, monospace;
+      --font-sans: system-ui, "Plus Jakarta Sans", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-sans);
+    }
+
+    /* T006 — layout: sticky header, three-column grid, glass cards */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.5rem;
+      background: var(--surface);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    h1 {
+      font-family: var(--font-mono);
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 0;
+      background: linear-gradient(90deg, var(--brand), var(--brand-2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    button {
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: var(--fg);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 0.45rem 0.9rem;
+      cursor: pointer;
+    }
+
+    button:hover { background: var(--surface); border-color: var(--brand); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    a:focus-visible {
+      outline: 2px solid var(--brand-2);
+      outline-offset: 2px;
+    }
+
+    select {
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: var(--fg);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 0.4rem 0.6rem;
+    }
+
+    /* Belt-and-suspenders alongside color-scheme above: Chrome partially
+       honors explicit option colors even where it ignores the select's own
+       background for the dropdown popup. */
+    select option {
+      background: #16161F;
+      color: var(--fg);
+    }
+
+    #mode-banner {
+      font-size: 0.8rem;
+      color: var(--fg-muted);
+      padding: 0.3rem 0.7rem;
+      border-radius: 0.5rem;
+      background: var(--surface-2);
+    }
+    #mode-banner[data-kind="warning"] { color: var(--danger); }
+    #mode-banner[data-kind="success"] { color: var(--success); }
+
+    #stats {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--fg-muted);
+      margin-left: auto;
+    }
+
+    #diagnostics {
+      margin: 0 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background: var(--surface);
+    }
+    #diagnostics summary {
+      cursor: pointer;
+      padding: 0.5rem 0.8rem;
+      font-size: 0.85rem;
+      color: var(--fg-muted);
+    }
+    #diagnostics ul { margin: 0; padding: 0.5rem 1.5rem 0.8rem; }
+    #diagnostics li { font-size: 0.82rem; color: var(--fg-muted); }
+    #diagnostics li[data-severity="error"] { color: var(--danger); }
+    #diagnostics[hidden] { display: none; }
+
+    main#board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      padding: 1.5rem;
+    }
+    @media (max-width: 900px) {
+      main#board { grid-template-columns: 1fr; }
+    }
+
+    .column {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 0.75rem;
+      min-height: 200px;
+    }
+    .column-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+      padding: 0 0.25rem;
+    }
+    .column-header h2 {
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      margin: 0;
+    }
+    .column-count {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--fg-muted);
+    }
+
+    .card {
+      background: var(--surface);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border);
+      border-radius: 0.6rem;
+      padding: 0.7rem 0.85rem;
+      margin-bottom: 0.6rem;
+    }
+    .card-top {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+    }
+    .card-id {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--brand-2);
+    }
+    .card-title {
+      font-size: 0.9rem;
+      flex: 1;
+    }
+    .card-priority { font-size: 0.85rem; }
+    .card-progress {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--fg-muted);
+    }
+    .card-epic {
+      font-size: 0.75rem;
+      color: var(--fg-muted);
+      margin-top: 0.2rem;
+    }
+    .card-persona {
+      font-size: 0.8rem;
+      font-style: italic;
+      color: var(--fg-muted);
+      margin: 0.5rem 0;
+    }
+    .card-tasks { margin-top: 0.4rem; }
+    .card-task {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      font-size: 0.82rem;
+      padding: 0.15rem 0;
+    }
+    .card-task[data-done="true"] .card-task-text {
+      color: var(--fg-muted);
+      text-decoration: line-through;
+    }
+    .card-task input[type="checkbox"] {
+      margin-top: 0.15rem;
+      accent-color: var(--brand);
+    }
+
+    #empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: var(--fg-muted);
+      padding: 3rem 1rem;
+    }
+
+    #conflict-banner {
+      grid-column: 1 / -1;
+      background: rgba(248, 113, 113, 0.12);
+      border: 1px solid var(--danger);
+      border-radius: 0.6rem;
+      padding: 0.7rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 0.85rem;
+    }
+    #conflict-banner[hidden] { display: none; }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Eventify Backlog Board</h1>
+    <button id="open-btn" type="button">Open TASKS.md</button>
+    <button id="reopen-btn" type="button" hidden>Reopen …</button>
+    <span id="mode-banner"></span>
+    <select id="epic-filter" hidden>
+      <option value="">All Epics</option>
+    </select>
+    <select id="priority-filter" hidden>
+      <option value="">All Priorities</option>
+      <option value="🔴">🔴 Blocking</option>
+      <option value="🟡">🟡 Required</option>
+      <option value="🟢">🟢 Polish</option>
+    </select>
+    <span id="stats"></span>
+  </header>
+
+  <details id="diagnostics" hidden>
+    <summary>Diagnostics (<span id="diagnostics-count">0</span>)</summary>
+    <ul id="diagnostics-list"></ul>
+  </details>
+
+  <main id="board">
+    <div id="empty-state">Click "Open TASKS.md" to load the backlog.</div>
+
+    <div id="conflict-banner" hidden>
+      <span>TASKS.md changed on disk. Reload to continue.</span>
+      <button id="reload-btn" type="button">Reload</button>
+    </div>
+
+    <section class="column" data-status="todo" hidden>
+      <div class="column-header">
+        <h2>To Do</h2>
+        <span class="column-count" data-count-for="todo">0</span>
+      </div>
+      <div class="column-body" data-body-for="todo"></div>
+    </section>
+
+    <section class="column" data-status="in-progress" hidden>
+      <div class="column-header">
+        <h2>In Progress</h2>
+        <span class="column-count" data-count-for="in-progress">0</span>
+      </div>
+      <div class="column-body" data-body-for="in-progress"></div>
+    </section>
+
+    <section class="column" data-status="done" hidden>
+      <div class="column-header">
+        <h2>Done</h2>
+        <span class="column-count" data-count-for="done">0</span>
+      </div>
+      <div class="column-body" data-body-for="done"></div>
+    </section>
+  </main>
+
+  <script>
+    // Plain classic script, not type="module": nothing here uses import/
+    // export, and keeping it classic means every top-level function stays
+    // inspectable from devtools — useful in a tool with no build step and
+    // no bundler-provided debugging story.
+
+    // ------------------------------------------------------------------
+    // T011 — shared UI feedback helpers (contracts/persistence.md §7)
+    // ------------------------------------------------------------------
+    const modeBanner = document.getElementById('mode-banner');
+
+    function showBanner(kind, message) {
+      modeBanner.textContent = message;
+      modeBanner.dataset.kind = kind;
+    }
+
+    function showError(message) {
+      // Errors are shown verbatim and never swallowed (FR-015).
+      showBanner('warning', message);
+      console.error('[tasks-board]', message);
+    }
+
+    // ------------------------------------------------------------------
+    // T008 — capability detection (contracts/persistence.md §1)
+    // ------------------------------------------------------------------
+    const capabilities = {
+      canPickFiles: 'showOpenFilePicker' in window,
+      canUseIndexedDb: false, // refined asynchronously below
+    };
+
+    let boardMode = capabilities.canPickFiles ? 'read-write' : 'read-only';
+
+    function announceMode() {
+      if (boardMode === 'read-write') {
+        showBanner('info', 'Ready — writes go straight to disk.');
+      } else {
+        showBanner(
+          'warning',
+          "This browser can't write files — open in Chrome or Edge for full functionality."
+        );
+      }
+    }
+
+    async function detectIndexedDb() {
+      if (!('indexedDB' in window)) return false;
+      try {
+        await new Promise((resolve, reject) => {
+          const req = indexedDB.open('eventify-tasks-board-probe');
+          req.onsuccess = () => { req.result.close(); resolve(); };
+          req.onerror = () => reject(req.error);
+        });
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    // ------------------------------------------------------------------
+    // T044 — IndexedDB handle store (contracts/persistence.md §5).
+    // FileSystemFileHandle is structured-cloneable, so it stores directly.
+    // ------------------------------------------------------------------
+    const HANDLE_DB_NAME = 'eventify-tasks-board';
+    const HANDLE_STORE = 'handles';
+
+    function openHandleDb() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open(HANDLE_DB_NAME, 1);
+        req.onupgradeneeded = () => {
+          req.result.createObjectStore(HANDLE_STORE, { keyPath: 'id' });
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    // T046 — every call here is wrapped so a failure only disables the
+    // "Reopen" convenience; it must never block US1-US4 (a live possibility
+    // under file://, per research.md §2).
+    async function saveHandle(handle) {
+      if (!capabilities.canUseIndexedDb) return;
+      try {
+        const db = await openHandleDb();
+        await new Promise((resolve, reject) => {
+          const tx = db.transaction(HANDLE_STORE, 'readwrite');
+          tx.objectStore(HANDLE_STORE).put({ id: 'tasks-md', handle, savedAt: new Date().toISOString() });
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => reject(tx.error);
+        });
+        db.close();
+      } catch (err) {
+        console.warn('[tasks-board] could not save file handle:', err.message);
+      }
+    }
+
+    async function loadSavedHandle() {
+      if (!capabilities.canUseIndexedDb) return null;
+      try {
+        const db = await openHandleDb();
+        const record = await new Promise((resolve, reject) => {
+          const tx = db.transaction(HANDLE_STORE, 'readonly');
+          const req = tx.objectStore(HANDLE_STORE).get('tasks-md');
+          req.onsuccess = () => resolve(req.result || null);
+          req.onerror = () => reject(req.error);
+        });
+        db.close();
+        return record;
+      } catch (err) {
+        console.warn('[tasks-board] could not read saved file handle:', err.message);
+        return null;
+      }
+    }
+
+    // ------------------------------------------------------------------
+    // T010 — split retaining line separators (research.md §3, FR-014)
+    // ------------------------------------------------------------------
+    function splitLinesKeepingSeparators(text) {
+      // Keeping the separator on each element means CRLF/LF/final-newline
+      // handling needs no special-casing anywhere else in the codebase.
+      const lines = text.split(/(?<=\n)/);
+      console.assert(
+        lines.join('') === text,
+        'splitLinesKeepingSeparators: round-trip invariant violated'
+      );
+      return lines;
+    }
+
+    // ------------------------------------------------------------------
+    // T009 — open the file via the File System Access API
+    // (contracts/persistence.md §2). Must run inside a user gesture.
+    // ------------------------------------------------------------------
+    async function openTasksFile() {
+      let handle;
+      try {
+        [handle] = await window.showOpenFilePicker({
+          types: [{ description: 'Markdown', accept: { 'text/markdown': ['.md'] } }],
+          multiple: false,
+        });
+      } catch (err) {
+        if (err && err.name === 'AbortError') return null; // user cancelled — not an error
+        showError('Could not open file picker: ' + err.message);
+        return null;
+      }
+      return readHandle(handle);
+    }
+
+    async function readHandle(handle) {
+      const file = await handle.getFile();
+      const buf = await file.arrayBuffer();
+      const text = new TextDecoder('utf-8', { ignoreBOM: true }).decode(buf);
+      return { handle, text };
+    }
+
+    // ==================================================================
+    // Parser (contracts/tasks-md-grammar.md, data-model.md)
+    // ==================================================================
+
+    // T013 — GitHub-style anchor slug: lowercase, strip everything but
+    // [a-z0-9 space -], then spaces -> hyphens. Em dashes are REMOVED, not
+    // replaced, which is why "Epic 1 — Identity Service" yields a DOUBLE
+    // hyphen: "epic-1--identity-service". Reproducing this exactly is what
+    // makes the Roadmap -> Epic priority join work at all.
+    function githubAnchorSlug(headingText) {
+      return headingText
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s/g, '-');
+    }
+
+    const EPIC_HEADING_RE = /^### Epic (\d+)\s*[—-]\s*(.+?)\s*$/;
+    const STORY_HEADING_RE = /^#### (US-\d+\.\d+)\s*[—-]\s*(.+?)\s*$/;
+    // Group 1: leading whitespace. Group 2: marker char (between the brackets).
+    // Group 3: remaining text after "- [x] ".
+    const TASK_RE = /^(\s*)[-*]\s\[([^\]])\]\s(.*?)\r?\n?$/;
+    const FENCE_RE = /^```/;
+    const CONTINUATION_RE = /^(\s+)\S/;
+    const BRANCH_META_RE = /\*\*Branch:\*\*\s*`([^`]+)`/;
+    const DEPENDS_META_RE = /\*\*Depends on:\*\*\s*([^·]+?)\s*(?:·|$)/;
+
+    // T014 — Roadmap table: locate Priority/Epics columns BY HEADER NAME so
+    // reordering columns can't break the join (FR-003).
+    function parseRoadmapTable(lines) {
+      const anchorInfo = new Map(); // anchor -> { phase, priority }
+      let i = lines.findIndex((l) => /^## Roadmap\s*$/.test(l));
+      if (i === -1) return anchorInfo;
+
+      let headerCells = null;
+      let priorityIdx = -1;
+      let epicsIdx = -1;
+      let phaseIdx = -1;
+
+      for (i += 1; i < lines.length; i++) {
+        const raw = lines[i].replace(/\r?\n$/, '');
+        if (/^##\s/.test(raw)) break; // next section
+        if (!raw.trim().startsWith('|')) continue;
+
+        const cells = raw.split('|').slice(1, -1).map((c) => c.trim());
+
+        if (!headerCells) {
+          headerCells = cells;
+          phaseIdx = cells.findIndex((c) => /phase/i.test(c));
+          priorityIdx = cells.findIndex((c) => /priority/i.test(c));
+          epicsIdx = cells.findIndex((c) => /epics/i.test(c));
+          continue;
+        }
+        if (cells.every((c) => /^:?-+:?$/.test(c))) continue; // separator row
+
+        if (priorityIdx === -1 || epicsIdx === -1) continue;
+        const phase = phaseIdx >= 0 ? cells[phaseIdx] : null;
+        const priority = cells[priorityIdx] || null;
+        const epicsCell = cells[epicsIdx] || '';
+
+        for (const m of epicsCell.matchAll(/\[E\d+\]\(#([a-z0-9-]+)\)/g)) {
+          anchorInfo.set(m[1], { phase, priority });
+        }
+      }
+      return anchorInfo;
+    }
+
+    // T012, T015-T019 — the main parse pass.
+    function parseTasksMd(text) {
+      const sourceLines = splitLinesKeepingSeparators(text);
+      const anchorInfo = parseRoadmapTable(sourceLines);
+
+      const epics = [];
+      const diagnostics = [];
+      const seenStoryIds = new Set();
+
+      let inFence = false;
+      let currentEpic = null;
+      let currentStory = null;
+      let lastTask = null; // for continuation-line folding
+      let sawBacklogHeading = false;
+      let personaOpen = false; // persona line spans multiple source lines
+      let personaBuffer = [];
+
+      for (let idx = 0; idx < sourceLines.length; idx++) {
+        const raw = sourceLines[idx].replace(/\r?\n$/, '');
+
+        // T012 — fenced code blocks are skipped ENTIRELY (FR-002). 35 such
+        // blocks exist in the current file; a checkbox-looking line inside
+        // one of them must never become a phantom task.
+        if (FENCE_RE.test(raw)) {
+          inFence = !inFence;
+          continue;
+        }
+        if (inFence) continue;
+
+        if (/^## Backlog\s*$/.test(raw)) {
+          sawBacklogHeading = true;
+          continue;
+        }
+
+        // T013 — Epic heading
+        const epicMatch = raw.match(EPIC_HEADING_RE);
+        if (epicMatch) {
+          const anchor = githubAnchorSlug(`Epic ${epicMatch[1]} — ${epicMatch[2]}`);
+          const info = anchorInfo.get(anchor) || {};
+          currentEpic = {
+            number: Number(epicMatch[1]),
+            title: epicMatch[2],
+            anchor,
+            priority: info.priority ?? null,
+            phase: info.phase ?? null,
+            branch: null,
+            dependsOn: null,
+            directTasks: [],
+            stories: [],
+            lineIndex: idx,
+          };
+          epics.push(currentEpic);
+          currentStory = null;
+          lastTask = null;
+          personaOpen = false;
+          personaBuffer = [];
+          continue;
+        }
+
+        // Branch/DependsOn metadata line, e.g.
+        // "**Branch:** `identity` · **Depends on:** E0 · ..."
+        if (currentEpic && BRANCH_META_RE.test(raw)) {
+          const branchMatch = raw.match(BRANCH_META_RE);
+          const dependsMatch = raw.match(DEPENDS_META_RE);
+          if (branchMatch) currentEpic.branch = branchMatch[1];
+          if (dependsMatch) currentEpic.dependsOn = dependsMatch[1].trim();
+          continue;
+        }
+
+        // T015 — Story heading
+        const storyMatch = raw.match(STORY_HEADING_RE);
+        if (storyMatch) {
+          const id = storyMatch[1];
+          if (seenStoryIds.has(id)) {
+            diagnostics.push({
+              severity: 'warning',
+              lineIndex: idx,
+              message: `Duplicate story id ${id}`,
+            });
+          }
+          seenStoryIds.add(id);
+
+          currentStory = {
+            id,
+            title: storyMatch[2],
+            persona: null,
+            epicNumber: currentEpic ? currentEpic.number : null,
+            tasks: [],
+            lineIndex: idx,
+          };
+          if (currentEpic) currentEpic.stories.push(currentStory);
+          else {
+            diagnostics.push({
+              severity: 'warning',
+              lineIndex: idx,
+              message: `Story ${id} appears before any Epic heading`,
+            });
+          }
+          lastTask = null;
+          personaOpen = false;
+          personaBuffer = [];
+          continue;
+        }
+
+        // Persona line: the first fully-italicised text right after a story
+        // heading — MAY wrap across multiple source lines (contracts/
+        // tasks-md-grammar.md §5). In the real file, every persona wraps
+        // this way, so a single-line-only regex silently captures nothing.
+        if (currentStory && currentStory.persona === null && currentStory.tasks.length === 0) {
+          if (personaOpen) {
+            const trimmed = raw.trim();
+            const closesHere = /\*\s*$/.test(trimmed);
+            personaBuffer.push(trimmed.replace(/\*\s*$/, ''));
+            if (closesHere) {
+              currentStory.persona = personaBuffer.join(' ').trim();
+              personaOpen = false;
+              personaBuffer = [];
+            }
+            continue;
+          }
+          const startMatch = raw.trim().match(/^\*(.*)$/);
+          if (startMatch) {
+            const rest = startMatch[1];
+            const singleLineMatch = rest.match(/^(.*)\*\s*$/);
+            if (singleLineMatch) {
+              currentStory.persona = singleLineMatch[1].trim();
+            } else {
+              personaOpen = true;
+              personaBuffer = [rest.trim()];
+            }
+            continue;
+          }
+        }
+
+        // T016 — task checkbox
+        const taskMatch = raw.match(TASK_RE);
+        if (taskMatch) {
+          const marker = taskMatch[2];
+          // Measured, not assumed: locate the marker's actual column offset.
+          const markerOffset = raw.indexOf('[' + marker + ']') + 1;
+          const markerFoundAtOffset = sourceLines[idx][markerOffset] === marker;
+          if (!markerFoundAtOffset) {
+            diagnostics.push({
+              severity: 'error',
+              lineIndex: idx,
+              message: 'Checkbox marker not found at expected offset',
+            });
+          }
+          const task = {
+            text: taskMatch[3],
+            done: marker !== ' ',
+            lineIndex: idx,
+            markerOffset,
+            continuationLineCount: 0,
+            ownerKind: currentStory ? 'story' : 'epic',
+            toggleable: markerFoundAtOffset,
+          };
+          if (currentStory) currentStory.tasks.push(task);
+          else if (currentEpic) currentEpic.directTasks.push(task);
+          else {
+            diagnostics.push({
+              severity: 'warning',
+              lineIndex: idx,
+              message: 'Task found outside any Epic',
+            });
+          }
+          lastTask = task;
+          continue;
+        }
+
+        // T017 — continuation line: indented, non-empty, not a checkbox/heading.
+        if (lastTask && raw.trim() !== '' && CONTINUATION_RE.test(raw)) {
+          lastTask.text += ' ' + raw.trim();
+          lastTask.continuationLineCount += 1;
+          continue;
+        }
+
+        // Anything else ends a continuation run and, once we hit a blank
+        // line or unrelated prose, stops folding into the last task.
+        if (raw.trim() === '') { lastTask = null; continue; }
+        lastTask = null;
+      }
+
+      if (!sawBacklogHeading) {
+        diagnostics.push({
+          severity: 'warning',
+          lineIndex: null,
+          message: 'No "## Backlog" heading found — Epics/Stories may be incomplete',
+        });
+      }
+
+      // T018 verification note: Epic 0's directTasks[] is populated above
+      // whenever a checkbox is seen before the first "#### US-" heading
+      // under that Epic — no special-casing needed beyond "currentStory is
+      // null when the task line is reached".
+
+      let total = 0;
+      let done = 0;
+      for (const epic of epics) {
+        for (const t of epic.directTasks) { total++; if (t.done) done++; }
+        for (const story of epic.stories) {
+          for (const t of story.tasks) { total++; if (t.done) done++; }
+        }
+      }
+
+      return {
+        sourceLines,
+        originalText: text,
+        epics,
+        diagnostics,
+        stats: { total, done },
+      };
+    }
+
+    // T026 — pure toggle: flips exactly one character on exactly one line.
+    // Never re-serialises the document (FR-012). Returns a NEW array; the
+    // caller decides whether/when to commit it.
+    function toggleTaskInLines(lines, lineIndex, markerOffset) {
+      const line = lines[lineIndex];
+      const current = line[markerOffset];
+      const next = current === ' ' ? 'x' : ' ';
+      const newLine = line.slice(0, markerOffset) + next + line.slice(markerOffset + 1);
+      const newLines = lines.slice();
+      newLines[lineIndex] = newLine;
+      return newLines;
+    }
+
+    // T029 — the one-character guard (contracts/persistence.md §4 step 5).
+    // A failed invariant here means the parser's coordinates are wrong;
+    // writing anyway risks corrupting docs/TASKS.md, so this throws rather
+    // than returning a boolean the caller might ignore.
+    function assertExactlyOneCharacterDiffers(before, after) {
+      if (before.length !== after.length) {
+        throw new Error(
+          `expected equal length (before=${before.length}, after=${after.length})`
+        );
+      }
+      let diffCount = 0;
+      for (let i = 0; i < before.length; i++) {
+        if (before[i] !== after[i]) diffCount++;
+      }
+      if (diffCount !== 1) {
+        throw new Error(`expected exactly 1 differing character, found ${diffCount}`);
+      }
+    }
+
+    // T020 — derived story/epic-group status. The `length > 0` guard is
+    // load-bearing: a zero-task story must land in To Do, never Done.
+    function deriveStatus(tasks) {
+      if (tasks.length === 0) return 'todo';
+      const doneCount = tasks.filter((t) => t.done).length;
+      if (doneCount === 0) return 'todo';
+      if (doneCount === tasks.length) return 'done';
+      return 'in-progress';
+    }
+
+    // ==================================================================
+    // Render layer (T021-T023, extended by US3/US4)
+    // ==================================================================
+
+    // Flattens Epics/Stories into a uniform list of "cards": one per Story,
+    // plus one per Epic that owns direct tasks (Epic 0's shape today).
+    function buildCards(doc) {
+      const cards = [];
+      for (const epic of doc.epics) {
+        if (epic.directTasks.length > 0) {
+          cards.push({
+            label: `E${epic.number}`,
+            title: `${epic.title} — direct tasks`,
+            epicNumber: epic.number,
+            epicLabel: `Epic ${epic.number} — ${epic.title}`,
+            priority: epic.priority,
+            persona: null,
+            tasks: epic.directTasks,
+            status: deriveStatus(epic.directTasks),
+          });
+        }
+        for (const story of epic.stories) {
+          cards.push({
+            label: story.id,
+            title: story.title,
+            epicNumber: epic.number,
+            epicLabel: `Epic ${epic.number} — ${epic.title}`,
+            priority: epic.priority,
+            persona: story.persona,
+            tasks: story.tasks,
+            status: deriveStatus(story.tasks),
+          });
+        }
+      }
+      return cards;
+    }
+
+    function priorityLabel(p) {
+      return p || '';
+    }
+
+    function renderCard(card) {
+      const el = document.createElement('div');
+      el.className = 'card';
+
+      const top = document.createElement('div');
+      top.className = 'card-top';
+
+      const idEl = document.createElement('span');
+      idEl.className = 'card-id';
+      idEl.textContent = card.label;
+
+      const titleEl = document.createElement('span');
+      titleEl.className = 'card-title';
+      titleEl.textContent = card.title;
+
+      const prioEl = document.createElement('span');
+      prioEl.className = 'card-priority';
+      prioEl.textContent = priorityLabel(card.priority);
+
+      const doneCount = card.tasks.filter((t) => t.done).length;
+      const progressEl = document.createElement('span');
+      progressEl.className = 'card-progress';
+      progressEl.textContent = `${doneCount}/${card.tasks.length}`;
+
+      top.append(idEl, titleEl, prioEl, progressEl);
+
+      const epicLine = document.createElement('div');
+      epicLine.className = 'card-epic';
+      epicLine.textContent = card.epicLabel;
+
+      const detail = document.createElement('div');
+      detail.className = 'card-detail';
+      detail.hidden = true;
+
+      if (card.persona) {
+        const p = document.createElement('p');
+        p.className = 'card-persona';
+        p.textContent = card.persona;
+        detail.appendChild(p);
+      }
+
+      const taskList = document.createElement('div');
+      taskList.className = 'card-tasks';
+      for (const task of card.tasks) {
+        const row = document.createElement('label');
+        row.className = 'card-task';
+        row.dataset.done = String(task.done);
+
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = task.done;
+        cb.dataset.lineIndex = String(task.lineIndex);
+        cb.dataset.markerOffset = String(task.markerOffset);
+        if (task.toggleable === false) {
+          cb.disabled = true;
+          cb.title = 'Marker not found at the expected offset — see diagnostics';
+        } else if (boardMode !== 'read-write') {
+          cb.disabled = true;
+          cb.title = "This browser can't write files — read-only.";
+        } else {
+          // T027 — clicking is intercepted: the native checkbox toggle is
+          // prevented, and the box only visually flips once the write to
+          // disk has actually succeeded (T031/T032). There is never a
+          // moment where the UI shows a state the file doesn't have yet.
+          cb.addEventListener('click', (e) => {
+            e.preventDefault();
+            toggleTask(cb, task);
+          });
+        }
+
+        const textEl = document.createElement('span');
+        textEl.className = 'card-task-text';
+        textEl.textContent = task.text;
+
+        row.append(cb, textEl);
+        taskList.appendChild(row);
+      }
+      detail.appendChild(taskList);
+
+      top.addEventListener('click', () => { detail.hidden = !detail.hidden; });
+
+      el.append(top, epicLine, detail);
+      return el;
+    }
+
+    function renderBoard(doc, filters) {
+      const columns = { todo: [], 'in-progress': [], done: [] };
+      const cards = buildCards(doc).filter((c) => {
+        if (filters.epicNumber !== '' && String(c.epicNumber) !== filters.epicNumber) return false;
+        if (filters.priority !== '' && c.priority !== filters.priority) return false;
+        return true;
+      });
+      for (const card of cards) columns[card.status].push(card);
+
+      for (const status of ['todo', 'in-progress', 'done']) {
+        const body = document.querySelector(`[data-body-for="${status}"]`);
+        body.innerHTML = '';
+        for (const card of columns[status]) body.appendChild(renderCard(card));
+        document.querySelector(`[data-count-for="${status}"]`).textContent =
+          String(columns[status].length);
+      }
+
+      document.getElementById('stats').textContent =
+        `${doc.stats.done}/${doc.stats.total} tasks done`;
+
+      for (const section of document.querySelectorAll('main#board .column')) {
+        section.hidden = false;
+      }
+      document.getElementById('empty-state').hidden = true;
+    }
+
+    // T023 — diagnostics panel: collapsed with a count badge; the board
+    // still renders fully even when diagnostics exist (FR-005).
+    function renderDiagnostics(diagnostics) {
+      const panel = document.getElementById('diagnostics');
+      const list = document.getElementById('diagnostics-list');
+      const countEl = document.getElementById('diagnostics-count');
+      list.innerHTML = '';
+      countEl.textContent = String(diagnostics.length);
+      panel.hidden = diagnostics.length === 0;
+      for (const d of diagnostics) {
+        const li = document.createElement('li');
+        li.dataset.severity = d.severity;
+        li.textContent = d.lineIndex != null
+          ? `Line ${d.lineIndex + 1}: ${d.message}`
+          : d.message;
+        list.appendChild(li);
+      }
+    }
+
+    // ==================================================================
+    // T024 — self-test harness. No test runner, no dependency: assertions
+    // run against inline fixtures and render a pass/fail list in place of
+    // the board when `?selftest=1` is present (research.md §6).
+    // ==================================================================
+    function assert(cond, message) {
+      if (!cond) throw new Error(message);
+    }
+
+    const selfTests = [];
+    function registerTest(name, fn) { selfTests.push({ name, fn }); }
+
+    function runSelfTests() {
+      return selfTests.map(({ name, fn }) => {
+        try {
+          fn();
+          return { name, pass: true };
+        } catch (err) {
+          return { name, pass: false, detail: err.message };
+        }
+      });
+    }
+
+    function renderSelfTestResults(results) {
+      document.body.innerHTML = '';
+      const pre = document.createElement('pre');
+      pre.style.cssText =
+        'color:#fff;background:#08080F;padding:2rem;font-family:monospace;' +
+        'white-space:pre-wrap;min-height:100vh;margin:0;box-sizing:border-box;';
+      const passCount = results.filter((r) => r.pass).length;
+      let out = 'Eventify Backlog Board — self-test\n' + '='.repeat(40) + '\n\n';
+      for (const r of results) {
+        out += (r.pass ? 'PASS' : 'FAIL') + '  ' + r.name;
+        out += r.detail ? '\n      ' + r.detail + '\n' : '\n';
+      }
+      out += `\n${passCount}/${results.length} passed\n`;
+      pre.textContent = out;
+      document.body.appendChild(pre);
+    }
+
+    // ------------------------------------------------------------------
+    // T025 — parser self-tests (fixtures constructed to exercise the
+    // exact edge cases from spec.md's Edge Cases section)
+    // ------------------------------------------------------------------
+    const FIXTURE_BASIC =
+      '## Roadmap\n\n' +
+      '| Phase | Branch/Milestone | Priority | Epics | Goal | Demo |\n' +
+      '|---|---|---|---|---|---|\n' +
+      '| 1 — Identity | `identity` | 🔴 | [E1](#epic-1--identity-service) | Goal | Demo |\n\n' +
+      '## Backlog\n\n' +
+      '### Epic 0 — Foundation / BuildingBlocks\n\n' +
+      '- [x] Direct task one\n' +
+      '- [x] Direct task two\n\n' +
+      '### Epic 1 — Identity Service\n\n' +
+      '**Branch:** `identity` · **Depends on:** E0 · **ARCHITECTURE ref:** §4.1\n\n' +
+      '#### US-1.1 — Sample story\n\n' +
+      '*As a Customer, I want X that wraps across two source lines because the\n' +
+      'real file always wraps its persona sentences this way.*\n\n' +
+      '```gherkin\n' +
+      'Given something\n' +
+      '- [ ] this looks like a task but is inside a fence\n' +
+      '```\n\n' +
+      '- [ ] First task wraps onto a\n' +
+      '      continuation line here\n' +
+      '- [x] Second task\n\n' +
+      '#### US-4.1 — Empty story\n\n' +
+      '*As a Customer, I want Y.*\n';
+
+    registerTest('parser: gherkin-fenced checkbox is not parsed as a task', () => {
+      const doc = parseTasksMd(FIXTURE_BASIC);
+      const story = doc.epics.find((e) => e.number === 1).stories.find((s) => s.id === 'US-1.1');
+      assert(story.tasks.length === 2, `expected 2 tasks, got ${story.tasks.length}`);
+      assert(
+        !story.tasks.some((t) => t.text.includes('this looks like a task')),
+        'a fenced checkbox leaked into the task list'
+      );
+    });
+
+    registerTest('parser: continuation line folds into the preceding task', () => {
+      const doc = parseTasksMd(FIXTURE_BASIC);
+      const story = doc.epics.find((e) => e.number === 1).stories.find((s) => s.id === 'US-1.1');
+      const t = story.tasks[0];
+      assert(
+        t.text.includes('First task wraps onto a') && t.text.includes('continuation line here'),
+        'continuation text was not folded: ' + t.text
+      );
+      assert(t.continuationLineCount === 1, 'expected continuationLineCount 1, got ' + t.continuationLineCount);
+    });
+
+    registerTest('parser: Epic-direct tasks (no story heading) are retained', () => {
+      const doc = parseTasksMd(FIXTURE_BASIC);
+      const e0 = doc.epics.find((e) => e.number === 0);
+      assert(e0.directTasks.length === 2, 'expected 2 direct tasks on Epic 0, got ' + e0.directTasks.length);
+      assert(e0.directTasks.every((t) => t.ownerKind === 'epic'), 'ownerKind should be "epic"');
+    });
+
+    registerTest('parser: a zero-task story derives todo, never done', () => {
+      const doc = parseTasksMd(FIXTURE_BASIC);
+      const story = doc.epics.find((e) => e.number === 1).stories.find((s) => s.id === 'US-4.1');
+      assert(story.tasks.length === 0, 'fixture story should have zero tasks');
+      assert(deriveStatus(story.tasks) === 'todo', 'a zero-task story must derive "todo"');
+    });
+
+    registerTest('parser: [X] and [-] markers parse as done without throwing', () => {
+      const text =
+        '## Backlog\n\n### Epic 0 — Foo\n\n' +
+        '- [X] Upper case done\n- [-] Dash marker\n- [ ] Not done\n';
+      const doc = parseTasksMd(text);
+      const tasks = doc.epics[0].directTasks;
+      assert(tasks.length === 3, 'expected 3 tasks, got ' + tasks.length);
+      assert(tasks[0].done === true, '[X] should be done');
+      assert(tasks[1].done === true, '[-] should be done');
+      assert(tasks[2].done === false, '[ ] should not be done');
+    });
+
+    registerTest('parser: duplicate story id renders both, plus a diagnostic', () => {
+      const dup =
+        FIXTURE_BASIC +
+        '\n#### US-1.1 — Sample story (duplicate)\n\n*As a Customer, I want X again.*\n\n- [ ] dup task\n';
+      const doc = parseTasksMd(dup);
+      const matches = doc.epics.flatMap((e) => e.stories).filter((s) => s.id === 'US-1.1');
+      assert(matches.length === 2, 'expected both duplicate stories retained, got ' + matches.length);
+      assert(
+        doc.diagnostics.some((d) => /Duplicate story id US-1\.1/.test(d.message)),
+        'expected a duplicate-story-id diagnostic'
+      );
+    });
+
+    registerTest('parser: anchor slug matches GitHub\'s double-hyphen rule', () => {
+      const slug = githubAnchorSlug('Epic 1 — Identity Service');
+      assert(slug === 'epic-1--identity-service', 'got: ' + slug);
+    });
+
+    registerTest('parser: persona wrapping across two source lines is captured whole', () => {
+      // Regression test: caught only by running the parser against the
+      // real docs/TASKS.md, where every persona wraps this way — a
+      // single-line-only regex silently returned null for all 45 stories.
+      const doc = parseTasksMd(FIXTURE_BASIC);
+      const story = doc.epics.find((e) => e.number === 1).stories.find((s) => s.id === 'US-1.1');
+      assert(story.persona !== null, 'multi-line persona was not captured at all');
+      assert(
+        story.persona.includes('wraps across two source lines') &&
+          story.persona.includes('real file always wraps'),
+        'persona text incomplete: ' + story.persona
+      );
+      assert(!story.persona.includes('*'), 'stray asterisk left in persona: ' + story.persona);
+    });
+
+    registerTest('parser: single-line persona still works', () => {
+      const doc = parseTasksMd(FIXTURE_BASIC);
+      const story = doc.epics.find((e) => e.number === 1).stories.find((s) => s.id === 'US-4.1');
+      assert(story.persona === 'As a Customer, I want Y.', 'got: ' + story.persona);
+    });
+
+    registerTest('parser: sourceLines.join("") round-trips to originalText', () => {
+      const doc = parseTasksMd(FIXTURE_BASIC);
+      assert(doc.sourceLines.join('') === doc.originalText, 'round-trip invariant failed');
+    });
+
+    // ------------------------------------------------------------------
+    // T033 — write-path self-tests (toggleTaskInLines, the one-character
+    // guard). This is the decisive test: SC-002 depends on it entirely.
+    // ------------------------------------------------------------------
+    const CRLF_FIXTURE = '- [ ] Task A\r\n- [ ] Task B\r\n';
+
+    registerTest('toggle: CRLF line endings survive a toggle untouched', () => {
+      const lines = splitLinesKeepingSeparators(CRLF_FIXTURE);
+      const lineIndex = 0;
+      const markerOffset = lines[0].indexOf('[') + 1;
+      const toggled = toggleTaskInLines(lines, lineIndex, markerOffset);
+      assert(toggled[lineIndex].endsWith('\r\n'), 'CRLF was not preserved on the toggled line');
+      assert(toggled[1] === lines[1], 'the untouched line must be byte-identical');
+      assert(toggled.join('') !== CRLF_FIXTURE, 'toggle should have changed something');
+      const untoggled = toggleTaskInLines(toggled, lineIndex, markerOffset);
+      assert(untoggled.join('') === CRLF_FIXTURE, 'toggling twice must return the original bytes');
+    });
+
+    registerTest('toggle: exactly one character changes (SC-002)', () => {
+      const lines = splitLinesKeepingSeparators(CRLF_FIXTURE);
+      const toggled = toggleTaskInLines(lines, 0, lines[0].indexOf('[') + 1);
+      assertExactlyOneCharacterDiffers(CRLF_FIXTURE, toggled.join(''));
+    });
+
+    registerTest('toggle: the one-character guard rejects a multi-character diff', () => {
+      let threw = false;
+      try {
+        assertExactlyOneCharacterDiffers('- [ ] A\n', '- [x] B\n');
+      } catch {
+        threw = true;
+      }
+      assert(threw, 'guard should have thrown on a 2-character diff');
+    });
+
+    registerTest('toggle: round-trip through parseTasksMd matches lineIndex/markerOffset', () => {
+      const doc = parseTasksMd(FIXTURE_BASIC);
+      const story = doc.epics.find((e) => e.number === 1).stories.find((s) => s.id === 'US-1.1');
+      const task = story.tasks[1]; // "Second task", single-line, unambiguous
+      const toggled = toggleTaskInLines(doc.sourceLines, task.lineIndex, task.markerOffset);
+      const newText = toggled.join('');
+      assertExactlyOneCharacterDiffers(doc.originalText, newText);
+      const reparsed = parseTasksMd(newText);
+      const reparsedTask = reparsed.epics
+        .find((e) => e.number === 1).stories.find((s) => s.id === 'US-1.1').tasks[1];
+      assert(reparsedTask.done === !task.done, 'toggled task did not flip state on re-parse');
+    });
+
+    // ==================================================================
+    // Application wiring
+    // ==================================================================
+    const appState = {
+      handle: null,
+      doc: null,
+      filters: { epicNumber: '', priority: '' },
+    };
+
+    async function loadFromResult(result) {
+      appState.handle = result.handle;
+      appState.doc = parseTasksMd(result.text);
+      renderDiagnostics(appState.doc.diagnostics);
+      populateFilters(appState.doc);
+      renderBoard(appState.doc, appState.filters);
+    }
+
+    // T039, T042 — filter controls, with per-Epic completion counts shown
+    // directly in the dropdown (FR-009, FR-010).
+    function populateFilters(doc) {
+      const epicSelect = document.getElementById('epic-filter');
+      const priorSelected = epicSelect.value;
+      epicSelect.innerHTML = '<option value="">All Epics</option>';
+      for (const epic of doc.epics) {
+        const allTasks = epic.directTasks.concat(epic.stories.flatMap((s) => s.tasks));
+        const done = allTasks.filter((t) => t.done).length;
+        const opt = document.createElement('option');
+        opt.value = String(epic.number);
+        opt.textContent = `E${epic.number} — ${epic.title} (${done}/${allTasks.length})`;
+        epicSelect.appendChild(opt);
+      }
+      epicSelect.value = priorSelected;
+      if (epicSelect.value !== priorSelected) epicSelect.value = ''; // stale selection, e.g. Epic removed
+      epicSelect.hidden = false;
+      document.getElementById('priority-filter').hidden = false;
+    }
+
+    // T040 — filter application: re-render from the SAME renderBoard used by
+    // US1, which already applies appState.filters (epicNumber/priority) to
+    // every card before bucketing it into a column.
+    document.getElementById('epic-filter').addEventListener('change', (e) => {
+      appState.filters.epicNumber = e.target.value;
+      renderBoard(appState.doc, appState.filters);
+    });
+    document.getElementById('priority-filter').addEventListener('change', (e) => {
+      appState.filters.priority = e.target.value;
+      renderBoard(appState.doc, appState.filters);
+    });
+
+    // T028, T030-T032 — the full write path for a single checkbox toggle.
+    // Note on FR-015 ("never optimistic"): the checkbox's native toggle was
+    // already prevented in T027's click listener, so there is nothing to
+    // revert on failure — the box simply never changes until this function
+    // reaches the success path and triggers a re-render from the new state.
+    async function toggleTask(cb, task) {
+      if (!appState.handle) return;
+      cb.disabled = true;
+
+      // T028 — permission (contracts/persistence.md §3). Must be requested
+      // from within this click-originated call stack while activation is
+      // still live.
+      try {
+        let perm = await appState.handle.queryPermission({ mode: 'readwrite' });
+        if (perm !== 'granted') {
+          perm = await appState.handle.requestPermission({ mode: 'readwrite' });
+        }
+        if (perm !== 'granted') {
+          showError('Write permission was not granted.');
+          boardMode = 'read-only';
+          announceMode();
+          cb.disabled = false;
+          return;
+        }
+      } catch (err) {
+        showError('Permission request failed: ' + err.message);
+        cb.disabled = false;
+        return;
+      }
+
+      // T035 — compare-before-write (contracts/persistence.md §4 steps 2-3,
+      // FR-013). Re-read on EVERY toggle: the user is expected to keep
+      // editing TASKS.md by hand, and a stale in-memory copy must never
+      // silently overwrite a hand-made edit.
+      let onDiskText;
+      try {
+        const file = await appState.handle.getFile();
+        onDiskText = new TextDecoder('utf-8', { ignoreBOM: true }).decode(await file.arrayBuffer());
+      } catch (err) {
+        showError('Could not re-read the file before writing: ' + err.message);
+        cb.disabled = false;
+        return;
+      }
+      if (onDiskText !== appState.doc.originalText) {
+        showConflict();
+        cb.disabled = false;
+        return;
+      }
+
+      const newLines = toggleTaskInLines(appState.doc.sourceLines, task.lineIndex, task.markerOffset);
+      const newText = newLines.join('');
+
+      try {
+        assertExactlyOneCharacterDiffers(appState.doc.originalText, newText);
+      } catch (err) {
+        showError('Refusing to write — internal consistency check failed: ' + err.message);
+        cb.disabled = false;
+        return;
+      }
+
+      // T030 — the write itself. createWritable() truncates, so the full
+      // document is (re)written — byte-identical except the one character
+      // the guard above just verified.
+      try {
+        const writable = await appState.handle.createWritable();
+        await writable.write(new TextEncoder().encode(newText));
+        await writable.close();
+      } catch (err) {
+        showError('Write failed: ' + err.message);
+        cb.disabled = false;
+        return;
+      }
+
+      // T031 — commit in memory, then re-render from the new source of
+      // truth. The owning card's derived status is recomputed as a side
+      // effect of rebuilding all cards, moving it between columns without
+      // a page reload.
+      appState.doc.originalText = newText;
+      appState.doc.sourceLines = newLines;
+      task.done = !task.done;
+      let total = 0, done = 0;
+      for (const epic of appState.doc.epics) {
+        for (const t of epic.directTasks) { total++; if (t.done) done++; }
+        for (const story of epic.stories) { for (const t of story.tasks) { total++; if (t.done) done++; } }
+      }
+      appState.doc.stats = { total, done };
+      populateFilters(appState.doc);
+      renderBoard(appState.doc, appState.filters);
+      showBanner('success', 'Saved.');
+    }
+
+    document.getElementById('open-btn').addEventListener('click', async () => {
+      const result = await openTasksFile();
+      if (!result) return;
+      await loadFromResult(result);
+      await saveHandle(result.handle);
+      document.getElementById('reopen-btn').hidden = true;
+      showBanner('success', 'Loaded TASKS.md.');
+    });
+
+    // T036 — conflict UI. The attempted toggle is DISCARDED, not queued:
+    // re-applying it after reload could re-tick a task the user had
+    // deliberately unticked by hand in the meantime.
+    function showConflict() {
+      document.getElementById('conflict-banner').hidden = false;
+    }
+
+    // T037 — reload path: re-read, re-parse, re-render from the file's
+    // current on-disk contents.
+    document.getElementById('reload-btn').addEventListener('click', async () => {
+      if (!appState.handle) return;
+      const result = await readHandle(appState.handle);
+      await loadFromResult(result);
+      document.getElementById('conflict-banner').hidden = true;
+      showBanner('success', 'Reloaded TASKS.md.');
+    });
+
+    // T045 — offer to reopen the previously-picked file. Permission never
+    // survives a reload (research.md §1), so this is always "one click to
+    // re-grant", never zero.
+    document.getElementById('reopen-btn').addEventListener('click', async () => {
+      const record = await loadSavedHandle();
+      if (!record) return;
+      try {
+        let perm = await record.handle.queryPermission({ mode: 'readwrite' });
+        if (perm !== 'granted') perm = await record.handle.requestPermission({ mode: 'readwrite' });
+        if (perm !== 'granted') {
+          showError('Permission to reopen the file was not granted.');
+          return;
+        }
+        const result = await readHandle(record.handle);
+        await loadFromResult(result);
+        showBanner('success', 'Reopened ' + record.handle.name + '.');
+      } catch (err) {
+        showError('Could not reopen the file: ' + err.message);
+      }
+    });
+
+    (async function bootstrap() {
+      if (new URLSearchParams(location.search).get('selftest') === '1') {
+        renderSelfTestResults(runSelfTests());
+        return;
+      }
+      announceMode();
+      capabilities.canUseIndexedDb = await detectIndexedDb();
+
+      // T046 — degrades silently: no saved handle, or IndexedDB itself
+      // unavailable, just means the button never appears. US1-US4 unaffected.
+      const record = await loadSavedHandle();
+      if (record) {
+        const reopenBtn = document.getElementById('reopen-btn');
+        reopenBtn.textContent = 'Reopen ' + record.handle.name;
+        reopenBtn.hidden = false;
+      }
+    })();
+  </script>
+</body>
+</html>

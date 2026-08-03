@@ -29,9 +29,9 @@ public class ArtistTests
 
     public static readonly TheoryData<string, string?, string?> NotChangedTestData = new TheoryData<string, string?, string?>
     {
-        { Name, Bio, ImageUrl }, 
-        { Name, null, ImageUrl }, 
-        { Name, Bio, null }, 
+        { Name, Bio, ImageUrl },
+        { Name, null, ImageUrl },
+        { Name, Bio, null },
         { Name, null, null }
     };
 

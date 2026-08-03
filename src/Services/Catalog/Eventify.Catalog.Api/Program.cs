@@ -1,4 +1,4 @@
-using Eventify.Catalog.Application;
+﻿using Eventify.Catalog.Application;
 using Eventify.Catalog.Infrastructure;
 using Eventify.Catalog.Infrastructure.Persistence;
 using Eventify.ServiceDefaults;

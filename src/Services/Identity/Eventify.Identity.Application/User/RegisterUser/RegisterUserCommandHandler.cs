@@ -1,5 +1,6 @@
 ﻿using ErrorOr;
 using Eventify.Identity.Domain.Entities;
+using Eventify.Localization;
 using Eventify.SharedKernel.Application.CQRS;
 using Microsoft.AspNetCore.Identity;
 
@@ -18,7 +19,7 @@ public sealed class RegisterUserCommandHandler : ICommandHandler<RegisterUserCom
     {
         if (await _userManager.FindByEmailAsync(command.Email) is not null)
         {
-            return Error.Conflict(description: string.Format(IdentityConstants.UserAlreadyExist, command.Email));
+            return Error.Conflict(nameof(command.Email), Captions.AlreadyExistsValidation);
         }
 
         var user = new ApplicationUser(command.Email, command.FirstName, command.LastName);

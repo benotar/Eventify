@@ -1,4 +1,4 @@
-namespace Eventify.SharedKernel.Application.Exceptions;
+﻿namespace Eventify.SharedKernel.Application.Exceptions;
 
 public sealed class NotFoundException : Exception
 {
