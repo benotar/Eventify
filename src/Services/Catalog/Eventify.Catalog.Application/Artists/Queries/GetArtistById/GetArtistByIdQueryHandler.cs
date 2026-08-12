@@ -3,23 +3,26 @@ using Eventify.Catalog.Application.Artists.Responses;
 using Eventify.Catalog.Application.Interfaces;
 using Eventify.Catalog.Domain.Artists.ValueObjects;
 using Eventify.SharedKernel.Application.CQRS;
+using Microsoft.EntityFrameworkCore;
 
 namespace Eventify.Catalog.Application.Artists.Queries.GetArtistById;
 
 public sealed class GetArtistByIdQueryHandler : IQueryHandler<GetArtistByIdQuery, ArtistResponse>
 {
-    private readonly IArtistRepository _artistRepository;
+    private readonly IApplicationDbContext _dbContext;
 
-    public GetArtistByIdQueryHandler(IArtistRepository artistRepository)
+    public GetArtistByIdQueryHandler(IApplicationDbContext dbContext)
     {
-        _artistRepository = artistRepository;
+        _dbContext = dbContext;
     }
 
     public async Task<ErrorOr<ArtistResponse>> Handle(GetArtistByIdQuery query, CancellationToken ct)
     {
-        var artistId = ArtistId.Of(query.Id);
+        var artistId = ArtistId.Create(query.Id);
 
-        var artist = await _artistRepository.GetByIdAsync(artistId, ct);
+        var artist = await _dbContext.Artists
+            .AsNoTracking()
+            .FirstOrDefaultAsync(artist => artist.Id == artistId, ct);
 
         if (artist is null)
         {

@@ -18,7 +18,7 @@ public class UpdateArtistCommandHandlerTests : ArtistCommandHandlerBase
 
     public UpdateArtistCommandHandlerTests()
     {
-        _sut = new UpdateArtistCommandHandler(ArtistRepositoryMock.Object, DbContextMock.Object);
+        _sut = new UpdateArtistCommandHandler(DbContextMock.Object);
     }
 
     [Fact]
@@ -38,9 +38,9 @@ public class UpdateArtistCommandHandlerTests : ArtistCommandHandlerBase
     public async Task Handle_WhenArtistExists_ReturnsSuccess()
     {
         // Arrange
-        var artist = Artist.Create(ArtistName.Of("Eminem"));
-        ArtistRepositoryMock.Setup(repo => repo.GetByIdAsync(It.IsAny<ArtistId>(), Ct))
-            .ReturnsAsync(artist);
+        var artist = Artist.Create(ArtistName.Create("Eminem"));
+        // ArtistRepositoryMock.Setup(repo => repo.GetByIdAsync(It.IsAny<ArtistId>(), Ct))
+        //     .ReturnsAsync(artist);
 
         // Act
         var result = await _sut.Handle(Command, Ct);

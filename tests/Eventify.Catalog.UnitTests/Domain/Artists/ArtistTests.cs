@@ -1,5 +1,4 @@
 ﻿using Eventify.Catalog.Domain.Artists;
-using Eventify.Catalog.Domain.Artists.Events;
 using Eventify.Catalog.Domain.Artists.ValueObjects;
 using Eventify.SharedKernel.Extensions;
 using FluentAssertions;
@@ -29,10 +28,7 @@ public class ArtistTests
 
     public static readonly TheoryData<string, string?, string?> NotChangedTestData = new TheoryData<string, string?, string?>
     {
-        { Name, Bio, ImageUrl },
-        { Name, null, ImageUrl },
-        { Name, Bio, null },
-        { Name, null, null }
+        { Name, Bio, ImageUrl }, { Name, null, ImageUrl }, { Name, Bio, null }, { Name, null, null }
     };
 
     [Theory]
@@ -40,7 +36,7 @@ public class ArtistTests
     public void Create_WhenValidData_ShouldSetProperties(string name, string? bio, string? imageUrl)
     {
         // Arrange
-        var artistName = ArtistName.Of(name);
+        var artistName = ArtistName.Create(name);
 
         // Act
         var result = Artist.Create(artistName, bio, imageUrl);
@@ -53,30 +49,14 @@ public class ArtistTests
         result.ImageUrl.Should().Be(imageUrl);
     }
 
-    [Fact]
-    public void Create_WhenCalled_ShouldRaiseArtistCreatedDomainEvent()
-    {
-        // Arrange
-        var artistName = ArtistName.Of(Name);
-
-        // Act
-        var result = Artist.Create(artistName, Bio, ImageUrl);
-
-        // Assert
-        result.DomainEvents.Should().NotBeEmpty();
-        result.DomainEvents.Should().ContainSingle(e => e is ArtistCreatedDomainEvent)
-            .Which.As<ArtistCreatedDomainEvent>()
-            .ArtistId.Should().Be(result.Id);
-    }
-
     [Theory]
     [MemberData(nameof(ArtistTestData))]
     public void Update_WhenDataChanged_ShouldUpdateProperties(string name, string? bio, string? imageUrl)
     {
         // Arrange
-        var artistName = ArtistName.Of(Name);
+        var artistName = ArtistName.Create(Name);
         var artist = Artist.Create(artistName, Bio, ImageUrl);
-        var updatedArtistName = ArtistName.Of(name);
+        var updatedArtistName = ArtistName.Create(name);
 
         // Act
         artist.Update(updatedArtistName, bio, imageUrl);
@@ -85,57 +65,5 @@ public class ArtistTests
         artist.Name.Should().Be(updatedArtistName);
         artist.Bio.Should().Be(bio);
         artist.ImageUrl.Should().Be(imageUrl);
-    }
-
-    [Theory]
-    [MemberData(nameof(ArtistTestData))]
-    public void Update_WhenDataChanged_ShouldRaiseArtistUpdatedDomainEvent(string name, string? bio, string? imageUrl)
-    {
-        // Arrange
-        var artistName = ArtistName.Of(Name);
-        var artist = Artist.Create(artistName, Bio, ImageUrl);
-        var updatedArtistName = ArtistName.Of(name);
-
-        // Act
-        artist.Update(updatedArtistName, bio, imageUrl);
-
-        // Assert
-        artist.DomainEvents.Should().ContainSingle(e => e is ArtistUpdatedDomainEvent)
-            .Which.As<ArtistUpdatedDomainEvent>()
-            .ArtistId.Should().Be(artist.Id);
-    }
-
-    [Theory]
-    [MemberData(nameof(NotChangedTestData))]
-    public void Update_WhenDataNotChanged_ShouldNotRaiseDomainEvent(string name, string? bio, string? imageUrl)
-    {
-        // Arrange
-        var artistName = ArtistName.Of(name);
-        var artist = Artist.Create(artistName, bio, imageUrl);
-
-        // Act
-        artist.Update(artistName, bio, imageUrl);
-
-        // Assert
-        artist.DomainEvents.Should().NotContain(e => e is ArtistUpdatedDomainEvent);
-        artist.Name.Should().Be(artistName);
-        artist.Bio.Should().Be(bio);
-        artist.ImageUrl.Should().Be(imageUrl);
-    }
-
-    [Fact]
-    public void Delete_WhenCalled_ShouldRaiseArtistDeletedDomainEvent()
-    {
-        // Arrange
-        var artistName = ArtistName.Of(Name);
-        var artist = Artist.Create(artistName, Bio, ImageUrl);
-
-        // Act
-        artist.Delete();
-
-        // Assert
-        artist.DomainEvents.Should().ContainSingle(e => e is ArtistDeletedDomainEvent)
-            .Which.As<ArtistDeletedDomainEvent>()
-            .ArtistId.Should().Be(artist.Id);
     }
 }

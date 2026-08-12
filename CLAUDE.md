@@ -212,21 +212,30 @@ Full source-of-truth: `docs/ARCHITECTURE.md`.
 
 ## BuildingBlocks
 
-Two projects in `src/BuildingBlocks/`:
+Four projects in `src/BuildingBlocks/`:
 
 - **`Eventify.SharedKernel`** — Domain + Application + Infrastructure base classes consolidated:
-    - Domain: `Entity<TId>`, `AggregateRoot<TId>`, `ValueObject`, `DomainEvent` (abstract record), interfaces (
+    - Domain: `Entity<TId>`, `AggregateRoot<TId>`, `DomainEvent` (abstract record), interfaces (
       `IEntity`, `IAggregateRoot`, `IAuditable`, `IClearableAggregate`, `IDomainEvent`), `DomainException`
     - Application: `ICommand`, `IQuery<T>`, `ICommandHandler`, `IQueryHandler`, `LoggingBehavior`, `ValidationBehavior`,
-      `NotFoundException`, `ValidationException`
+      `NotFoundException`
     - Infrastructure: `BaseDbContext`, `UpdateAuditableInterceptor`, `PublishDomainEventsInterceptor`
 
 - **`Eventify.IntegrationEvents`** — cross-service event contracts; no deps; `IntegrationEvent` abstract record (UUIDv7)
 
+- **`Eventify.Localization`** — shared resx-based UI string resources (`Captions.resx` + `Captions.uk-UA.resx`); referenced by services that need localized UI text
+
+- **`Eventify.ServiceDefaults`** — shared ASP.NET Core host wiring per service: `GlobalExceptionHandler` + `ProblemDetails`,
+  OpenAPI + Scalar UI, API versioning defaults, Carter registration, `MigrateDatabaseAsync<TContext>()` startup helper,
+  request-localization setup. Depends on `SharedKernel` and `Localization`.
+
 ## Key design decisions
 
 **IDs:** All entity IDs use `Guid.CreateVersion7()` (UUIDv7 — time-sortable, B-tree friendly). Aggregates use
-strongly-typed IDs as `readonly record struct ArtistId(Guid Value)`.
+strongly-typed IDs as `sealed record` types with a `get`-only `Value` property, a private constructor, and a static
+`Create(Guid value)` factory that rejects `Guid.Empty` (e.g. `ArtistId`, `VenueId`). Not positional records — a private
+constructor is required to close off construction via object initializer, which a positional record's public
+primary constructor would allow.
 
 **Audit fields:** `CreatedAt`/`UpdatedAt` on `Entity<TId>` are mutated only via the internal `IAuditable` interface.
 Populated by `UpdateAuditableInterceptor` (EF Core `ISaveChangesInterceptor`) — never override `SaveChangesAsync` per
@@ -257,9 +266,9 @@ with MediatR philosophy).
 *No mapper libraries** (no AutoMapper / Mapster / Mapperly). Aggregates are small enough that boilerplate is minimal;
 full IDE refactoring + compile-time safety wins.
 
-**Money:** Value Object `record Money(decimal Amount, string Currency)` in `SharedKernel`. Validates `Amount >= 0` and
-ISO 4217 `Currency` in constructor. EF `OwnsOne(b => b.Money)` flattens to `*_amount` + `*_currency` columns. All
-monetary fields use `Money`, never raw `decimal` + `string`.
+**Money:** Value Object `sealed record Money` in `SharedKernel`, with `Amount`/`Currency` as `get`-only properties set
+by a public constructor. Validates `Amount >= 0` and ISO 4217 `Currency` in the constructor. EF `OwnsOne(b => b.Money)`
+flattens to `*_amount` + `*_currency` columns. All monetary fields use `Money`, never raw `decimal` + `string`.
 
 **API conventions:** URL-segment versioning (`/v1/...`) via `Asp.Versioning.Http`. Offset pagination via
 `PagedResult<T>` envelope (`Items`, `Page`, `PageSize`, `TotalCount`, `TotalPages`); defaults `pageSize=20`, max `100`.
@@ -278,7 +287,9 @@ Catalog, Booking, Payment are 4-project Clean Architecture (`Domain`, `Applicati
 - **Classic constructors only** — never primary constructors on classes, with one exception: classes that directly
   inherit `DbContext` (e.g., `BaseDbContext`, `CatalogDbContext`, `ApplicationDbContext`) may use a primary constructor
   for the `DbContextOptions` parameter. Everywhere else, use explicit `private readonly` fields assigned in constructor
-  body. Positional record syntax (e.g., `record struct ArtistId(Guid Value)`) is fine.
+  body. Positional record syntax is fine for plain data carriers (e.g., `PagedResult<T>`). Validated VOs and IDs
+  (`ArtistId`, `ArtistName`, `VenueId`, ...) use a private constructor + static factory instead — positional syntax
+  would expose a public constructor and let validation be bypassed.
   **Not tool-enforced:** Roslyn's `IDE0290` only suggests converting classic → primary constructors; it has no
   diagnostic for an existing primary constructor, so `.editorconfig` cannot flag a violation of this rule (including
   the exception boundary). This is a code-review convention, not a build-time gate.

@@ -3,27 +3,32 @@ using Eventify.Catalog.Application.Artists.Responses;
 using Eventify.Catalog.Application.Interfaces;
 using Eventify.SharedKernel.Application.Common;
 using Eventify.SharedKernel.Application.CQRS;
+using Microsoft.EntityFrameworkCore;
 
 namespace Eventify.Catalog.Application.Artists.Queries.GetArtists;
 
 public sealed class GetArtistsQueryHandler : IQueryHandler<GetArtistsQuery, PagedResult<ArtistResponse>>
 {
-    private readonly IArtistRepository _repository;
+    private readonly IApplicationDbContext _dbContext;
 
-    public GetArtistsQueryHandler(IArtistRepository repository)
+    public GetArtistsQueryHandler(IApplicationDbContext dbContext)
     {
-        _repository = repository;
+        _dbContext = dbContext;
     }
 
     public async Task<ErrorOr<PagedResult<ArtistResponse>>> Handle(GetArtistsQuery query, CancellationToken ct)
     {
-        var artists = await _repository.GetAllAsync(query.Page, query.PageSize, ct);
+        var artistQuery = _dbContext.Artists.AsNoTracking();
 
-        var totalCount = await _repository.CountAsync(ct);
+        var totalCount = await artistQuery.CountAsync(ct);
 
-        var items = artists.Select(artist => artist.ToResponse())
-            .ToList();
+        var artists = await artistQuery
+            .OrderBy(artist => artist.Id)
+            .Skip((query.Page - 1) * query.PageSize)
+            .Take(query.PageSize)
+            .Select(artist => new ArtistResponse(artist.Id.Value, artist.Name.Value, artist.Bio, artist.ImageUrl))
+            .ToListAsync(ct);
 
-        return new PagedResult<ArtistResponse>(items, query.Page, query.PageSize, totalCount);
+        return new PagedResult<ArtistResponse>(artists, query.Page, query.PageSize, totalCount);
     }
 }

@@ -1,6 +1,5 @@
 ﻿using Eventify.Catalog.Application.Interfaces;
 using Eventify.Catalog.Infrastructure.Persistence;
-using Eventify.Catalog.Infrastructure.Repositories;
 using Eventify.SharedKernel.Extensions;
 using Eventify.SharedKernel.Infrastructure.Interceptor;
 using Eventify.SharedKernel.Options;
@@ -29,8 +28,6 @@ public static class DependencyInjection
             });
 
             services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<CatalogDbContext>());
-
-            services.AddScoped<IArtistRepository, ArtistRepository>();
 
             return services;
         }

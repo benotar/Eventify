@@ -2,7 +2,7 @@
 
 namespace Eventify.Catalog.Domain.Artists.ValueObjects;
 
-public record ArtistName
+public sealed record ArtistName
 {
     public string Value { get; }
 
@@ -11,9 +11,9 @@ public record ArtistName
         Value = value;
     }
 
-    public static ArtistName Of(string value)
+    public static ArtistName Create(string value)
     {
-        DomainException.ThrowIfNullOrWhiteSpace(value, "Artist name cannot be blank.");
+        DomainException.ThrowIfNullOrWhiteSpace(value, "Artist name cannot be blank");
 
         return new ArtistName(value);
     }

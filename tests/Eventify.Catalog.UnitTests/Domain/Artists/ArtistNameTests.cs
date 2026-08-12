@@ -13,7 +13,7 @@ public class ArtistNameTests
     public void Of_WhenNameIsNullOrWhiteSpace_ShouldThrowDomainException(string name)
     {
         // Act 
-        var act = () => ArtistName.Of(name);
+        var act = () => ArtistName.Create(name);
 
         // Assert
         act.Should().Throw<DomainException>();
@@ -26,7 +26,7 @@ public class ArtistNameTests
         const string name = "Coldplay";
 
         // Act 
-        var result = ArtistName.Of(name);
+        var result = ArtistName.Create(name);
 
         // Assert
         result.Value.Should().Be(name);

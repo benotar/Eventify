@@ -13,7 +13,7 @@ public class ArtistIdTests
         var id = Guid.Empty;
 
         // Act
-        var act = () => ArtistId.Of(id);
+        var act = () => ArtistId.Create(id);
 
         // Assert
         act.Should().Throw<DomainException>();
@@ -26,7 +26,7 @@ public class ArtistIdTests
         var id = Guid.CreateVersion7();
 
         // Act 
-        var result = ArtistId.Of(id);
+        var result = ArtistId.Create(id);
 
         // Assert
         result.Value.Should().Be(id);

@@ -29,4 +29,12 @@ public class DomainException : Exception
             throw new DomainException(message);
         }
     }
+
+    public static void ThrowIfEmpty(Guid value, string message)
+    {
+        if (value.IsEmpty)
+        {
+            throw new DomainException(message);
+        }
+    }
 }
