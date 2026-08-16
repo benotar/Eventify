@@ -6,10 +6,13 @@ using Eventify.ServiceDefaults;
 var builder = WebApplication.CreateBuilder(args);
 
 // DI
+builder.Services.AddSomethingINotDecideShouldDo();
+
 builder.AddServiceDefaults();
 
-builder.Services.AddApplication();
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services
+    .AddApplication()
+    .AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 

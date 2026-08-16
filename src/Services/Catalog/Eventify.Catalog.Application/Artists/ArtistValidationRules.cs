@@ -17,15 +17,10 @@ static internal class ArtistValidationRules
         {
             ruleBuilder
                 .NotEmpty()
-                .WithMessage("Name is required.")
                 .MinimumLength(SharedConstants.MinNameLength)
-                .WithMessage($"Name must be at least {SharedConstants.MinNameLength} characters.")
                 .MaximumLength(SharedConstants.MaxNameLength)
-                .WithMessage($"Name must not exceed {SharedConstants.MaxNameLength} characters.")
                 .Matches(NameRegex)
-                .WithMessage("Name can only contain letters, numbers, spaces, hyphens, and apostrophes")
-                .Must(name => name.IsNotBlank)
-                .WithMessage("Name cannot be only whitespace");
+                .Must(name => name.IsNotBlank);
         }
     }
 
@@ -35,18 +30,14 @@ static internal class ArtistValidationRules
         {
             return ruleBuilder
                 .MaximumLength(SharedConstants.MaxBioLength)
-                .WithMessage($"Bio must not exceed {SharedConstants.MaxBioLength} characters")
-                .Must(bio => bio.IsEmpty || bio.IsNotBlank)
-                .WithMessage("Bio cannot be only whitespace");
+                .Must(bio => bio.IsEmpty || bio.IsNotBlank);
         }
 
         public IRuleBuilderOptions<T, string?> ArtistImageUrl()
         {
             return ruleBuilder
                 .MaximumLength(SharedConstants.MaxImageUrlLength)
-                .WithMessage($"Image URL must not exceed {SharedConstants.MaxImageUrlLength} characters")
                 .Must(BeAValidHttpUrl)
-                .WithMessage("Image URL must be a valid HTTP or HTTPS URL")
                 .Must(BeAnImageUrl)
                 .WithMessage($"Image URL must point to an image ({string.Join(", ", AllowedImageExtensions)})");
         }
@@ -59,11 +50,11 @@ static internal class ArtistValidationRules
                && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
     }
 
-    private static bool BeAnImageUrl(string? url)
+    private static bool BeAnImageUrl(string url)
     {
-        if (url!.IsBlank)
+        if (url.IsBlank)
         {
-            return true;
+            return false;
         }
 
         var path = Uri.TryCreate(url, UriKind.Absolute, out var uri)

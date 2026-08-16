@@ -5,10 +5,10 @@ namespace Eventify.Catalog.UnitTests.Application.Artists;
 
 public abstract class ArtistCommandHandlerBase
 {
-    protected readonly Mock<IApplicationDbContext> DbContextMock;
+    protected readonly Mock<IArtistDbContext> DbContextMock;
 
     protected ArtistCommandHandlerBase()
     {
-        DbContextMock = new Mock<IApplicationDbContext>();
+        DbContextMock = new Mock<IArtistDbContext>();
     }
 }

@@ -1,4 +1,4 @@
-﻿using Eventify.SharedKernel.Application.CQRS;
+﻿using Eventify.SharedKernel.Application.Messaging;
 
 namespace Eventify.Identity.Application.User.RegisterUser;
 

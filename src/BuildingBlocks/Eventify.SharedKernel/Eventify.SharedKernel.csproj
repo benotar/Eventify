@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
-        <PackageReference Include="ErrorOr" />
         <PackageReference Include="FluentValidation" />
-        <PackageReference Include="MediatR" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" />
         <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
         <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" />
+        <PackageReference Include="Scrutor" />
+        <PackageReference Include="Serilog" />
     </ItemGroup>
 
 </Project>

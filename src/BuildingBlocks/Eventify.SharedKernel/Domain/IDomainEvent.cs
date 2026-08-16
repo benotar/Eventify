@@ -1,8 +1,6 @@
-﻿using MediatR;
+﻿namespace Eventify.SharedKernel.Domain;
 
-namespace Eventify.SharedKernel.Domain;
-
-public interface IDomainEvent : INotification
+public interface IDomainEvent
 {
     Guid EventId { get; }
     DateTimeOffset OccurredOn { get; }

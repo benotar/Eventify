@@ -1,7 +1,7 @@
-﻿using ErrorOr;
-using Eventify.Identity.Domain.Entities;
+﻿using Eventify.Identity.Domain.Entities;
 using Eventify.Localization;
-using Eventify.SharedKernel.Application.CQRS;
+using Eventify.SharedKernel;
+using Eventify.SharedKernel.Application.Messaging;
 using Microsoft.AspNetCore.Identity;
 
 namespace Eventify.Identity.Application.User.RegisterUser;
@@ -15,11 +15,12 @@ public sealed class RegisterUserCommandHandler : ICommandHandler<RegisterUserCom
         _userManager = userManager;
     }
 
-    public async Task<ErrorOr<Guid>> Handle(RegisterUserCommand command, CancellationToken ct)
+    public async Task<Result<Guid>> Handle(RegisterUserCommand command, CancellationToken cancellationToken)
     {
         if (await _userManager.FindByEmailAsync(command.Email) is not null)
         {
-            return Error.Conflict(nameof(command.Email), Captions.AlreadyExistsValidation);
+            return Result.Failure<Guid>(Error.Conflict(nameof(command.Email),
+                Captions.AlreadyExistsValidation)); // Move to UserErrors
         }
 
         var user = new ApplicationUser(command.Email, command.FirstName, command.LastName);
@@ -28,7 +29,8 @@ public sealed class RegisterUserCommandHandler : ICommandHandler<RegisterUserCom
 
         if (!createUserResult.Succeeded)
         {
-            return Error.Failure(description: createUserResult.Errors.First().Description);
+            return Result.Failure<Guid>(Error.Failure(string.Empty,
+                createUserResult.Errors.First().Description)); // Move to UserErrors
         }
 
         return user.Id;

@@ -16,12 +16,19 @@ namespace Eventify.ServiceDefaults;
 
 public static class Extensions
 {
+    public static IServiceCollection
+        AddSomethingINotDecideShouldDo(this IServiceCollection services) // TODO Change the name of method when I decide what this method should do
+    {
+        services.AddOpenApi();
+
+        return services;
+    }
+
     public static void AddServiceDefaults<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
         builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
         builder.Services.AddProblemDetails();
 
-        builder.Services.AddOpenApi();
 
         builder.Services.AddApiVersioning(options =>
         {

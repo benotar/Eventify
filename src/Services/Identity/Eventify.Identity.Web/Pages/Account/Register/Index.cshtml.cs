@@ -1,5 +1,5 @@
 ﻿using Eventify.Identity.Application.User.RegisterUser;
-using MediatR;
+using Eventify.SharedKernel.Application.Messaging;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -7,30 +7,28 @@ namespace Eventify.Identity.Web.Pages.Account.Register;
 
 public class Index : PageModel
 {
-    private readonly ISender _sender;
+    private readonly ICommandHandler<RegisterUserCommand, Guid> _handler;
 
-    public Index(ISender sender)
+    public Index(ICommandHandler<RegisterUserCommand, Guid> handler)
     {
-        _sender = sender;
+        _handler = handler;
     }
 
     [BindProperty] public RegisterModel Model { get; set; } = default!;
     [BindProperty(SupportsGet = true)] public string? ReturnUrl { get; set; }
 
-    public async Task<IActionResult> OnPostAsync(CancellationToken ct)
+    public async Task<IActionResult> OnPostAsync(CancellationToken cancellationToken)
     {
-        var result = await _sender.Send(new RegisterUserCommand(Model.Email, Model.FirstName, Model.LastName, Model.Password),
-            ct);
+        var command = new RegisterUserCommand(Model.Email, Model.FirstName, Model.LastName, Model.Password);
 
-        if (!result.IsError)
+        var result = await _handler.Handle(command, cancellationToken);
+
+        if (!result.IsSuccess)
         {
             return RedirectToPage("../Login/Index", new { ReturnUrl });
         }
 
-        foreach (var error in result.Errors)
-        {
-            ModelState.AddModelError($"{nameof(Model)}.{error.Code}", error.Description);
-        }
+        ModelState.AddModelError($"{nameof(Model)}.{result.Error.Code}", result.Error.Description);
 
         return Page();
     }

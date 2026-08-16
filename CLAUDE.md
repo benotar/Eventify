@@ -217,8 +217,11 @@ Four projects in `src/BuildingBlocks/`:
 - **`Eventify.SharedKernel`** — Domain + Application + Infrastructure base classes consolidated:
     - Domain: `Entity<TId>`, `AggregateRoot<TId>`, `DomainEvent` (abstract record), interfaces (
       `IEntity`, `IAggregateRoot`, `IAuditable`, `IClearableAggregate`, `IDomainEvent`), `DomainException`
-    - Application: `ICommand`, `IQuery<T>`, `ICommandHandler`, `IQueryHandler`, `LoggingBehavior`, `ValidationBehavior`,
-      `NotFoundException`
+    - Application: `Result`/`Result<T>`, `Error`/`ErrorType`/`ValidationError` (root namespace), messaging contracts in
+      `Eventify.SharedKernel.Application.Messaging` (`ICommand`, `ICommand<TResponse>`, `ICommandHandler`,
+      `ICommandHandler<,>`, `IQuery<TResponse>`, `IQueryHandler<,>`), cross-cutting decorators in
+      `Eventify.SharedKernel.Application.Behaviors` (`LoggingDecorator` — nested `CommandHandler`/`CommandBaseHandler`/
+      `QueryHandler`), `IUnitOfWork`
     - Infrastructure: `BaseDbContext`, `UpdateAuditableInterceptor`, `PublishDomainEventsInterceptor`
 
 - **`Eventify.IntegrationEvents`** — cross-service event contracts; no deps; `IntegrationEvent` abstract record (UUIDv7)
@@ -242,25 +245,35 @@ Populated by `UpdateAuditableInterceptor` (EF Core `ISaveChangesInterceptor`) �
 service.
 
 **Domain events:** `AggregateRoot<TId>.RaiseDomainEvent` is protected. Clearing happens only via internal
-`IClearableAggregate`. Dispatch by `PublishDomainEventsInterceptor` (**pre-save**, `SavingChangesAsync`, via MediatR
-`IPublisher`). Pre-save is required for two reasons: (1) EF Core detaches deleted entities from the ChangeTracker after
-`SaveChanges`, so post-save dispatch would silently lose `*DeletedDomainEvent`s; (2) domain event handlers that write to
-the Outbox table must participate in the same DB transaction as the aggregate change — pre-save guarantees this. Events
-are materialized with `.ToList()` before `ClearDomainEvents()` to avoid the live-wrapper trap (`AsReadOnly()` wraps the
-underlying list, not a copy).
+`IClearableAggregate`. Dispatch is meant to happen in `PublishDomainEventsInterceptor` (**pre-save**,
+`SavingChangesAsync`). Pre-save is required for two reasons: (1) EF Core detaches deleted entities from the
+ChangeTracker after `SaveChanges`, so post-save dispatch would silently lose `*DeletedDomainEvent`s; (2) domain event
+handlers that write to the Outbox table must participate in the same DB transaction as the aggregate change — pre-save
+guarantees this. Events are materialized with `.ToList()` before `ClearDomainEvents()` to avoid the live-wrapper trap
+(`AsReadOnly()` wraps the underlying list, not a copy). **Currently stubbed out** — see Known gaps below; it used to
+call MediatR's `IPublisher`, now needs a replacement dispatcher.
 
-**MediatR 12.2 pin:** `RequestHandlerDelegate<TResponse>` does not accept `CancellationToken` in 12.2. Pipeline
-behaviors call `next()` not `next(cancellationToken)`. If bumped to 12.5+, update `LoggingBehavior` and
-`ValidationBehavior`.
+**Custom CQRS messaging (no MediatR):** No `IMediator`/`ISender` abstraction. Carter endpoints inject
+`ICommandHandler<,>` / `IQueryHandler<,>` / `IQueryHandler<,>` directly from DI and call `.Handle()` themselves — the
+"mediator" is just constructor injection. `IServiceCollection.AddCustomMediatorWithBehavior(assembly)`
+(`Eventify.SharedKernel.Application.DependencyInjection`) uses Scrutor to scan-register every `ICommandHandler<>`,
+`ICommandHandler<,>`, `IQueryHandler<,>` implementation, then applies cross-cutting concerns via
+`services.Decorate<>()` (Scrutor decorator, not a MediatR pipeline behavior) — currently only `LoggingDecorator`.
+FluentValidation validators are registered separately via `AddValidatorsFromAssembly` in each service's
+`AddApplication()`, not through the scan above.
 
-**Error handling:** Application handlers return `ErrorOr<TResult>` (uses `ErrorOr` library). Business errors →
-`Error.NotFound/Conflict/Validation/Unauthorized/Failure`. `DomainException` only for invariant bugs that should never
-reach Domain. No try/catch in handlers; endpoints end with `result.Match(success, errs => errs.ToProblemDetails())`.
-Full rationale in `docs/ARCHITECTURE.md` §8.3.
+**Error handling:** Application handlers return `Result` / `Result<TValue>` (`Eventify.SharedKernel`, hand-rolled, not
+a library). Business errors → `Error.NotFound/Conflict/Problem/Failure` (`ErrorType` enum); `ValidationError` wraps
+multiple `Error`s for FluentValidation failures. `DomainException` only for invariant bugs that should never reach
+Domain. No try/catch in handlers; endpoints end with `result.Match(success, CustomResults.Problem)`
+(`Eventify.ServiceDefaults.CustomResults.Problem` maps `ErrorType` → HTTP status + RFC7231 `type` URI). Full rationale
+in `docs/ARCHITECTURE.md` §8.3 — **that doc still describes the old ErrorOr version, needs updating.**
 
 **Endpoints:** Minimal APIs via **Carter** (`ICarterModule` per aggregate under `Endpoints/`). Thin handlers: parse →
-`request.ToCommand()` → `sender.Send()` → `result.Match()`. **No MVC controllers anywhere.** No FastEndpoints (conflicts
-with MediatR philosophy).
+build the command/query inline (e.g. `new CreateArtistCommand(request.Name, ...)`) → `handler.Handle()` →
+`result.Match()`. The earlier `request.ToCommand()` extension-method convention was dropped along with MediatR — construct
+the record directly in the route delegate. **No MVC controllers anywhere.** No FastEndpoints (keeps the same
+request→command→handler shape as the rest of the app).
 
 **Mapping:** Manual static extension methods (`ToDto`/`ToDomain`/`ToIntegrationEvent`) colocated with the DTO/event. *
 *No mapper libraries** (no AutoMapper / Mapster / Mapperly). Aggregates are small enough that boilerplate is minimal;

@@ -27,7 +27,8 @@ public static class DependencyInjection
                 options.UseNpgsql(dbOption.ConnectionString);
             });
 
-            services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<CatalogDbContext>());
+            services.AddScoped<IArtistDbContext>(sp => sp.GetRequiredService<CatalogDbContext>());
+            services.AddScoped<IVenueDbContext>(sp => sp.GetRequiredService<CatalogDbContext>());
 
             return services;
         }

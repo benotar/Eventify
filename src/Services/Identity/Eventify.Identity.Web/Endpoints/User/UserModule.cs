@@ -1,13 +1,17 @@
 ﻿using Asp.Versioning.Conventions;
 using Carter;
+using Eventify.Identity.Application.User.RegisterUser;
 using Eventify.ServiceDefaults;
 using Eventify.SharedKernel;
-using MediatR;
+using Eventify.SharedKernel.Application.Messaging;
+using Eventify.SharedKernel.Extensions;
 
 namespace Eventify.Identity.Web.Endpoints.User;
 
 public sealed class UserModule : ICarterModule
 {
+    private record RegisterUserRequest(string Email, string FirstName, string LastName, string Password);
+
     public void AddRoutes(IEndpointRouteBuilder app)
     {
         var versionSet = app.NewApiVersionSet()
@@ -20,12 +24,18 @@ public sealed class UserModule : ICarterModule
             .HasApiVersion(1, 0);
 
         // Commands
-        group.MapPost("/", async (RegisterUserRequest request, ISender sender, CancellationToken ct) =>
+        group.MapPost("/", async (RegisterUserRequest request,
+                ICommandHandler<RegisterUserCommand, Guid> handler,
+                CancellationToken cancellationToken) =>
             {
-                var result = await sender.Send(request.ToCommand(), ct);
+                var command = new RegisterUserCommand(request.Email, request.FirstName, request.LastName, request.Password);
 
-                return result.Match(id => Results.Created($"/v1/users/{id}", id),
-                    errors => errors.ToProblemDetails());
+                var result = await handler.Handle(command, cancellationToken);
+
+                return result.Match(id => Results.Created($"/v1/users/{id}", id), CustomResults.Problem);
+
+                // return result.Match(id => Results.Created($"/v1/users/{id}", id),
+                //     errors => errors.ToProblemDetails());
             })
             .RequireAuthorization(policyBuilder => policyBuilder.RequireRole(SharedConstants.Admin));
     }

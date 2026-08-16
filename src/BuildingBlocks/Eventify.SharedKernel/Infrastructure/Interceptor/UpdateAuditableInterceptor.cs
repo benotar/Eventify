@@ -1,7 +1,6 @@
 ﻿using Eventify.SharedKernel.Domain;
 using Eventify.SharedKernel.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Eventify.SharedKernel.Infrastructure.Interceptor;
@@ -47,16 +46,5 @@ public sealed class UpdateAuditableInterceptor : SaveChangesInterceptor
                 entry.Entity.SetUpdatedAt(now);
             }
         }
-    }
-}
-
-static internal class EntityEntryExtensions
-{
-    public static bool HasChangedOwnedEntities(this EntityEntry entry)
-    {
-        return entry.References.Any(r =>
-            r.TargetEntry is not null
-            && r.TargetEntry.Metadata.IsOwned()
-            && r.TargetEntry.State is EntityState.Added or EntityState.Modified);
     }
 }

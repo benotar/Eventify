@@ -13,9 +13,9 @@ public static class DependencyInjection
         {
             var assembly = Assembly.GetExecutingAssembly();
 
-            services.AddValidatorsFromAssembly(assembly);
+            services.AddCommandQueryHandlers(assembly);
 
-            services.AddMediatrWithBehavior(assembly);
+            services.AddValidatorsFromAssembly(assembly, includeInternalTypes: true);
 
             return services;
         }
