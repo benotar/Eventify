@@ -6,6 +6,11 @@ public sealed record ArtistId
 {
     public Guid Value { get; }
 
+    // // EF Core
+    private ArtistId()
+    {
+    }
+
     private ArtistId(Guid value)
     {
         Value = value;

@@ -1,11 +1,11 @@
 ﻿using Eventify.SharedKernel.Extensions;
 using FluentValidation;
 
-namespace Eventify.Catalog.Application.Artists.Commands.Update;
+namespace Eventify.Catalog.Application.Artists.Commands.UpdateProfile;
 
-public sealed class UpdateArtistCommandValidator : AbstractValidator<UpdateArtistCommand>
+public sealed class UpdateArtistProfileCommandValidator : AbstractValidator<UpdateArtistProfileCommand>
 {
-    public UpdateArtistCommandValidator()
+    public UpdateArtistProfileCommandValidator()
     {
         RuleFor(command => command.Id)
             .NotEmpty();
@@ -16,9 +16,5 @@ public sealed class UpdateArtistCommandValidator : AbstractValidator<UpdateArtis
         RuleFor(command => command.Bio)
             .ArtistBio()
             .When(command => command.Bio!.IsNotEmpty);
-
-        RuleFor(command => command.ImageUrl)
-            .ArtistImageUrl()
-            .When(command => command.ImageUrl!.IsNotBlank);
     }
 }

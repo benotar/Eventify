@@ -2,7 +2,7 @@
 using Carter;
 using Eventify.Catalog.Application.Artists.Commands.Create;
 using Eventify.Catalog.Application.Artists.Commands.Delete;
-using Eventify.Catalog.Application.Artists.Commands.Update;
+using Eventify.Catalog.Application.Artists.Commands.UpdateProfile;
 using Eventify.Catalog.Application.Artists.Queries;
 using Eventify.Catalog.Application.Artists.Queries.Get;
 using Eventify.Catalog.Application.Artists.Queries.GetById;
@@ -15,20 +15,24 @@ namespace Eventify.Catalog.Api.Endpoints.Artist;
 
 public sealed class ArtistModule : ICarterModule
 {
-    public sealed record GetArtistsRequest(int Page = 1, int PageSize = 20);
+    private sealed record GetArtistsRequest(int Page = 1, int PageSize = 20);
 
-    public sealed record CreateArtistRequest
+    private sealed record CreateArtistRequest
     {
         public required string Name { get; init; }
         public string? Bio { get; init; }
         public string? ImageUrl { get; init; }
     }
 
-    public sealed record UpdateArtistRequest
+    private sealed record UpdateArtistProfileRequest
     {
         public required string Name { get; init; }
-        public string? Bio { get; init; }
-        public string? ImageUrl { get; init; }
+        public required string Bio { get; init; }
+    }
+
+    private sealed record UpdateArtistImageUrlRequest
+    {
+        public required string ImageUrl { get; init; }
     }
 
     public void AddRoutes(IEndpointRouteBuilder app)
@@ -47,7 +51,7 @@ public sealed class ArtistModule : ICarterModule
             ICommandHandler<CreateArtistCommand, Guid> handler,
             CancellationToken cancellationToken) =>
         {
-            var command = new CreateArtistCommand(request.Name, request.Bio, request.ImageUrl);
+            var command = new CreateArtistCommand { Name = request.Name, Bio = request.Bio, ImageUrl = request.ImageUrl };
 
             var result = await handler.Handle(command, cancellationToken);
 
@@ -55,11 +59,11 @@ public sealed class ArtistModule : ICarterModule
         });
 
         group.MapPut("/{id:guid}", async (Guid id,
-            UpdateArtistRequest request,
-            ICommandHandler<UpdateArtistCommand> handler,
+            UpdateArtistProfileRequest profileRequest,
+            ICommandHandler<UpdateArtistProfileCommand> handler,
             CancellationToken cancellationToken) =>
         {
-            var command = new UpdateArtistCommand(id, request.Name, request.Bio, request.ImageUrl);
+            var command = new UpdateArtistProfileCommand { Id = id, Name = profileRequest.Name, Bio = profileRequest.Bio, };
 
             var result = await handler.Handle(command, cancellationToken);
 
@@ -70,7 +74,7 @@ public sealed class ArtistModule : ICarterModule
             ICommandHandler<DeleteArtistCommand> handler,
             CancellationToken cancellationToken) =>
         {
-            var command = new DeleteArtistCommand(id);
+            var command = new DeleteArtistCommand { Id = id };
 
             var result = await handler.Handle(command, cancellationToken);
 

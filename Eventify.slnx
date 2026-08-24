@@ -40,8 +40,9 @@
         <File Path="docs/THEORY.md" />
         <File Path="migrations.txt" />
     </Folder>
-    <Folder Name="/Tests/">
-        <Project Path="tests/Eventify.Catalog.UnitTests/Eventify.Catalog.UnitTests.csproj" />
+    <Folder Name="/Tests/" />
+    <Folder Name="/Tests/Catalog/">
+        <Project Path="tests/Eventify.Catalog.Application.UnitTests/Eventify.Catalog.Application.UnitTests.csproj" />
     </Folder>
     <Folder Name="/Tools/" />
     <Folder Name="/Tools/tasks-board/">

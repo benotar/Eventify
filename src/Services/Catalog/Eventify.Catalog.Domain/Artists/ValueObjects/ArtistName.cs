@@ -6,6 +6,11 @@ public sealed record ArtistName
 {
     public string Value { get; }
 
+    // EF Core
+    private ArtistName()
+    {
+    }
+
     private ArtistName(string value)
     {
         Value = value;

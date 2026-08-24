@@ -1,5 +1,7 @@
-﻿using Eventify.Catalog.Domain.Artists.ValueObjects;
+﻿using Eventify.Catalog.Domain.Artists.DomainEvents;
+using Eventify.Catalog.Domain.Artists.ValueObjects;
 using Eventify.SharedKernel.Domain;
+using Eventify.SharedKernel.Domain.Exceptions;
 
 namespace Eventify.Catalog.Domain.Artists;
 
@@ -31,15 +33,28 @@ public class Artist : AggregateRoot<ArtistId>
         return artist;
     }
 
-    public void Update(ArtistName artistName, string? bio, string? imageUrl)
+    public void UpdateProfile(ArtistName artistName, string bio)
     {
-        if (Name == artistName && Bio == bio && ImageUrl == imageUrl)
-        {
-            return;
-        }
+        DomainException.ThrowIfNullOrEmpty(artistName.Value, "The artist name cannot be null or empty");
 
         Name = artistName;
         Bio = bio;
+    }
+
+    public void UpdateImageUrl(string imageUrl)
+    {
+        DomainException.ThrowIfNullOrEmpty(imageUrl, "The artist image url cannot be null or empty");
+
         ImageUrl = imageUrl;
+    }
+
+    public void DeleteImageUrl()
+    {
+        ImageUrl = null;
+    }
+
+    public void MarkDeleted()
+    {
+        RaiseDomainEvent(new ArtistDeletedDomainEvent(Id));
     }
 }

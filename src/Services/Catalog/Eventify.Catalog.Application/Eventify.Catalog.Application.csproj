@@ -9,6 +9,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <InternalsVisibleTo Include="Eventify.Catalog.UnitTests"/>
+        <InternalsVisibleTo Include="Eventify.Catalog.Application.UnitTests" />
     </ItemGroup>
 </Project>

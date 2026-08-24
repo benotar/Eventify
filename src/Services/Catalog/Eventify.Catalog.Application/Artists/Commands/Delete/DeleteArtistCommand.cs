@@ -2,4 +2,7 @@
 
 namespace Eventify.Catalog.Application.Artists.Commands.Delete;
 
-public sealed record DeleteArtistCommand(Guid Id) : ICommand;
+public sealed record DeleteArtistCommand : ICommand
+{
+    public required Guid Id { get; init; }
+}

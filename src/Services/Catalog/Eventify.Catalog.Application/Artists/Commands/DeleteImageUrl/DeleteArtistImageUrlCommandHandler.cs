@@ -5,18 +5,18 @@ using Eventify.SharedKernel;
 using Eventify.SharedKernel.Application.Messaging;
 using Microsoft.EntityFrameworkCore;
 
-namespace Eventify.Catalog.Application.Artists.Commands.Delete;
+namespace Eventify.Catalog.Application.Artists.Commands.DeleteImageUrl;
 
-internal sealed class DeleteArtistCommandHandler : ICommandHandler<DeleteArtistCommand>
+internal sealed class DeleteArtistImageUrlCommandHandler : ICommandHandler<DeleteArtistImageUrlCommand>
 {
     private readonly IArtistDbContext _dbContext;
 
-    public DeleteArtistCommandHandler(IArtistDbContext dbContext)
+    public DeleteArtistImageUrlCommandHandler(IArtistDbContext dbContext)
     {
         _dbContext = dbContext;
     }
 
-    public async Task<Result> Handle(DeleteArtistCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(DeleteArtistImageUrlCommand command, CancellationToken cancellationToken)
     {
         var artistId = ArtistId.Create(command.Id);
 
@@ -27,9 +27,7 @@ internal sealed class DeleteArtistCommandHandler : ICommandHandler<DeleteArtistC
             return Result.Failure(ArtistErrors.NotFound(artistId));
         }
 
-        _dbContext.Artists.Remove(artist);
-
-        artist.MarkDeleted();
+        artist.DeleteImageUrl();
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 
