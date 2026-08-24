@@ -1,46 +1,59 @@
-﻿using Eventify.Catalog.Domain.Artists.Events;
+﻿using Eventify.Catalog.Domain.Artists.DomainEvents;
 using Eventify.Catalog.Domain.Artists.ValueObjects;
 using Eventify.SharedKernel.Domain;
+using Eventify.SharedKernel.Domain.Exceptions;
 
 namespace Eventify.Catalog.Domain.Artists;
 
 public class Artist : AggregateRoot<ArtistId>
 {
-    public ArtistName Name { get; private set; } = default!;
+    public ArtistName Name { get; private set; }
     public string? Bio { get; private set; }
     public string? ImageUrl { get; private set; }
 
-    // For EF Core
+    // Prevent the error "No suitable constructor was found for the type..." that EF Core can throw
     private Artist()
     {
     }
 
+    private Artist(ArtistId id, ArtistName name, string? bio, string? imageUrl)
+    {
+        Id = id;
+        Name = name;
+        Bio = bio;
+        ImageUrl = imageUrl;
+    }
+
     public static Artist Create(ArtistName name, string? bio = null, string? imageUrl = null)
     {
-        var id = ArtistId.Of(Guid.CreateVersion7());
+        var id = ArtistId.Create(Guid.CreateVersion7());
 
-        var artist = new Artist { Id = id, Name = name, Bio = bio, ImageUrl = imageUrl };
-
-        artist.RaiseDomainEvent(new ArtistCreatedDomainEvent(id));
+        var artist = new Artist(id, name, bio, imageUrl);
 
         return artist;
     }
 
-    public void Update(ArtistName artistName, string? bio, string? imageUrl)
+    public void UpdateProfile(ArtistName artistName, string bio)
     {
-        if (Name == artistName && Bio == bio && ImageUrl == imageUrl)
-        {
-            return;
-        }
+        DomainException.ThrowIfNullOrEmpty(artistName.Value, "The artist name cannot be null or empty");
 
         Name = artistName;
         Bio = bio;
-        ImageUrl = imageUrl;
-
-        RaiseDomainEvent(new ArtistUpdatedDomainEvent(Id));
     }
 
-    public void Delete()
+    public void UpdateImageUrl(string imageUrl)
+    {
+        DomainException.ThrowIfNullOrEmpty(imageUrl, "The artist image url cannot be null or empty");
+
+        ImageUrl = imageUrl;
+    }
+
+    public void DeleteImageUrl()
+    {
+        ImageUrl = null;
+    }
+
+    public void MarkDeleted()
     {
         RaiseDomainEvent(new ArtistDeletedDomainEvent(Id));
     }

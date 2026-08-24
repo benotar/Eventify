@@ -59,6 +59,63 @@ namespace Eventify.Catalog.Infrastructure.Migrations
 
                     b.ToTable("artists", (string)null);
                 });
+
+            modelBuilder.Entity("Eventify.Catalog.Domain.Venues.Venue", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Address", "Eventify.Catalog.Domain.Venues.Venue.Address#Address", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("City")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("Address_City");
+
+                            b1.Property<string>("Country")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("Address_Country");
+
+                            b1.Property<string>("State")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("Address_State");
+
+                            b1.Property<string>("Street")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("Address_Street");
+
+                            b1.Property<string>("ZipCode")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("Address_ZipCode");
+                        });
+
+                    b.ComplexProperty(typeof(Dictionary<string, object>), "Name", "Eventify.Catalog.Domain.Venues.Venue.Name#VenueName", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("character varying(200)")
+                                .HasColumnName("Name");
+                        });
+
+                    b.HasKey("Id");
+
+                    b.ToTable("venues", (string)null);
+                });
 #pragma warning restore 612, 618
         }
     }

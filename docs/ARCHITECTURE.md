@@ -230,7 +230,7 @@ In Docker Compose only the Gateway exposes a host port (5000). All other service
 | Property | Value |
 |---|---|
 | **Owns** | Users, Roles, Refresh Tokens, OIDC clients/scopes |
-| **Tech** | ASP.NET Core 9 + Duende IdentityServer 7 + ASP.NET Identity for user store |
+| **Tech** | ASP.NET Core 10 + Duende IdentityServer 7 + ASP.NET Identity for user store |
 | **Architecture style** | Clean Architecture (high importance, multi-aggregate) |
 | **DB** | `eventify_identity` (Postgres) |
 | **Public sync API** | OIDC endpoints (`/connect/token`, `/connect/authorize`, `/connect/userinfo`, `.well-known/openid-configuration`); Admin REST for user mgmt |
@@ -244,7 +244,7 @@ In Docker Compose only the Gateway exposes a host port (5000). All other service
 | Property | Value |
 |---|---|
 | **Owns** | Artists, Events, Venues, SeatLayouts, Sections, Seats (definitions), Sessions, PriceTiers |
-| **Tech** | ASP.NET Core 9 + EF Core 9 + Npgsql |
+| **Tech** | ASP.NET Core 10 + EF Core 10 + Npgsql |
 | **Architecture style** | Clean Architecture (rich domain) |
 | **DB** | `eventify_catalog` (Postgres) |
 | **Public sync API** | REST: `GET /events`, `GET /events/{id}`, `GET /sessions/{id}`, `GET /sessions/{id}/seats`; Admin REST for CRUD; gRPC for inter-service: `GetSessionDetails(sessionId)`, `GetSeatLayout(sessionId)`, `ValidateSeats(sessionId, seatIds)` |
@@ -258,7 +258,7 @@ In Docker Compose only the Gateway exposes a host port (5000). All other service
 | Property | Value |
 |---|---|
 | **Owns** | Reservations (with TTL), Bookings, BookingSagaState |
-| **Tech** | ASP.NET Core 9 + EF Core 9 + MassTransit StateMachine + Redis (RedLock) + SignalR |
+| **Tech** | ASP.NET Core 10 + EF Core 10 + MassTransit StateMachine + Redis (RedLock) + SignalR |
 | **Architecture style** | Clean Architecture (highest complexity, holds Saga) |
 | **DB** | `eventify_booking` (Postgres) |
 | **Public sync API** | REST: `POST /reservations`, `GET /reservations/{id}`, `DELETE /reservations/{id}`, `POST /reservations/{id}/confirm`, `GET /bookings/me`, `GET /bookings/{id}`; SignalR hub `/hubs/seats/{sessionId}` |
@@ -272,7 +272,7 @@ In Docker Compose only the Gateway exposes a host port (5000). All other service
 | Property | Value |
 |---|---|
 | **Owns** | Payments, Refunds, Stripe webhook events log |
-| **Tech** | ASP.NET Core 9 + EF Core 9 + Stripe.NET SDK |
+| **Tech** | ASP.NET Core 10 + EF Core 10 + Stripe.NET SDK |
 | **Architecture style** | Clean Architecture |
 | **DB** | `eventify_payment` (Postgres) |
 | **Public sync API** | REST: `POST /payments` (creates Stripe PaymentIntent, returns client_secret), `POST /webhooks/stripe`, `GET /payments/{id}`, `POST /refunds` (admin) |
@@ -286,7 +286,7 @@ In Docker Compose only the Gateway exposes a host port (5000). All other service
 | Property | Value |
 |---|---|
 | **Owns** | Tickets, ValidationLog |
-| **Tech** | ASP.NET Core 9 + EF Core 9 + QRCoder (QR generation) |
+| **Tech** | ASP.NET Core 10 + EF Core 10 + QRCoder (QR generation) |
 | **Architecture style** | Vertical Slice Architecture (small, simple service) |
 | **DB** | `eventify_ticket` (Postgres) |
 | **Public sync API** | REST: `GET /tickets/me`, `GET /tickets/{id}` (returns metadata + QR PNG), `POST /tickets/validate` (validator endpoint, API key auth) |
@@ -300,7 +300,7 @@ In Docker Compose only the Gateway exposes a host port (5000). All other service
 | Property | Value |
 |---|---|
 | **Owns** | OutboxMessages, EmailTemplates, EmailLog |
-| **Tech** | ASP.NET Core 9 + EF Core 9 + MailKit |
+| **Tech** | ASP.NET Core 10 + EF Core 10 + MailKit |
 | **Architecture style** | Vertical Slice Architecture |
 | **DB** | `eventify_notification` (Postgres) |
 | **Public sync API** | Internal admin only: `GET /emails/{id}` (debug); no public endpoints |
@@ -543,7 +543,7 @@ classDiagram
 **Integration Events** are the cross-service language. They are:
 - Past tense (`SeatsReserved`, not `ReserveSeats`).
 - Immutable.
-- Schema-versioned in `Eventify.BuildingBlocks.IntegrationEvents` package.
+- Schema-versioned in `Eventify.IntegrationEvents` package.
 - Routed via MassTransit topology (auto-created exchanges and queues, one queue per consumer).
 
 **Commands** (`Send`, not `Publish`) are reserved for Saga-internal orchestration:
@@ -778,7 +778,7 @@ URL-segment versioning via `Asp.Versioning.Http`:
 |---|---|---|
 | Runtime | **.NET 10 (LTS)** | Latest stable LTS (support until ~Nov 2028), fresh EF Core 10, best for portfolio |
 | Web framework | **ASP.NET Core 10 Minimal APIs** + **Carter** modules per aggregate | One model across all services; thin endpoints, MediatR handlers (see §8.10) |
-| ORM | **EF Core 9** with **Npgsql** | Learning goal (work uses MSSQL without EF Core); migrations included |
+| ORM | **EF Core 10** with **Npgsql** | Learning goal (work uses MSSQL without EF Core); migrations included |
 | Auth | **Duende IdentityServer 7** | Industry-standard OIDC; portfolio impact |
 | Messaging | **RabbitMQ 3.13** + **MassTransit 8.5** | Already familiar; first-class Saga support |
 | Cache & locks | **Redis 7** + **StackExchange.Redis** + **RedLock.net** | Standard for distributed locks |
@@ -913,6 +913,8 @@ Eventify/                                     # repo root
 │   ├── BuildingBlocks/                       # shared libraries (folder; projects below)
 │   │   ├── Eventify.SharedKernel/            # Domain/Application/Infrastructure base classes — single consolidated project
 │   │   ├── Eventify.IntegrationEvents/       # cross-service event contracts
+│   │   ├── Eventify.Localization/            # shared resx UI string resources (Captions.resx + Captions.uk-UA.resx)
+│   │   ├── Eventify.ServiceDefaults/         # shared ASP.NET Core host wiring (OpenAPI, versioning, Carter, exception handling)
 │   │   └── Eventify.IntegrationContracts.Grpc/  # .proto files (added with Catalog gRPC)
 │   │
 │   ├── Services/
@@ -933,7 +935,7 @@ Eventify/                                     # repo root
 │   │   └── Eventify.ApiGateway/              # YARP
 │   │
 │   └── Web/
-│       └── eventify-web/                     # React + Vite
+│       └── EventifySpa/                      # React + Vite
 │
 ├── tests/
 │   ├── Eventify.Catalog.UnitTests/
@@ -993,7 +995,7 @@ Each service connects only to its own database with a dedicated user. No `GRANT`
 ### Identifiers
 
 - All entity IDs use **UUIDv7** (`Guid.CreateVersion7()`). Timestamp-prefixed Guids preserve B-tree locality on Postgres primary keys, avoiding index fragmentation that random v4 Guids cause on insert.
-- Aggregates use **strongly-typed IDs** as `readonly record struct` (e.g., `public readonly record struct ArtistId(Guid Value)`). Prevents accidental `customerId` ↔ `orderId` mix-ups at compile time; mapped to `uuid` columns via EF Core value converters.
+- Aggregates use **strongly-typed IDs** as `sealed record` types with a `get`-only `Value`, a private constructor, and a static `Create(Guid value)` factory that rejects `Guid.Empty` (e.g. `ArtistId`, `VenueId`). Prevents accidental `customerId` ↔ `orderId` mix-ups at compile time; mapped to `uuid` columns via EF Core value converters. Not a positional record/`record struct` — that would expose a public constructor and let the `Guid.Empty` check be bypassed via direct construction.
 - `IDomainEvent.EventId` and `IntegrationEvent.Id` also use UUIDv7 — gives stable, time-sortable identifiers for tracing and ordering.
 
 ### Audit & domain event dispatch
@@ -1072,7 +1074,7 @@ Pipelines:
 1. `build.yml` (every push): restore + build + unit tests + lint + arch tests.
 2. `integration-tests.yml` (every PR to `main`): run integration tests with Testcontainers.
 3. `docker-publish.yml` (Iter 4+, on tag): build images and push to `ghcr.io/<user>/eventify-<service>:<tag>`.
-4. `frontend.yml`: lint + typecheck + build for `src/Web/eventify-web`.
+4. `frontend.yml`: lint + typecheck + build for `src/Web/EventifySpa`.
 
 Branch protection on `main`: require all checks green.
 

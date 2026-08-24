@@ -1,13 +1,20 @@
-﻿using Eventify.SharedKernel.Domain;
+﻿using Eventify.SharedKernel.Application;
+using Eventify.SharedKernel.Domain;
 using Eventify.SharedKernel.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Eventify.SharedKernel.Infrastructure.Interceptor;
 
 public sealed class UpdateAuditableInterceptor : SaveChangesInterceptor
 {
+    private readonly IDateTimeOffsetProvider _dateTimeOffsetProvider;
+
+    public UpdateAuditableInterceptor(IDateTimeOffsetProvider dateTimeOffsetProvider)
+    {
+        _dateTimeOffsetProvider = dateTimeOffsetProvider;
+    }
+
     public override ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData,
         InterceptionResult<int> result,
         CancellationToken ct = default)
@@ -20,9 +27,9 @@ public sealed class UpdateAuditableInterceptor : SaveChangesInterceptor
         return base.SavingChangesAsync(eventData, result, ct);
     }
 
-    private static void UpdateEntities(DbContext context)
+    private void UpdateEntities(DbContext context)
     {
-        var now = DateTimeOffset.UtcNow;
+        var now = _dateTimeOffsetProvider.UtcNow;
 
         var entries = context.ChangeTracker
             .Entries<IAuditable>()
@@ -47,16 +54,5 @@ public sealed class UpdateAuditableInterceptor : SaveChangesInterceptor
                 entry.Entity.SetUpdatedAt(now);
             }
         }
-    }
-}
-
-static internal class EntityEntryExtensions
-{
-    public static bool HasChangedOwnedEntities(this EntityEntry entry)
-    {
-        return entry.References.Any(r =>
-            r.TargetEntry is not null
-            && r.TargetEntry.Metadata.IsOwned()
-            && r.TargetEntry.State is EntityState.Added or EntityState.Modified);
     }
 }

@@ -28,4 +28,8 @@ public static class SharedConstants
     // Pagination
     public const int MinPageSize = 1;
     public const int MaxPageSize = 100;
+
+    // Table names
+    public const string ArtistsTableName = "artists";
+    public const string VenuesTableName = "venues";
 }

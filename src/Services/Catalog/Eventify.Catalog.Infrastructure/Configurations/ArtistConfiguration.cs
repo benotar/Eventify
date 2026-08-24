@@ -1,5 +1,4 @@
-﻿using Eventify.Catalog.Application;
-using Eventify.Catalog.Domain.Artists;
+﻿using Eventify.Catalog.Domain.Artists;
 using Eventify.Catalog.Domain.Artists.ValueObjects;
 using Eventify.SharedKernel;
 using Microsoft.EntityFrameworkCore;
@@ -11,12 +10,14 @@ public class ArtistConfiguration : IEntityTypeConfiguration<Artist>
 {
     public void Configure(EntityTypeBuilder<Artist> builder)
     {
-        builder.ToTable(CatalogConstants.ArtistsTableName);
+        builder.ToTable(SharedConstants.ArtistsTableName);
 
-        builder.HasKey(a => a.Id);
+        builder.HasKey(artist => artist.Id);
+
+        builder.Ignore(artist => artist.DomainEvents);
 
         builder.Property(prop => prop.Id)
-            .HasConversion(id => id.Value, value => ArtistId.Of(value));
+            .HasConversion(id => id.Value, value => ArtistId.Create(value));
 
         builder.ComplexProperty(prop => prop.Name, propertyBuilder =>
         {

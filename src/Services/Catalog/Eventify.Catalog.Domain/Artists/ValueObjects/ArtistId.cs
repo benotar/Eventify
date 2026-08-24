@@ -1,14 +1,25 @@
 ﻿using Eventify.SharedKernel.Domain.Exceptions;
-using Eventify.SharedKernel.Extensions;
 
 namespace Eventify.Catalog.Domain.Artists.ValueObjects;
 
-public readonly record struct ArtistId(Guid Value)
+public sealed record ArtistId
 {
-    public static ArtistId Of(Guid value)
+    public Guid Value { get; }
+
+    // // EF Core
+    private ArtistId()
     {
-        return value.IsEmpty
-            ? throw new DomainException("ArtistId cannot be empty.")
-            : new ArtistId(value);
+    }
+
+    private ArtistId(Guid value)
+    {
+        Value = value;
+    }
+
+    public static ArtistId Create(Guid value)
+    {
+        DomainException.ThrowIfEmpty(value, "ArtistId cannot be empty");
+
+        return new ArtistId(value);
     }
 }
