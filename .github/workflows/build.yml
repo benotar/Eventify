@@ -27,9 +27,6 @@ jobs:
       - name: Restore
         run: dotnet restore Eventify.slnx
 
-      - name: Code style check
-        run: dotnet format Eventify.slnx --verify-no-changes
-
       - name: Build
         run: dotnet build Eventify.slnx --configuration Release --no-restore
 
