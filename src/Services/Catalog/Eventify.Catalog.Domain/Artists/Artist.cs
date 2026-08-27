@@ -35,15 +35,13 @@ public class Artist : AggregateRoot<ArtistId>
 
     public void UpdateProfile(ArtistName artistName, string bio)
     {
-        DomainException.ThrowIfNullOrEmpty(artistName.Value, "The artist name cannot be null or empty");
-
         Name = artistName;
         Bio = bio;
     }
 
     public void UpdateImageUrl(string imageUrl)
     {
-        DomainException.ThrowIfNullOrEmpty(imageUrl, "The artist image url cannot be null or empty");
+        DomainException.ThrowIfNullOrWhiteSpace(imageUrl, "The artist image url cannot be null or empty");
 
         ImageUrl = imageUrl;
     }
