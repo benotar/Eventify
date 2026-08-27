@@ -31,7 +31,7 @@ public abstract class BaseHandlerTest
         return dbContext;
     }
 
-    static async protected Task<Artist> SeedArtistAsync(TestDbContext dbContext, string? bio, string? imageUrl)
+    static async protected Task<Artist> SeedArtistAsync(TestDbContext dbContext, string? bio = null, string? imageUrl = null)
     {
         var artistName = ArtistName.Create(Name);
         var artist = Artist.Create(artistName, bio, imageUrl);

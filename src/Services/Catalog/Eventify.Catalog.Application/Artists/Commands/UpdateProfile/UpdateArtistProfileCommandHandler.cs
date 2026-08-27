@@ -16,11 +16,11 @@ internal sealed class UpdateArtistProfileCommandHandler : ICommandHandler<Update
         _dbContext = dbContext;
     }
 
-    public async Task<Result> Handle(UpdateArtistProfileCommand profileCommand, CancellationToken ct)
+    public async Task<Result> Handle(UpdateArtistProfileCommand profileCommand, CancellationToken cancellationToken)
     {
         var artistId = ArtistId.Create(profileCommand.Id);
 
-        var artist = await _dbContext.Artists.SingleOrDefaultAsync(artist => artist.Id == artistId, ct);
+        var artist = await _dbContext.Artists.SingleOrDefaultAsync(artist => artist.Id == artistId, cancellationToken);
 
         if (artist is null)
         {
@@ -31,7 +31,7 @@ internal sealed class UpdateArtistProfileCommandHandler : ICommandHandler<Update
 
         artist.UpdateProfile(artistName, profileCommand.Bio);
 
-        await _dbContext.SaveChangesAsync(ct);
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
     }
