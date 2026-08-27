@@ -38,7 +38,6 @@ public class UpdateArtistProfileCommandHandlerTests : BaseHandlerTest
         dateTimeOffsetProvider.UtcNow.Returns(DateTimeOffset.UtcNow);
 
         await using var dbContext = await CreateDbContextAsync(dateTimeOffsetProvider);
-
         var originalArtist = await SeedArtistAsync(dbContext, "Original Bio", "Original ImageUrl");
 
         var command = new UpdateArtistProfileCommand { Id = originalArtist.Id.Value, Name = "Updated Name", Bio = "Updated Bio" };
@@ -49,6 +48,8 @@ public class UpdateArtistProfileCommandHandlerTests : BaseHandlerTest
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
+
+        dbContext.ChangeTracker.Clear();
 
         var updatedArtist =
             await dbContext.Artists.SingleAsync(a => a.Id == originalArtist.Id, TestContext.Current.CancellationToken);
