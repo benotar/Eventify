@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Eventify.Catalog.Application.Artists.Queries.Get;
 
-public sealed class GetArtistsQueryHandler : IQueryHandler<GetArtistsQuery, PagedResult<ArtistResponse>>
+internal sealed class GetArtistsQueryHandler : IQueryHandler<GetArtistsQuery, PagedResult<ArtistResponse>>
 {
     private readonly IArtistDbContext _dbContext;
 
