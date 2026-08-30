@@ -15,7 +15,7 @@ public sealed class RegisterUserCommandHandler : ICommandHandler<RegisterUserCom
         _userManager = userManager;
     }
 
-    public async Task<Result<Guid>> Handle(RegisterUserCommand command, CancellationToken cancellationToken)
+    public async Task<Result<Guid>> HandleAsync(RegisterUserCommand command, CancellationToken cancellationToken)
     {
         if (await _userManager.FindByEmailAsync(command.Email) is not null)
         {

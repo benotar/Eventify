@@ -1,6 +1,5 @@
 ﻿using Eventify.ArchitectureTests.Commons;
 using Microsoft.AspNetCore.Mvc;
-using NetArchTest.Rules;
 using Shouldly;
 
 namespace Eventify.Catalog.ArchitectureTests.Layers;
@@ -10,7 +9,7 @@ public class LayerTests : BaseTest
     [Fact]
     public void Domain_Should_NotHaveDependencyOnApplication()
     {
-        var result = ArchitectureChecker.GetNoDependencyOnResult(DomainAssembly, ApplicationAssembly);
+        var result = ArchitectureHelper.GetNoDependencyOnResult(DomainAssembly, ApplicationAssembly);
 
         result.IsSuccessful.ShouldBeTrue();
     }
@@ -18,7 +17,7 @@ public class LayerTests : BaseTest
     [Fact]
     public void Domain_Should_NotHaveDependencyOnInfrastructure()
     {
-        var result = ArchitectureChecker.GetNoDependencyOnResult(DomainAssembly, InfrastructureAssembly);
+        var result = ArchitectureHelper.GetNoDependencyOnResult(DomainAssembly, InfrastructureAssembly);
 
         result.IsSuccessful.ShouldBeTrue();
     }
@@ -26,7 +25,7 @@ public class LayerTests : BaseTest
     [Fact]
     public void Domain_Should_NotHaveDependencyOnPresentation()
     {
-        var result = ArchitectureChecker.GetNoDependencyOnResult(DomainAssembly, PresentationAssembly);
+        var result = ArchitectureHelper.GetNoDependencyOnResult(DomainAssembly, PresentationAssembly);
 
         result.IsSuccessful.ShouldBeTrue();
     }
@@ -34,7 +33,7 @@ public class LayerTests : BaseTest
     [Fact]
     public void Application_Should_NotHaveDependencyOnInfrastructure()
     {
-        var result = ArchitectureChecker.GetNoDependencyOnResult(ApplicationAssembly, InfrastructureAssembly);
+        var result = ArchitectureHelper.GetNoDependencyOnResult(ApplicationAssembly, InfrastructureAssembly);
 
         result.IsSuccessful.ShouldBeTrue();
     }
@@ -42,7 +41,7 @@ public class LayerTests : BaseTest
     [Fact]
     public void Application_Should_NotHaveDependencyOnPresentation()
     {
-        var result = ArchitectureChecker.GetNoDependencyOnResult(ApplicationAssembly, PresentationAssembly);
+        var result = ArchitectureHelper.GetNoDependencyOnResult(ApplicationAssembly, PresentationAssembly);
 
         result.IsSuccessful.ShouldBeTrue();
     }
@@ -50,22 +49,26 @@ public class LayerTests : BaseTest
     [Fact]
     public void Infrastructure_Should_NotHaveDependencyOnPresentation()
     {
-        var result = ArchitectureChecker.GetNoDependencyOnResult(InfrastructureAssembly, PresentationAssembly);
+        var result = ArchitectureHelper.GetNoDependencyOnResult(InfrastructureAssembly, PresentationAssembly);
 
         result.IsSuccessful.ShouldBeTrue();
     }
 
     [Fact]
-    public void Infrastructure_Should_NotInheritController()
+    public void Presentation_Should_NotInheritController()
     {
-        var result = Types.InAssembly(PresentationAssembly)
-            .ShouldNot()
-            .Inherit(typeof(ControllerBase))
-            .Or()
-            .Inherit(typeof(Controller))
-            .GetResult();
+        var result = ArchitectureHelper.GetAssemblyNotInheritTypeResult(PresentationAssembly, typeof(ControllerBase),
+            typeof(Controller));
 
-        result.IsSuccessful.ShouldBeTrue($"Failing types: {string.Join(", ",
-            result.FailingTypes?.Select(t => t.FullName) ?? [])}");
+        result.ShouldBeSuccessful();
+    }
+
+    [Fact]
+    public void ApiEndpoints_Should_NotHaveDependencyOnEfCore()
+    {
+        var result = ArchitectureHelper.GetAssemblyInNamespaceNoDependencyOnResult(PresentationAssembly, "Catalog.Api.Endpoints",
+            "Microsoft.EntityFrameworkCore");
+
+        result.ShouldBeSuccessful();
     }
 }

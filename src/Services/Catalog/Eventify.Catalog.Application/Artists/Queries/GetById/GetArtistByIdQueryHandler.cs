@@ -16,7 +16,7 @@ internal sealed class GetArtistByIdQueryHandler : IQueryHandler<GetArtistByIdQue
         _dbContext = dbContext;
     }
 
-    public async Task<Result<ArtistResponse>> Handle(GetArtistByIdQuery query, CancellationToken cancellationToken)
+    public async Task<Result<ArtistResponse>> HandleAsync(GetArtistByIdQuery query, CancellationToken cancellationToken)
     {
         var artistId = ArtistId.Create(query.Id);
 

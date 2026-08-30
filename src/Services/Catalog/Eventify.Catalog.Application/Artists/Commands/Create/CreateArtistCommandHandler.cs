@@ -16,7 +16,7 @@ internal sealed class CreateArtistCommandHandler : ICommandHandler<CreateArtistC
         _dbContext = dbContext;
     }
 
-    public async Task<Result<Guid>> Handle(CreateArtistCommand command, CancellationToken cancellationToken)
+    public async Task<Result<Guid>> HandleAsync(CreateArtistCommand command, CancellationToken cancellationToken)
     {
         var name = ArtistName.Create(command.Name);
 

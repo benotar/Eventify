@@ -23,7 +23,7 @@ public class DeleteArtistCommandHandlerTests : BaseHandlerTest
         var handler = new DeleteArtistCommandHandler(dbContext);
 
         // Act
-        var result = await handler.Handle(command, TestContext.Current.CancellationToken);
+        var result = await handler.HandleAsync(command, TestContext.Current.CancellationToken);
 
         // Assert
         var artistId = ArtistId.Create(command.Id);
@@ -45,7 +45,7 @@ public class DeleteArtistCommandHandlerTests : BaseHandlerTest
         var handler = new DeleteArtistCommandHandler(dbContext);
 
         // Act
-        var result = await handler.Handle(command, TestContext.Current.CancellationToken);
+        var result = await handler.HandleAsync(command, TestContext.Current.CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

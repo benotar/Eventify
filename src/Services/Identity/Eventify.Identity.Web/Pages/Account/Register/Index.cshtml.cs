@@ -21,7 +21,7 @@ public class Index : PageModel
     {
         var command = new RegisterUserCommand(Model.Email, Model.FirstName, Model.LastName, Model.Password);
 
-        var result = await _handler.Handle(command, cancellationToken);
+        var result = await _handler.HandleAsync(command, cancellationToken);
 
         if (!result.IsSuccess)
         {

@@ -15,7 +15,7 @@ internal sealed class GetArtistsQueryHandler : IQueryHandler<GetArtistsQuery, Pa
         _dbContext = dbContext;
     }
 
-    public async Task<Result<PagedResult<ArtistResponse>>> Handle(GetArtistsQuery query, CancellationToken cancellationToken)
+    public async Task<Result<PagedResult<ArtistResponse>>> HandleAsync(GetArtistsQuery query, CancellationToken cancellationToken)
     {
         var artistQuery = _dbContext.Artists.AsNoTracking();
 

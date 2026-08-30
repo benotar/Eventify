@@ -19,13 +19,13 @@ static internal class LoggingDecorator
             _logger = logger;
         }
 
-        public async Task<Result<TResponse>> Handle(TCommand command, CancellationToken cancellationToken)
+        public async Task<Result<TResponse>> HandleAsync(TCommand command, CancellationToken cancellationToken)
         {
             var commandName = typeof(TCommand).Name;
 
             _logger.LogInformation("Processing command {Command}", commandName);
 
-            var result = await _innerHandler.Handle(command, cancellationToken);
+            var result = await _innerHandler.HandleAsync(command, cancellationToken);
 
             if (result.IsSuccess)
             {
@@ -55,13 +55,13 @@ static internal class LoggingDecorator
             _logger = logger;
         }
 
-        public async Task<Result> Handle(TCommand command, CancellationToken cancellationToken)
+        public async Task<Result> HandleAsync(TCommand command, CancellationToken cancellationToken)
         {
             var commandName = typeof(TCommand).Name;
 
             _logger.LogInformation("Processing command {Command}", commandName);
 
-            var result = await _innerHandler.Handle(command, cancellationToken);
+            var result = await _innerHandler.HandleAsync(command, cancellationToken);
 
             if (result.IsSuccess)
             {
@@ -91,13 +91,13 @@ static internal class LoggingDecorator
             _logger = logger;
         }
 
-        public async Task<Result<TResponse>> Handle(TQuery query, CancellationToken cancellationToken)
+        public async Task<Result<TResponse>> HandleAsync(TQuery query, CancellationToken cancellationToken)
         {
             var queryName = typeof(TQuery).Name;
 
             _logger.LogInformation("Processing query {Query}", queryName);
 
-            var result = await _innerHandler.Handle(query, cancellationToken);
+            var result = await _innerHandler.HandleAsync(query, cancellationToken);
 
             if (result.IsSuccess)
             {

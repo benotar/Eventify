@@ -8,13 +8,13 @@ static internal class ValidationDecorator
     internal sealed class CommandHandler<TCommand, TResponse> : ICommandHandler<TCommand, TResponse>
         where TCommand : ICommand<TResponse>
     {
-        public async Task<Result<TResponse>> Handle(TCommand command, CancellationToken cancellationToken)
+        public async Task<Result<TResponse>> HandleAsync(TCommand command, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
     }
 
-// private readonly IEnumerable<IValidator<TRequest>> _validators;
+    // private readonly IEnumerable<IValidator<TRequest>> _validators;
     //
     // public ValidationDecorator(IEnumerable<IValidator<TRequest>> validators)
     // {
