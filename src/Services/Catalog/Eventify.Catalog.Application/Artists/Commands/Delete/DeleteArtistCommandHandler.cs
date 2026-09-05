@@ -16,7 +16,7 @@ internal sealed class DeleteArtistCommandHandler : ICommandHandler<DeleteArtistC
         _dbContext = dbContext;
     }
 
-    public async Task<Result> Handle(DeleteArtistCommand command, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(DeleteArtistCommand command, CancellationToken cancellationToken)
     {
         var artistId = ArtistId.Create(command.Id);
 

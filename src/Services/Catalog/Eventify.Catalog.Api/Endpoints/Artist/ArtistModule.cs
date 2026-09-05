@@ -13,24 +13,24 @@ using Eventify.SharedKernel.Extensions;
 
 namespace Eventify.Catalog.Api.Endpoints.Artist;
 
-public sealed class ArtistModule : ICarterModule
+internal sealed class ArtistModule : ICarterModule
 {
-    private sealed record GetArtistsRequest(int Page = 1, int PageSize = 20);
+    public sealed record GetArtistsRequest(int Page = 1, int PageSize = 20);
 
-    private sealed record CreateArtistRequest
+    public sealed record CreateArtistRequest
     {
         public required string Name { get; init; }
         public string? Bio { get; init; }
         public string? ImageUrl { get; init; }
     }
 
-    private sealed record UpdateArtistProfileRequest
+    public sealed record UpdateArtistProfileRequest
     {
         public required string Name { get; init; }
         public required string Bio { get; init; }
     }
 
-    private sealed record UpdateArtistImageUrlRequest
+    public sealed record UpdateArtistImageUrlRequest
     {
         public required string ImageUrl { get; init; }
     }
@@ -53,7 +53,7 @@ public sealed class ArtistModule : ICarterModule
         {
             var command = new CreateArtistCommand { Name = request.Name, Bio = request.Bio, ImageUrl = request.ImageUrl };
 
-            var result = await handler.Handle(command, cancellationToken);
+            var result = await handler.HandleAsync(command, cancellationToken);
 
             return result.Match(id => Results.Created($"/v1/artists/{id}", id), CustomResults.Problem);
         });
@@ -65,7 +65,7 @@ public sealed class ArtistModule : ICarterModule
         {
             var command = new UpdateArtistProfileCommand { Id = id, Name = profileRequest.Name, Bio = profileRequest.Bio, };
 
-            var result = await handler.Handle(command, cancellationToken);
+            var result = await handler.HandleAsync(command, cancellationToken);
 
             return result.Match(Results.NoContent, CustomResults.Problem);
         });
@@ -76,7 +76,7 @@ public sealed class ArtistModule : ICarterModule
         {
             var command = new DeleteArtistCommand { Id = id };
 
-            var result = await handler.Handle(command, cancellationToken);
+            var result = await handler.HandleAsync(command, cancellationToken);
 
             return result.Match(Results.NoContent, CustomResults.Problem);
         });
@@ -88,7 +88,7 @@ public sealed class ArtistModule : ICarterModule
         {
             var query = new GetArtistsQuery(request.Page, request.PageSize);
 
-            var result = await handler.Handle(query, cancellationToken);
+            var result = await handler.HandleAsync(query, cancellationToken);
 
             return result.Match(Results.Ok, CustomResults.Problem);
         });
@@ -99,7 +99,7 @@ public sealed class ArtistModule : ICarterModule
         {
             var query = new GetArtistByIdQuery(id);
 
-            var result = await handler.Handle(query, cancellationToken);
+            var result = await handler.HandleAsync(query, cancellationToken);
 
             return result.Match(Results.Ok, CustomResults.Problem);
         });

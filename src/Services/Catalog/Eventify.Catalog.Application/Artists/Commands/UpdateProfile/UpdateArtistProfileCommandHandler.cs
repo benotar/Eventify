@@ -16,7 +16,7 @@ internal sealed class UpdateArtistProfileCommandHandler : ICommandHandler<Update
         _dbContext = dbContext;
     }
 
-    public async Task<Result> Handle(UpdateArtistProfileCommand profileCommand, CancellationToken cancellationToken)
+    public async Task<Result> HandleAsync(UpdateArtistProfileCommand profileCommand, CancellationToken cancellationToken)
     {
         var artistId = ArtistId.Create(profileCommand.Id);
 

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Eventify.Catalog.Application.Artists.Queries.Get;
 
-public sealed class GetArtistsQueryHandler : IQueryHandler<GetArtistsQuery, PagedResult<ArtistResponse>>
+internal sealed class GetArtistsQueryHandler : IQueryHandler<GetArtistsQuery, PagedResult<ArtistResponse>>
 {
     private readonly IArtistDbContext _dbContext;
 
@@ -15,7 +15,7 @@ public sealed class GetArtistsQueryHandler : IQueryHandler<GetArtistsQuery, Page
         _dbContext = dbContext;
     }
 
-    public async Task<Result<PagedResult<ArtistResponse>>> Handle(GetArtistsQuery query, CancellationToken cancellationToken)
+    public async Task<Result<PagedResult<ArtistResponse>>> HandleAsync(GetArtistsQuery query, CancellationToken cancellationToken)
     {
         var artistQuery = _dbContext.Artists.AsNoTracking();
 

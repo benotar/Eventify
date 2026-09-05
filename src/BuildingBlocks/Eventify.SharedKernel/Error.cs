@@ -1,4 +1,4 @@
-namespace Eventify.SharedKernel;
+﻿namespace Eventify.SharedKernel;
 
 public record Error
 {

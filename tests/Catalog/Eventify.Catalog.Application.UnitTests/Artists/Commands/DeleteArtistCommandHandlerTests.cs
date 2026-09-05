@@ -1,13 +1,14 @@
-﻿using Eventify.Catalog.Application.Artists.Commands.UpdateProfile;
+﻿using Eventify.Catalog.Application.Artists.Commands.Delete;
 using Eventify.Catalog.Application.UnitTests.Abstractions;
 using Eventify.Catalog.Domain.Artists;
+using Eventify.Catalog.Domain.Artists.DomainEvents;
 using Eventify.Catalog.Domain.Artists.ValueObjects;
 using Eventify.SharedKernel.Application;
 using Microsoft.EntityFrameworkCore;
 
 namespace Eventify.Catalog.Application.UnitTests.Artists.Commands;
 
-public class UpdateArtistProfileCommandHandlerTests : BaseHandlerTest
+public class DeleteArtistCommandHandlerTests : BaseHandlerTest
 {
     [Fact]
     public async Task Handle_Should_ReturnNotFound_WhenDoesNotExist()
@@ -18,11 +19,11 @@ public class UpdateArtistProfileCommandHandlerTests : BaseHandlerTest
 
         await using var dbContext = await CreateDbContextAsync(dateTimeOffsetProvider);
 
-        var command = new UpdateArtistProfileCommand { Id = Guid.CreateVersion7(), Name = Name, Bio = "UpdatedBio" };
-        var handler = new UpdateArtistProfileCommandHandler(dbContext);
+        var command = new DeleteArtistCommand { Id = Guid.CreateVersion7() };
+        var handler = new DeleteArtistCommandHandler(dbContext);
 
         // Act
-        var result = await handler.Handle(command, TestContext.Current.CancellationToken);
+        var result = await handler.HandleAsync(command, TestContext.Current.CancellationToken);
 
         // Assert
         var artistId = ArtistId.Create(command.Id);
@@ -31,30 +32,26 @@ public class UpdateArtistProfileCommandHandlerTests : BaseHandlerTest
     }
 
     [Fact]
-    public async Task Handle_Should_UpdateProfile_WhenIsValid()
+    public async Task Handle_Should_RemoveArtistAndRaiseDomainEvent_WhenIsValid()
     {
         // Arrange
         var dateTimeOffsetProvider = Substitute.For<IDateTimeOffsetProvider>();
         dateTimeOffsetProvider.UtcNow.Returns(DateTimeOffset.UtcNow);
 
         await using var dbContext = await CreateDbContextAsync(dateTimeOffsetProvider);
-        var originalArtist = await SeedArtistAsync(dbContext, "Original Bio", "Original ImageUrl");
+        var seededArtist = await SeedArtistAsync(dbContext, "Bio");
 
-        var command = new UpdateArtistProfileCommand { Id = originalArtist.Id.Value, Name = "Updated Name", Bio = "Updated Bio" };
-        var handler = new UpdateArtistProfileCommandHandler(dbContext);
+        var command = new DeleteArtistCommand { Id = seededArtist.Id.Value };
+        var handler = new DeleteArtistCommandHandler(dbContext);
 
         // Act
-        var result = await handler.Handle(command, TestContext.Current.CancellationToken);
+        var result = await handler.HandleAsync(command, TestContext.Current.CancellationToken);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
-
-        dbContext.ChangeTracker.Clear();
-
-        var updatedArtist =
-            await dbContext.Artists.SingleAsync(a => a.Id == originalArtist.Id, TestContext.Current.CancellationToken);
-
-        updatedArtist.Name.Value.ShouldBe(command.Name);
-        updatedArtist.Bio.ShouldBe(command.Bio);
+        var exists = await dbContext.Artists
+            .AnyAsync(a => a.Id == ArtistId.Create(command.Id), TestContext.Current.CancellationToken);
+        exists.ShouldBeFalse();
+        seededArtist.DomainEvents.ShouldContain(domainEvent => domainEvent is ArtistDeletedDomainEvent);
     }
 }

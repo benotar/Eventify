@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Eventify.Catalog.Application.Artists.Queries.GetById;
 
-public sealed class GetArtistByIdQueryHandler : IQueryHandler<GetArtistByIdQuery, ArtistResponse>
+internal sealed class GetArtistByIdQueryHandler : IQueryHandler<GetArtistByIdQuery, ArtistResponse>
 {
     private readonly IArtistDbContext _dbContext;
 
@@ -16,7 +16,7 @@ public sealed class GetArtistByIdQueryHandler : IQueryHandler<GetArtistByIdQuery
         _dbContext = dbContext;
     }
 
-    public async Task<Result<ArtistResponse>> Handle(GetArtistByIdQuery query, CancellationToken cancellationToken)
+    public async Task<Result<ArtistResponse>> HandleAsync(GetArtistByIdQuery query, CancellationToken cancellationToken)
     {
         var artistId = ArtistId.Create(query.Id);
 

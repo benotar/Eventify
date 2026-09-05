@@ -1,3 +1,6 @@
-﻿namespace Eventify.Catalog.Application.Venues.Commands.Create;
+﻿using Eventify.SharedKernel.Application.Messaging;
 
-public record CreateVenueCommand();
+namespace Eventify.Catalog.Application.Venues.Commands.Create;
+
+// TODO Implement correct
+public sealed record CreateVenueCommand() : ICommand;

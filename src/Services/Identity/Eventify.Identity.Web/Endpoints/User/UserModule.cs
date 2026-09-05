@@ -30,7 +30,7 @@ public sealed class UserModule : ICarterModule
             {
                 var command = new RegisterUserCommand(request.Email, request.FirstName, request.LastName, request.Password);
 
-                var result = await handler.Handle(command, cancellationToken);
+                var result = await handler.HandleAsync(command, cancellationToken);
 
                 return result.Match(id => Results.Created($"/v1/users/{id}", id), CustomResults.Problem);
 

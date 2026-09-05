@@ -1,4 +1,4 @@
-using Eventify.Catalog.Application.Interfaces;
+﻿using Eventify.Catalog.Application.Interfaces;
 using Eventify.Catalog.Domain.Artists;
 using Eventify.Catalog.Infrastructure.Configurations;
 using Microsoft.Data.Sqlite;
