@@ -24,7 +24,6 @@ public record Address
     {
         DomainException.ThrowIfNullOrEmpty(country, "Country cannot be empty");
         DomainException.ThrowIfNullOrEmpty(city, "City cannot be empty");
-        //DomainException.ThrowIfNullOrEmpty(state, "State cannot be empty");
         DomainException.ThrowIfNullOrEmpty(street, "Street cannot be empty");
         DomainException.ThrowIfNullOrEmpty(zipCode, "ZipCode cannot be empty");
 
