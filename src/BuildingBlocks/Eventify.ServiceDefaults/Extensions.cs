@@ -7,7 +7,6 @@ using Eventify.SharedKernel.Languages;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Localization;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Scalar.AspNetCore;
@@ -16,8 +15,9 @@ namespace Eventify.ServiceDefaults;
 
 public static class Extensions
 {
-    public static IServiceCollection
-        AddSomethingINotDecideShouldDo(this IServiceCollection services) // TODO Change the name of method when I decide what this method should do
+    // TODO Change the name of method when I decide what this method should do
+    public static IServiceCollection AddSomethingINotDecidedShouldDo(
+            this IServiceCollection services)
     {
         services.AddOpenApi();
 
@@ -28,7 +28,6 @@ public static class Extensions
     {
         builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
         builder.Services.AddProblemDetails();
-
 
         builder.Services.AddApiVersioning(options =>
         {
@@ -51,13 +50,6 @@ public static class Extensions
             app.MapScalarApiReference();
 
             app.MapCarter();
-        }
-
-        public async Task MigrateDatabaseAsync<TContext>() where TContext : DbContext
-        {
-            using var scope = app.Services.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<TContext>();
-            await context.Database.MigrateAsync();
         }
     }
 

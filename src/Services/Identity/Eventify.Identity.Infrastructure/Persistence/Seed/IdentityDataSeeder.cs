@@ -18,7 +18,7 @@ public sealed class IdentityDataSeeder : IHostedService
         _adminCredentials = adminCredentials;
     }
 
-    public async Task StartAsync(CancellationToken ct)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
         using var scope = _scopeFactory.CreateScope();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
@@ -75,7 +75,7 @@ public sealed class IdentityDataSeeder : IHostedService
         }
     }
 
-    public Task StopAsync(CancellationToken ct)
+    public Task StopAsync(CancellationToken cancellationToken)
     {
         return Task.CompletedTask;
     }

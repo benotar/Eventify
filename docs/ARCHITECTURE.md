@@ -671,7 +671,7 @@ stateDiagram-v2
 
 **Endpoint pattern (Carter handler):**
 ```csharp
-var result = await sender.Send(req.ToCommand(), ct);
+var result = await sender.Send(req.ToCommand(),cancellationToken);
 return result.Match(
     dto => Results.Ok(dto),
     errors => errors.ToProblemDetails());  // extension in SharedKernel

@@ -19,13 +19,13 @@ public class Error : PageModel
 
     public string? ErrorMessage { get; private set; }
 
-    public async Task OnGet(string? errorId)
+    public async Task OnGet(string? errorId, CancellationToken cancellationToken)
     {
         GoHomeUrl = _servicesOptions.Spa;
 
         if (errorId is not null)
         {
-            var context = await _interaction.GetErrorContextAsync(errorId);
+            var context = await _interaction.GetErrorContextAsync(errorId, cancellationToken);
             ErrorMessage = context?.ErrorDescription ?? context?.Error;
         }
     }

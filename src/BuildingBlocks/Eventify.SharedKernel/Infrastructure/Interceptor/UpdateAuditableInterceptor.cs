@@ -17,14 +17,14 @@ public sealed class UpdateAuditableInterceptor : SaveChangesInterceptor
 
     public override ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData,
         InterceptionResult<int> result,
-        CancellationToken ct = default)
+        CancellationToken cancellationToken = default)
     {
         if (eventData.Context is not null)
         {
             UpdateEntities(eventData.Context);
         }
 
-        return base.SavingChangesAsync(eventData, result, ct);
+        return base.SavingChangesAsync(eventData, result, cancellationToken);
     }
 
     private void UpdateEntities(DbContext context)

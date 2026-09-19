@@ -24,22 +24,22 @@ public class Index : PageModel
         _servicesOptions = servicesOptions;
     }
 
-    public async Task<IActionResult> OnPostAsync()
+    public async Task<IActionResult> OnPostAsync(CancellationToken cancellationToken)
     {
         await _signInManager.SignOutAsync();
 
-        var context = await _interaction.GetLogoutContextAsync(LogoutId);
+        var context = await _interaction.GetLogoutContextAsync(LogoutId, cancellationToken);
 
         var postLogoutUri = context.PostLogoutRedirectUri;
 
         return Redirect(postLogoutUri ?? _servicesOptions.Spa);
     }
 
-    public async Task<IActionResult> OnGetAsync(string? logoutId)
+    public async Task<IActionResult> OnGetAsync(string? logoutId, CancellationToken cancellationToken)
     {
         LogoutId = logoutId;
 
-        var context = await _interaction.GetLogoutContextAsync(logoutId);
+        var context = await _interaction.GetLogoutContextAsync(logoutId, cancellationToken);
 
         CancelUrl = context.PostLogoutRedirectUri ?? _servicesOptions.Spa;
 

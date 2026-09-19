@@ -9,7 +9,7 @@
         <PackageReference Include="Duende.IdentityServer.AspNetIdentity" />
         <PackageReference Include="Duende.IdentityServer.EntityFramework" />
         <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
     </ItemGroup>
 
 </Project>

@@ -1,40 +1,41 @@
 services:
-  eventify_catalogdb:
-    image: postgres:17-alpine
-    container_name: eventify_catalogdb
+  eventify_catalog_db:
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    container_name: eventify_catalog_db
     ports:
-      - '5432:5432'
+      - '1433:1433'
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=EventifyCatalogDb
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=StrongPassword2026!
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      test: [ "CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'StrongPassword2026!' -C -Q 'SELECT 1' || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
     volumes:
-      - catalogdb_pgdata:/var/lib/postgresql/data
-  
-  eventify_identitydb:
-    image: postgres:17-alpine
-    container_name: eventify_identitydb
+      - eventify_catalog_db_data:/var/opt/mssql
+
+  eventify_identity_db:
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    container_name: eventify_identity_db
     ports:
-      - '5433:5432'
+      - '1434:1433'
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=EventifyIdentityDb
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=StrongPassword2026!
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      test: [ "CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'StrongPassword2026!' -C -Q 'SELECT 1' || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
     volumes:
-      - identitydb_pgdata:/var/lib/postgresql/data
+      - eventify_identity_db_data:/var/opt/mssql
 
 volumes:
-  catalogdb_pgdata:
-  identitydb_pgdata:
+  eventify_catalog_db_data:
+  eventify_identity_db_data:
+    driver: local

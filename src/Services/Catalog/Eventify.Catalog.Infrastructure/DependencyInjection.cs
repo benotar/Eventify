@@ -31,11 +31,11 @@ public static class DependencyInjection
             services.AddDbContext<CatalogDbContext>((sp, options) =>
             {
                 options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
-                options.UseNpgsql(dbOption.ConnectionString);
+                options.UseSqlServer(dbOption.ConnectionString);
             });
 
             services.AddScoped<IArtistDbContext>(sp => sp.GetRequiredService<CatalogDbContext>());
-            services.AddScoped<IVenueDbContext>(sp => sp.GetRequiredService<CatalogDbContext>());
+            //services.AddScoped<IVenueDbContext>(sp => sp.GetRequiredService<CatalogDbContext>());
 
             return services;
         }
