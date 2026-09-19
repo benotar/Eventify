@@ -11,11 +11,20 @@ $root = Split-Path -Parent $PSScriptRoot
 $outputDir = Join-Path $root 'deploy/sql'
 New-Item -ItemType Directory -Force -Path $outputDir | Out-Null
 
+$efScript = Join-Path $PSScriptRoot 'ef.ps1'
+
 foreach ($target in $targets)
 {
+    & $efScript $target.Service migrations has-pending-model-changes --context $target.Context
+
+    if ($LASTEXITCODE -ne 0)
+    {
+        throw "$( $target.Context ) has model changes without a migration. Run 'migrations add' first."
+    }
+
     $output = Join-Path $outputDir $target.File
 
-    & (Join-Path $PSScriptRoot 'ef.ps1') $target.Service migrations script --idempotent --context $target.Context --output $output
+    & $efScript $target.Service migrations script --idempotent --context $target.Context --output $output
 
     if ($LASTEXITCODE -ne 0)
     {

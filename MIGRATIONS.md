@@ -37,7 +37,7 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 | Script                   | What it does                                                                                  |
 |--------------------------|-----------------------------------------------------------------------------------------------|
 | `tools/ef.ps1`           | Runs `dotnet ef` for a service, filling in `--project` and `--startup-project`                |
-| `tools/generate-sql.ps1` | Regenerates the idempotent SQL script for every context into `deploy/sql/`                    |
+| `tools/generate-sql.ps1` | Checks every context for model changes without a migration, then regenerates its idempotent SQL script into `deploy/sql/` |
 | `tools/apply-sql.ps1`    | Runs a service's scripts from `deploy/sql/` against a database, optionally creating it first  |
 
 ### `tools/ef.ps1`
@@ -126,11 +126,36 @@ Catalog uses the `EFCore.ComplexIndexes.SqlServer` package for that: declare the
 .\tools\generate-sql.ps1
 ```
 
-Regenerates all files in `deploy/sql/` from the current migrations. The scripts are **idempotent**: before each migration they check the `__EFMigrationsHistory` table and apply only what the database does not have yet, so running a script again is safe.
+For each context, in the order of the [Contexts](#contexts) table, the script:
+
+1. Runs `migrations has-pending-model-changes` — compares the current model with the latest `*ModelSnapshot.cs`.
+   If the model has changes that no migration covers (for example, you changed an entity configuration but forgot `migrations add`), the script **stops with an error** naming the context. Add the migration and run the script again.
+2. Regenerates that context's file in `deploy/sql/` from its migrations.
+
+Because the contexts are processed one after another, a failure on a later context leaves the files of the earlier ones already regenerated. That is harmless — those contexts passed the check, so their files are correct.
+
+The scripts are **idempotent**: before each migration they check the `__EFMigrationsHistory` table and apply only what the database does not have yet, so running a script again is safe.
 
 - **Never edit `deploy/sql/*.sql` by hand** — the next regeneration overwrites them. Change the migration instead and regenerate.
 - The files are stored in git with LF line endings (see `.gitattributes`). A `CRLF will be replaced by LF` warning on `git add` is expected.
 - The files are committed so that anyone can set up a database from them without .NET or the EF tools.
+
+---
+
+## CI check
+
+The `migration-scripts` job in `.github/workflows/build.yml` runs on every pull request to `dev` and `main`. On a clean checkout of the PR it:
+
+1. runs `dotnet tool restore`;
+2. runs `tools/generate-sql.ps1` — this fails if any context has **model changes without a migration**;
+3. runs `git status --porcelain deploy/sql` — this fails if the regenerated files **differ from the committed ones**, i.e. a migration was committed without regenerating the SQL, or a `.sql` file was edited by hand.
+
+The job never commits anything; the regenerated files exist only on the runner, for the comparison.
+It needs no database and no secrets: `migrations script` and `has-pending-model-changes` do not connect to a database.
+
+For pull requests GitHub runs the workflow on the **merge result** of the PR branch and its target branch. So the check also catches two PRs that each added a migration: after the first one is merged, the second one must regenerate its scripts on top of the updated target branch.
+
+**When the job is red:** the log shows the reason — either the context with pending model changes, or the `git diff` of `deploy/sql/`. Fix it locally (`migrations add` and/or `generate-sql.ps1`) and commit.
 
 ---
 
