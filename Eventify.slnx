@@ -28,17 +28,25 @@
     <File Path="global.json" />
   </Folder>
   <Folder Name="/Solution-Items/DevOps/">
+    <File Path=".gitattributes" />
     <File Path=".github/workflows/build.yml" />
     <File Path=".gitignore" />
     <File Path="deploy/docker/compose.yml" />
+    <File Path="dotnet-tools.json" />
+  </Folder>
+  <Folder Name="/Solution-Items/DevOps/Sql/">
+    <File Path="deploy/sql/catalog.sql" />
+    <File Path="deploy/sql/identity-configuration.sql" />
+    <File Path="deploy/sql/identity-operational.sql" />
+    <File Path="deploy/sql/identity.sql" />
   </Folder>
   <Folder Name="/Solution-Items/Docs/">
+    <File Path="MIGRATIONS.md" />
     <File Path="README.md" />
     <File Path="docs/ARCHITECTURE.md" />
     <File Path="docs/OIDC_AUTH_FLOW.md" />
     <File Path="docs/TASKS.md" />
     <File Path="docs/THEORY.md" />
-    <File Path="migrations.txt" />
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="tests/Eventify.ArchitectureTests.Commons/Eventify.ArchitectureTests.Commons.csproj" />
@@ -48,7 +56,9 @@
     <Project Path="tests/Catalog/Eventify.Catalog.ArchitectureTests/Eventify.Catalog.ArchitectureTests.csproj" />
   </Folder>
   <Folder Name="/Tools/">
+    <File Path="tools/apply-sql.ps1" />
     <File Path="tools/ef.ps1" />
+    <File Path="tools/generate-sql.ps1" />
   </Folder>
   <Folder Name="/Tools/tasks-board/">
     <File Path="tools/tasks-board/README.md" />

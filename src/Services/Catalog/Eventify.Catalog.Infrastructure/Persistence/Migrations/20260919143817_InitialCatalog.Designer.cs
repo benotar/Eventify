@@ -4,77 +4,74 @@ using System.Collections.Generic;
 using Eventify.Catalog.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace Eventify.Catalog.Infrastructure.Migrations
+namespace Eventify.Catalog.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(CatalogDbContext))]
-    partial class CatalogDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260919143817_InitialCatalog")]
+    partial class InitialCatalog
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.8")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+                .HasAnnotation("ProductVersion", "10.0.11")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("Eventify.Catalog.Domain.Artists.Artist", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Bio")
                         .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)");
+                        .HasColumnType("nvarchar(2000)");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("ImageUrl")
-                        .ValueGeneratedOnAdd()
                         .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
-                        .HasDefaultValue("https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png");
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.ComplexProperty(typeof(Dictionary<string, object>), "Name", "Eventify.Catalog.Domain.Artists.Artist.Name#ArtistName", b1 =>
-                        {
-                            b1.IsRequired();
-
-                            b1.Property<string>("Value")
-                                .IsRequired()
-                                .HasMaxLength(200)
-                                .HasColumnType("character varying(200)")
-                                .HasColumnName("Name");
-                        });
+                        .HasColumnType("datetimeoffset");
 
                     b.HasKey("Id");
 
-                    b.ToTable("artists", (string)null);
+                    b.HasIndex("Name");
+
+                    b.ToTable("Artists", (string)null);
                 });
 
             modelBuilder.Entity("Eventify.Catalog.Domain.Venues.Venue", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetimeoffset");
 
                     b.ComplexProperty(typeof(Dictionary<string, object>), "Address", "Eventify.Catalog.Domain.Venues.Venue.Address#Address", b1 =>
                         {
@@ -83,7 +80,7 @@ namespace Eventify.Catalog.Infrastructure.Migrations
                             b1.Property<string>("City")
                                 .IsRequired()
                                 .HasMaxLength(100)
-                                .HasColumnType("character varying(100)")
+                                .HasColumnType("nvarchar(100)")
                                 .HasColumnName("Address_City")
                                 .HasAnnotation("CustomIndex:IsIndexed", true)
                                 .HasAnnotation("CustomIndex:IsUnique", false);
@@ -91,25 +88,24 @@ namespace Eventify.Catalog.Infrastructure.Migrations
                             b1.Property<string>("Country")
                                 .IsRequired()
                                 .HasMaxLength(100)
-                                .HasColumnType("character varying(100)")
+                                .HasColumnType("nvarchar(100)")
                                 .HasColumnName("Address_Country");
 
                             b1.Property<string>("State")
-                                .IsRequired()
                                 .HasMaxLength(100)
-                                .HasColumnType("character varying(100)")
+                                .HasColumnType("nvarchar(100)")
                                 .HasColumnName("Address_State");
 
                             b1.Property<string>("Street")
                                 .IsRequired()
                                 .HasMaxLength(200)
-                                .HasColumnType("character varying(200)")
+                                .HasColumnType("nvarchar(200)")
                                 .HasColumnName("Address_Street");
 
                             b1.Property<string>("ZipCode")
                                 .IsRequired()
                                 .HasMaxLength(20)
-                                .HasColumnType("character varying(20)")
+                                .HasColumnType("nvarchar(20)")
                                 .HasColumnName("Address_ZipCode")
                                 .HasAnnotation("CustomIndex:IsIndexed", true)
                                 .HasAnnotation("CustomIndex:IsUnique", false);
@@ -119,7 +115,7 @@ namespace Eventify.Catalog.Infrastructure.Migrations
 
                     b.HasIndex("Name");
 
-                    b.ToTable("venues", (string)null);
+                    b.ToTable("Venues", (string)null);
                 });
 #pragma warning restore 612, 618
         }

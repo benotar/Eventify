@@ -4,7 +4,7 @@
         <ProjectReference Include="..\Eventify.Catalog.Application\Eventify.Catalog.Application.csproj"/>
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="EFCore.ComplexIndexes.PostgreSQL" />
+        <PackageReference Include="EFCore.ComplexIndexes.SqlServer" />
         <PackageReference Include="Microsoft.EntityFrameworkCore"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
         <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />

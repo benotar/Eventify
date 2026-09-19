@@ -19,19 +19,17 @@ public class ArtistConfiguration : IEntityTypeConfiguration<Artist>
         builder.Property(prop => prop.Id)
             .HasConversion(id => id.Value, value => ArtistId.Create(value));
 
-        builder.ComplexProperty(prop => prop.Name, propertyBuilder =>
-        {
-            propertyBuilder.Property(n => n.Value)
-                .HasColumnName(nameof(Artist.Name))
-                .HasMaxLength(SharedConstants.MaxNameLength)
-                .IsRequired();
-        });
+        builder.Property(artist => artist.Name)
+            .HasConversion(name => name.Value, value => ArtistName.Create(value))
+            .HasMaxLength(SharedConstants.MaxNameLength)
+            .IsRequired();
+
+        builder.HasIndex(artist => artist.Name);
 
         builder.Property(prop => prop.Bio)
             .HasMaxLength(SharedConstants.MaxBioLength);
 
         builder.Property(prop => prop.ImageUrl)
-            .HasMaxLength(SharedConstants.MaxImageUrlLength)
-            .HasDefaultValue("https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png");
+            .HasMaxLength(SharedConstants.MaxImageUrlLength);
     }
 }

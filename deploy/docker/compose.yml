@@ -1,41 +1,22 @@
 services:
-  eventify_catalog_db:
+  eventify_db:
     image: mcr.microsoft.com/mssql/server:2025-latest
-    container_name: eventify_catalog_db
+    container_name: eventify_db
     ports:
       - '1433:1433'
     environment:
       - ACCEPT_EULA=Y
-      - SA_PASSWORD=StrongPassword2026!
+      - MSSQL_SA_PASSWORD=StrongPassword2026!
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'StrongPassword2026!' -C -Q 'SELECT 1' || exit 1" ]
+      test: [ "CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $$MSSQL_SA_PASSWORD -C -Q 'SELECT 1' || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
     volumes:
-      - eventify_catalog_db_data:/var/opt/mssql
-
-  eventify_identity_db:
-    image: mcr.microsoft.com/mssql/server:2025-latest
-    container_name: eventify_identity_db
-    ports:
-      - '1434:1433'
-    environment:
-      - ACCEPT_EULA=Y
-      - SA_PASSWORD=StrongPassword2026!
-    restart: unless-stopped
-    healthcheck:
-      test: [ "CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'StrongPassword2026!' -C -Q 'SELECT 1' || exit 1" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-    volumes:
-      - eventify_identity_db_data:/var/opt/mssql
+      - eventify_db_data:/var/opt/mssql
 
 volumes:
-  eventify_catalog_db_data:
-  eventify_identity_db_data:
+  eventify_db_data:
     driver: local
