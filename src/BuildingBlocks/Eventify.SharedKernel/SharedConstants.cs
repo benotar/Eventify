@@ -25,6 +25,12 @@ public static class SharedConstants
     public const int MaxEmailLength = 256;
     public const int MaxPasswordLength = 100;
 
+    public const int CountryMaxLength = 100;
+    public const int CityMaxLength = 100;
+    public const int StateMaxLength = 100;
+    public const int StreetMaxLength =200;
+    public const int ZipCodeMaxLength = 20;
+
     // Pagination
     public const int MinPageSize = 1;
     public const int MaxPageSize = 100;
