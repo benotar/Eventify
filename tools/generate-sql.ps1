@@ -19,7 +19,7 @@ foreach ($target in $targets)
 
     if ($LASTEXITCODE -ne 0)
     {
-        throw "$( $target.Context ) has model changes without a migration. Run 'migrations add' first."
+        throw "$( $target.Context ): 'has-pending-model-changes' failed — either the model has changes without a migration, or the command itself failed. See the output above."
     }
 
     $output = Join-Path $outputDir $target.File

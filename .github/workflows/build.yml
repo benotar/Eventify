@@ -45,6 +45,9 @@ jobs:
         with:
           global-json-file: global.json
 
+      - name: Restore
+        run: dotnet restore Eventify.slnx
+
       - name: Restore .NET tools
         run: dotnet tool restore
 
