@@ -1,1 +1,0 @@
-dotnet ef migrations add InitialCatalog -p src/Services/Catalog/Eventify.Catalog.Infrastructure -s src/Services/Catalog/Eventify.Catalog.Api

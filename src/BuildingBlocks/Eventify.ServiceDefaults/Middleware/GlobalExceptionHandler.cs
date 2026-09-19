@@ -15,7 +15,7 @@ public class GlobalExceptionHandler : IExceptionHandler
         _logger = logger;
     }
 
-    public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken ct)
+    public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
         _logger.LogError(exception, "Unhandled exception: {Message}", exception.Message);
 
@@ -38,7 +38,7 @@ public class GlobalExceptionHandler : IExceptionHandler
 
         httpContext.Response.StatusCode = status;
 
-        await httpContext.Response.WriteAsJsonAsync(problemDetails, ct);
+        await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
 
         return true;
     }

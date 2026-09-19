@@ -22,7 +22,7 @@ public class Index : PageModel
         _interaction = interaction;
     }
 
-    public async Task<IActionResult> OnPostAsync()
+    public async Task<IActionResult> OnPostAsync(CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
         {
@@ -44,7 +44,7 @@ public class Index : PageModel
             return Page();
         }
 
-        var context = await _interaction.GetAuthorizationContextAsync(ReturnUrl);
+        var context = await _interaction.GetAuthorizationContextAsync(ReturnUrl, cancellationToken);
 
         if (context != null || Url.IsLocalUrl(ReturnUrl))
             return Redirect(ReturnUrl!);

@@ -32,3 +32,36 @@ jobs:
 
       - name: Test
         run: dotnet test Eventify.slnx --configuration Release --no-restore --no-build
+
+  migration-scripts:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Restore
+        run: dotnet restore Eventify.slnx
+
+      - name: Restore .NET tools
+        run: dotnet tool restore
+
+      - name: Regenerate migration scripts
+        shell: pwsh
+        run: ./tools/generate-sql.ps1
+
+      - name: Check model and regenerate migration scripts
+        shell: pwsh
+        run: |
+          $changes = git status --porcelain deploy/sql
+          if ($changes)
+          {
+              $changes
+              git diff deploy/sql
+              throw 'deploy/sql is out of date. Run ./tools/generate-sql.ps1 locally and commit the result.'
+          }

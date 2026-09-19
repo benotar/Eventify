@@ -36,6 +36,6 @@ public static class SharedConstants
     public const int MaxPageSize = 100;
 
     // Table names
-    public const string ArtistsTableName = "artists";
-    public const string VenuesTableName = "venues";
+    public const string ArtistsTableName = "Artists";
+    public const string VenuesTableName = "Venues";
 }

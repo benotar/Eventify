@@ -18,66 +18,66 @@ public sealed class IdentityServerSeeder : IHostedService
         _serviceOptions = serviceOptions;
     }
 
-    public async Task StartAsync(CancellationToken ct)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
         using var scope = _scopeFactory.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
 
-        await SeedIdentityResources(dbContext, ct);
-        await SeedApiScopes(dbContext, ct);
-        await SeedApiResources(dbContext, ct);
-        await SeedClients(dbContext, ct);
+        await SeedIdentityResources(dbContext,cancellationToken);
+        await SeedApiScopes(dbContext,cancellationToken);
+        await SeedApiResources(dbContext,cancellationToken);
+        await SeedClients(dbContext, cancellationToken);
     }
 
-    private static async Task SeedIdentityResources(ConfigurationDbContext context, CancellationToken ct)
+    private static async Task SeedIdentityResources(ConfigurationDbContext context, CancellationToken cancellationToken)
     {
-        if (await context.IdentityResources.AnyAsync(ct))
+        if (await context.IdentityResources.AnyAsync(cancellationToken))
         {
             return;
         }
 
-        await context.AddRangeAsync(SeedData.GetIdentityResources().Select(resource => resource.ToEntity()), ct);
+        await context.AddRangeAsync(SeedData.GetIdentityResources().Select(resource => resource.ToEntity()), cancellationToken);
 
-        await context.SaveChangesAsync(ct);
+        await context.SaveChangesAsync(cancellationToken);
     }
 
-    private static async Task SeedApiScopes(ConfigurationDbContext context, CancellationToken ct)
+    private static async Task SeedApiScopes(ConfigurationDbContext context, CancellationToken cancellationToken)
     {
-        if (await context.ApiScopes.AnyAsync(ct))
+        if (await context.ApiScopes.AnyAsync(cancellationToken))
         {
             return;
         }
 
-        await context.AddRangeAsync(SeedData.GetApiScopes().Select(scope => scope.ToEntity()), ct);
+        await context.AddRangeAsync(SeedData.GetApiScopes().Select(scope => scope.ToEntity()), cancellationToken);
 
-        await context.SaveChangesAsync(ct);
+        await context.SaveChangesAsync(cancellationToken);
     }
 
-    private static async Task SeedApiResources(ConfigurationDbContext context, CancellationToken ct)
+    private static async Task SeedApiResources(ConfigurationDbContext context, CancellationToken cancellationToken)
     {
-        if (await context.ApiResources.AnyAsync(ct))
+        if (await context.ApiResources.AnyAsync(cancellationToken))
         {
             return;
         }
 
-        await context.AddRangeAsync(SeedData.GetApiResources().Select(resource => resource.ToEntity()), ct);
+        await context.AddRangeAsync(SeedData.GetApiResources().Select(resource => resource.ToEntity()), cancellationToken);
 
-        await context.SaveChangesAsync(ct);
+        await context.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task SeedClients(ConfigurationDbContext context, CancellationToken ct)
+    private async Task SeedClients(ConfigurationDbContext context, CancellationToken cancellationToken)
     {
-        if (await context.Clients.AnyAsync(ct))
+        if (await context.Clients.AnyAsync(cancellationToken))
         {
             return;
         }
 
-        await context.AddRangeAsync(SeedData.GetClients(_serviceOptions).Select(client => client.ToEntity()), ct);
+        await context.AddRangeAsync(SeedData.GetClients(_serviceOptions).Select(client => client.ToEntity()), cancellationToken);
 
-        await context.SaveChangesAsync(ct);
+        await context.SaveChangesAsync(cancellationToken);
     }
 
-    public Task StopAsync(CancellationToken ct)
+    public Task StopAsync(CancellationToken cancellationToken)
     {
         return Task.CompletedTask;
     }

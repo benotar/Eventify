@@ -17,7 +17,7 @@ public sealed class IdentityProfileService : IProfileService
         _userManager = userManager;
     }
 
-    public async Task GetProfileDataAsync(ProfileDataRequestContext context)
+    public async Task GetProfileDataAsync(ProfileDataRequestContext context, CancellationToken cancellationToken)
     {
         var userId = context.Subject.GetSubjectId();
 
@@ -39,7 +39,7 @@ public sealed class IdentityProfileService : IProfileService
         context.AddRequestedClaims(claims);
     }
 
-    public async Task IsActiveAsync(IsActiveContext context)
+    public async Task IsActiveAsync(IsActiveContext context, CancellationToken cancellationToken)
     {
         var userId = context.Subject.GetSubjectId();
 

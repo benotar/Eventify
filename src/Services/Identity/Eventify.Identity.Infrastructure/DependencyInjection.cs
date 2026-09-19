@@ -42,9 +42,9 @@ public static class DependencyInjection
             services.AddOption<DatabaseOptions>(configuration, out var dbOption);
             var migrationsAssembly = typeof(DependencyInjection).Assembly.GetName().Name;
 
-            services.AddDbContext<ApplicationDbContext>(options =>
+            services.AddDbContext<IdentityDbContext>(options =>
             {
-                options.UseNpgsql(dbOption.ConnectionString);
+                options.UseSqlServer(dbOption.ConnectionString);
             });
 
             services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
@@ -54,7 +54,7 @@ public static class DependencyInjection
                     options.Lockout.MaxFailedAccessAttempts = 5;
                     options.User.RequireUniqueEmail = true;
                 })
-                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddEntityFrameworkStores<IdentityDbContext>()
                 .AddDefaultTokenProviders();
 
             // Explicit UI contract the application cookie
@@ -85,12 +85,12 @@ public static class DependencyInjection
                 .AddConfigurationStore((options) =>
                 {
                     options.ConfigureDbContext = builder =>
-                        builder.UseNpgsql(dbOption.ConnectionString, sql => sql.MigrationsAssembly(migrationsAssembly));
+                        builder.UseSqlServer(dbOption.ConnectionString, sql => sql.MigrationsAssembly(migrationsAssembly));
                 })
                 .AddOperationalStore(options =>
                 {
                     options.ConfigureDbContext = builder =>
-                        builder.UseNpgsql(dbOption.ConnectionString, sql => sql.MigrationsAssembly(migrationsAssembly));
+                        builder.UseSqlServer(dbOption.ConnectionString, sql => sql.MigrationsAssembly(migrationsAssembly));
                 })
                 .AddDeveloperSigningCredential()
                 .AddAspNetIdentity<ApplicationUser>()

@@ -420,7 +420,7 @@ var dtos = await db.Artists
 var artistWithEvents = await db.Artists
     .Include(a => a.Events)
         .ThenInclude(e => e.Sessions)
-    .FirstOrDefaultAsync(a => a.Id == id, ct);
+    .FirstOrDefaultAsync(a => a.Id == id,cancellationToken);
 
 // Read-only queries — disable change tracking for performance
 await db.Artists.AsNoTracking().ToListAsync(ct);
@@ -568,9 +568,9 @@ var app = builder.Build();
 
 app.MapGet("/health", () => Results.Ok("ok"));
 
-app.MapGet("/artists/{id:guid}", async (Guid id, ISender sender, CancellationToken ct) =>
+app.MapGet("/artists/{id:guid}", async (Guid id, ISender sender, CancellationToken cancellationToken) =>
 {
-    var result = await sender.Send(new GetArtistQuery(id), ct);
+    var result = await sender.Send(new GetArtistQuery(id),cancellationToken);
     return result.Match(
         dto => Results.Ok(dto),
         errors => errors.ToProblemDetails());
@@ -828,7 +828,7 @@ When a piece of domain logic doesn't naturally belong to one aggregate (because 
 ```csharp
 public interface IUniqueEmailChecker
 {
-    Task<bool> IsUniqueAsync(Email email, CancellationToken ct);
+    Task<bool> IsUniqueAsync(Email email, CancellationToken cancellationToken);
 }
 ```
 
@@ -843,8 +843,8 @@ A repository abstracts persistence for an aggregate root. One repository per agg
 ```csharp
 public interface IReservationRepository
 {
-    Task<Reservation?> GetByIdAsync(ReservationId id, CancellationToken ct);
-    Task AddAsync(Reservation reservation, CancellationToken ct);
+    Task<Reservation?> GetByIdAsync(ReservationId id, CancellationToken cancellationToken);
+    Task AddAsync(Reservation reservation, CancellationToken cancellationToken);
     void Remove(Reservation reservation);
 }
 ```
@@ -858,10 +858,10 @@ public sealed class ReservationRepository : IReservationRepository
 
     public ReservationRepository(BookingDbContext db) => _db = db;
 
-    public Task<Reservation?> GetByIdAsync(ReservationId id, CancellationToken ct) =>
-        _db.Reservations.Include(r => r.Seats).FirstOrDefaultAsync(r => r.Id == id, ct);
+    public Task<Reservation?> GetByIdAsync(ReservationId id, CancellationToken cancellationToken) =>
+        _db.Reservations.Include(r => r.Seats).FirstOrDefaultAsync(r => r.Id == id,cancellationToken);
 
-    public async Task AddAsync(Reservation r, CancellationToken ct) => await _db.Reservations.AddAsync(r, ct);
+    public async Task AddAsync(Reservation r, CancellationToken cancellationToken) => await _db.Reservations.AddAsync(r,cancellationToken);
 
     public void Remove(Reservation r) => _db.Reservations.Remove(r);
 }
@@ -942,7 +942,7 @@ public sealed class BookingConfirmedDomainEventHandler : INotificationHandler<Bo
 
     public BookingConfirmedDomainEventHandler(BookingDbContext db) => _db = db;
 
-    public async Task Handle(BookingConfirmedDomainEvent e, CancellationToken ct)
+    public async Task Handle(BookingConfirmedDomainEvent e, CancellationToken cancellationToken)
     {
         var integration = new BookingConfirmedIntegrationEvent(
             e.BookingId.Value, e.UserId.Value, e.SessionId.Value,
@@ -950,7 +950,7 @@ public sealed class BookingConfirmedDomainEventHandler : INotificationHandler<Bo
 
         // MassTransit Outbox-aware Bus: the message ends up in the OutboxMessage table
         // in the same transaction as the aggregate.
-        await _publishEndpoint.Publish(integration, ct);
+        await _publishEndpoint.Publish(integration,cancellationToken);
     }
 }
 ```
@@ -1374,14 +1374,14 @@ MediatR (Jimmy Bogard) is an in-process mediator. It decouples the *caller* (an 
 public interface IRequest<TResponse> { }
 public interface IRequestHandler<TRequest, TResponse> where TRequest : IRequest<TResponse>
 {
-    Task<TResponse> Handle(TRequest request, CancellationToken ct);
+    Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken);
 }
 
 // Notifications are pub/sub — many handlers per notification.
 public interface INotification { }
 public interface INotificationHandler<TNotification> where TNotification : INotification
 {
-    Task Handle(TNotification notification, CancellationToken ct);
+    Task Handle(TNotification notification, CancellationToken cancellationToken);
 }
 ```
 
@@ -1429,10 +1429,10 @@ public sealed class CreateArtistCommandHandler : ICommandHandler<CreateArtistCom
         _db = db;
     }
 
-    public async Task<ErrorOr<Guid>> Handle(CreateArtistCommand cmd, CancellationToken ct)
+    public async Task<ErrorOr<Guid>> Handle(CreateArtistCommand cmd, CancellationToken cancellationToken)
     {
         var artist = Artist.Create(cmd.Name, cmd.Bio, cmd.ImageUrl);
-        await _repo.AddAsync(artist, ct);
+        await _repo.AddAsync(artist,cancellationToken);
         await _db.SaveChangesAsync(ct);
         return artist.Id.Value;
     }
@@ -1445,9 +1445,9 @@ public sealed class ArtistsModule : ICarterModule
     {
         var group = app.MapGroup("/v1/artists").WithTags("Artists");
 
-        group.MapPost("/", async (CreateArtistRequest req, ISender sender, CancellationToken ct) =>
+        group.MapPost("/", async (CreateArtistRequest req, ISender sender, CancellationToken cancellationToken) =>
         {
-            var result = await sender.Send(req.ToCommand(), ct);
+            var result = await sender.Send(req.ToCommand(),cancellationToken);
             return result.Match(
                 id => Results.Created($"/v1/artists/{id}", new { id }),
                 errors => errors.ToProblemDetails());
@@ -1498,7 +1498,7 @@ public interface IPipelineBehavior<TRequest, TResponse>
 }
 ```
 
-Note: in MediatR 12.2, `RequestHandlerDelegate<TResponse>` is `delegate Task<TResponse>()` — **no `CancellationToken` parameter**. So you call `await next()`, not `await next(ct)`. If you bump to 12.5+, the signature gains a CT parameter and you call `await next(ct)`.
+Note: in MediatR 12.2, `RequestHandlerDelegate<TResponse>` is `delegate Task<TResponse>()` — **no `CancellationToken` parameter**. So you call `await next()`, not `await next(ct)`. If you bump to 12.5+, the signature gains acancellationToken parameter and you call `await next(ct)`.
 
 ### 15.2 LoggingBehavior
 
@@ -1510,7 +1510,7 @@ public sealed class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRe
 
     public LoggingBehavior(ILogger<LoggingBehavior<TRequest, TResponse>> logger) => _logger = logger;
 
-    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken ct)
+    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
         var name = typeof(TRequest).Name;
         _logger.LogInformation("Handling {Request}", name);
@@ -1542,12 +1542,12 @@ public sealed class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<
 
     public ValidationBehavior(IEnumerable<IValidator<TRequest>> validators) => _validators = validators;
 
-    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken ct)
+    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
         if (!_validators.Any()) return await next();
 
         var context = new ValidationContext<TRequest>(request);
-        var failures = (await Task.WhenAll(_validators.Select(v => v.ValidateAsync(context, ct))))
+        var failures = (await Task.WhenAll(_validators.Select(v => v.ValidateAsync(context,cancellationToken))))
             .SelectMany(r => r.Errors)
             .Where(f => f is not null)
             .ToArray();
@@ -1628,7 +1628,7 @@ private static bool BeIso4217(string code) =>
 
 ```csharp
 RuleFor(x => x.Email)
-    .MustAsync(async (email, ct) => await _users.IsUniqueAsync(email, ct))
+    .MustAsync(async (email,cancellationToken) => await _users.IsUniqueAsync(email,cancellationToken))
     .WithMessage("Email already in use.");
 ```
 
@@ -1690,15 +1690,15 @@ A handler **never throws** for an expected business outcome. It returns `Error.X
 ### 18.1 The basics
 
 ```csharp
-public async Task<ErrorOr<Guid>> Handle(CreateReservationCommand cmd, CancellationToken ct)
+public async Task<ErrorOr<Guid>> Handle(CreateReservationCommand cmd, CancellationToken cancellationToken)
 {
-    if (await _sessions.GetAsync(cmd.SessionId, ct) is not { } session)
+    if (await _sessions.GetAsync(cmd.SessionId,cancellationToken) is not { } session)
         return Error.NotFound("Session.NotFound", "The session does not exist.");
 
     if (session.StartsAt <= _clock.UtcNow)
         return Error.Conflict("Session.AlreadyStarted", "Cannot reserve seats for a started session.");
 
-    var availability = await _seats.CheckAvailabilityAsync(cmd.SessionId, cmd.SeatIds, ct);
+    var availability = await _seats.CheckAvailabilityAsync(cmd.SessionId, cmd.SeatIds,cancellationToken);
     if (availability.Any(a => !a.IsAvailable))
         return Error.Conflict("Seat.Taken", "One or more seats are already reserved.");
 
@@ -1706,7 +1706,7 @@ public async Task<ErrorOr<Guid>> Handle(CreateReservationCommand cmd, Cancellati
     foreach (var seat in availability)
         reservation.AddSeat(seat.SeatId, seat.Price, seat.Category);
 
-    await _repo.AddAsync(reservation, ct);
+    await _repo.AddAsync(reservation,cancellationToken);
     await _db.SaveChangesAsync(ct);
     return reservation.Id.Value;
 }
@@ -1883,7 +1883,7 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
         _env = env;
     }
 
-    public async ValueTask<bool> TryHandleAsync(HttpContext ctx, Exception ex, CancellationToken ct)
+    public async ValueTask<bool> TryHandleAsync(HttpContext ctx, Exception ex, CancellationToken cancellationToken)
     {
         var traceId = Activity.Current?.Id ?? ctx.TraceIdentifier;
         _logger.LogError(ex, "Unhandled exception. TraceId={TraceId}", traceId);
@@ -2418,7 +2418,7 @@ public sealed class CreateReservationCommandHandler : ICommandHandler<CreateRese
 {
     private readonly CatalogService.CatalogServiceClient _catalog;
     // ...
-    public async Task<ErrorOr<Guid>> Handle(CreateReservationCommand cmd, CancellationToken ct)
+    public async Task<ErrorOr<Guid>> Handle(CreateReservationCommand cmd, CancellationToken cancellationToken)
     {
         var session = await _catalog.GetSessionDetailsAsync(
             new GetSessionDetailsRequest { SessionId = cmd.SessionId.ToString() },
@@ -2650,7 +2650,7 @@ public sealed class SeatHeldDomainEventHandler : INotificationHandler<SeatHeldDo
     private readonly IHubContext<SeatsHub> _hub;
     public SeatHeldDomainEventHandler(IHubContext<SeatsHub> hub) => _hub = hub;
 
-    public async Task Handle(SeatHeldDomainEvent e, CancellationToken ct)
+    public async Task Handle(SeatHeldDomainEvent e, CancellationToken cancellationToken)
     {
         await _hub.Clients.Group(e.SessionId.ToString())
             .SendAsync("SeatHeld", new { e.SeatId, e.ExpiresAt }, ct);
@@ -3666,7 +3666,7 @@ public static async Task<PagedResult<TDto>> ToPagedAsync<TEntity, TDto>(
     this IQueryable<TEntity> source,
     int page, int pageSize,
     Expression<Func<TEntity, TDto>> projection,
-    CancellationToken ct)
+    CancellationToken cancellationToken)
 {
     var total = await source.CountAsync(ct);
     var items = await source
@@ -3839,7 +3839,7 @@ public sealed class ArtistsModule : ICarterModule
     }
 
     private static async Task<IResult> ListArtists(
-        int page, int pageSize, ISender sender, CancellationToken ct)
+        int page, int pageSize, ISender sender, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new ListArtistsQuery(page, pageSize), ct);
         return result.Match(Results.Ok, errs => errs.ToProblemDetails());

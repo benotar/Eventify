@@ -5,8 +5,7 @@ using Eventify.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// DI
-builder.Services.AddSomethingINotDecideShouldDo();
+builder.Services.AddSomethingINotDecidedShouldDo();
 
 builder.AddServiceDefaults();
 
@@ -15,12 +14,6 @@ builder.Services
     .AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
-
-// Middleware + routing
-if (app.Environment.IsDevelopment())
-{
-    await app.MigrateDatabaseAsync<CatalogDbContext>();
-}
 
 app.MapDefaultEndpoints();
 

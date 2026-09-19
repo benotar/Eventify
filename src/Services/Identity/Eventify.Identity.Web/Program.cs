@@ -1,7 +1,5 @@
-﻿using Duende.IdentityServer.EntityFramework.DbContexts;
-using Eventify.Identity.Application;
+﻿using Eventify.Identity.Application;
 using Eventify.Identity.Infrastructure;
-using Eventify.Identity.Infrastructure.Persistence;
 using Eventify.ServiceDefaults;
 using Microsoft.Extensions.Options;
 
@@ -24,13 +22,13 @@ builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 
 var app = builder.Build();
 
-// Middleware + routing
-if (app.Environment.IsDevelopment())
-{
-    await app.MigrateDatabaseAsync<ApplicationDbContext>();
-    await app.MigrateDatabaseAsync<ConfigurationDbContext>();
-    await app.MigrateDatabaseAsync<PersistedGrantDbContext>();
-}
+// // Middleware + routing
+// if (app.Environment.IsDevelopment())
+// {
+//     await app.MigrateDatabaseAsync<ApplicationDbContext>();
+//     await app.MigrateDatabaseAsync<ConfigurationDbContext>();
+//     await app.MigrateDatabaseAsync<PersistedGrantDbContext>();
+// }
 
 app.UseWhen(ctx => ctx.Request.Headers.Accept.ToString().Contains("text/html"),
     htmlBranch => htmlBranch.UseExceptionHandler("/Error"));

@@ -5,11 +5,11 @@ namespace Eventify.Catalog.Application.Interfaces;
 
 public interface IArtistRepository
 {
-    Task<Artist?> GetByIdAsync(ArtistId id, CancellationToken ct = default);
+    Task<Artist?> GetByIdAsync(ArtistId id, CancellationToken cancellationToken = default);
 
-    Task<IReadOnlyList<Artist>> GetAllAsync(int page, int pageSize, CancellationToken ct = default);
+    Task<IReadOnlyList<Artist>> GetAllAsync(int page, int pageSize, CancellationToken cancellationToken = default);
 
-    Task<int> CountAsync(CancellationToken ct = default);
+    Task<int> CountAsync(CancellationToken cancellationToken = default);
 
     void Add(Artist artist);
 

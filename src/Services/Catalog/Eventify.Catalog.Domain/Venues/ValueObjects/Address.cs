@@ -1,5 +1,4 @@
 ﻿using Eventify.SharedKernel.Domain.Exceptions;
-using Eventify.SharedKernel.Extensions;
 
 namespace Eventify.Catalog.Domain.Venues.ValueObjects;
 
@@ -7,7 +6,7 @@ public record Address
 {
     public string Country { get; private set; }
     public string City { get; private set; }
-    public string State { get; private set; }
+    public string? State { get; private set; }
     public string Street { get; private set; }
     public string ZipCode { get; private set; }
 

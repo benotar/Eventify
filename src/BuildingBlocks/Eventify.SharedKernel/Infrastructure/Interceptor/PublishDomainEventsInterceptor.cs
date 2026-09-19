@@ -13,17 +13,17 @@ public sealed class PublishDomainEventsInterceptor : SaveChangesInterceptor
     //
     // public async override ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData,
     //     InterceptionResult<int> result,
-    //     CancellationToken ct = default)
+    //     CancellationToken cancellationToken = default)
     // {
     //     if (eventData.Context is not null)
     //     {
-    //         await PublishDomainEventsAsync(eventData.Context, ct);
+    //         await PublishDomainEventsAsync(eventData.Context,cancellationToken);
     //     }
     //
     //     return result;
     // }
     //
-    // private async Task PublishDomainEventsAsync(DbContext context, CancellationToken ct)
+    // private async Task PublishDomainEventsAsync(DbContext context, CancellationToken cancellationToken)
     // {
     //     var domainEvents = context.ChangeTracker
     //         .Entries<IAggregateRoot>()
@@ -44,7 +44,7 @@ public sealed class PublishDomainEventsInterceptor : SaveChangesInterceptor
     //
     //     foreach (var domainEvent in domainEvents)
     //     {
-    //         await _publisher.Publish(domainEvent, ct);
+    //         await _publisher.Publish(domainEvent,cancellationToken);
     //     }
     // }
 }

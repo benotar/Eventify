@@ -1,4 +1,5 @@
-﻿using Eventify.Catalog.Application.Interfaces;
+﻿using EFCore.ComplexIndexes.SqlServer;
+using Eventify.Catalog.Application.Interfaces;
 using Eventify.Catalog.Infrastructure.Persistence;
 using Eventify.Catalog.Infrastructure.Time;
 using Eventify.SharedKernel.Application;
@@ -31,7 +32,7 @@ public static class DependencyInjection
             services.AddDbContext<CatalogDbContext>((sp, options) =>
             {
                 options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
-                options.UseNpgsql(dbOption.ConnectionString);
+                options.UseSqlServer(dbOption.ConnectionString).UseSqlServerComplexIndexes();
             });
 
             services.AddScoped<IArtistDbContext>(sp => sp.GetRequiredService<CatalogDbContext>());
