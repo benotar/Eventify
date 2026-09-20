@@ -1,4 +1,5 @@
-﻿using Eventify.SharedKernel.Extensions;
+﻿using Eventify.SharedKernel.Application.Common;
+using Eventify.SharedKernel.Extensions;
 using FluentValidation;
 
 namespace Eventify.Catalog.Application.Artists.Commands.Create;
@@ -8,7 +9,7 @@ public sealed class CreateArtistCommandValidator : AbstractValidator<CreateArtis
     public CreateArtistCommandValidator()
     {
         RuleFor(command => command.Name)
-            .ArtistName();
+            .EntityName();
 
         RuleFor(command => command.Bio)
             .ArtistBio()

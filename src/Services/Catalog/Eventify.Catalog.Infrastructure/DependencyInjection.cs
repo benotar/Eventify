@@ -21,14 +21,31 @@ public static class DependencyInjection
     {
         public IServiceCollection AddInfrastructure(IConfiguration configuration)
         {
-            services.AddSingleton<IDateTimeOffsetProvider, DateTimeOffsetProvider>();
-            services.AddTransient<IDomainEventsDispatcher, DomainEventsDispatcher>();
+            return services.AddServices(configuration)
+                .AddDatabase(configuration);
+        }
 
+        private IServiceCollection AddServices(IConfiguration configuration)
+        {
+            return services.AddProviders(configuration)
+                .AddTransient<IDomainEventsDispatcher, DomainEventsDispatcher>()
+                .AddInterceptors(configuration);
+        }
+
+        private IServiceCollection AddProviders(IConfiguration configuration)
+        {
+            return services.AddSingleton<IDateTimeOffsetProvider, DateTimeOffsetProvider>();
+        }
+
+        private IServiceCollection AddInterceptors(IConfiguration configuration)
+        {
+            return services.AddScoped<ISaveChangesInterceptor, UpdateAuditableInterceptor>()
+                .AddScoped<ISaveChangesInterceptor, PublishDomainEventsInterceptor>();
+        }
+
+        private IServiceCollection AddDatabase(IConfiguration configuration)
+        {
             services.AddOption<DatabaseOptions>(configuration, out var dbOption);
-
-            services.AddScoped<ISaveChangesInterceptor, UpdateAuditableInterceptor>();
-            services.AddScoped<ISaveChangesInterceptor, PublishDomainEventsInterceptor>();
-
             services.AddDbContext<CatalogDbContext>((sp, options) =>
             {
                 options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());

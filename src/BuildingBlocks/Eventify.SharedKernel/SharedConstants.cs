@@ -18,7 +18,6 @@ public static class SharedConstants
     public const int MinNameLength = 2;
     public const int MinPasswordLength = 8;
 
-
     public const int MaxNameLength = 200;
     public const int MaxBioLength = 2000;
     public const int MaxImageUrlLength = 500;
@@ -28,7 +27,7 @@ public static class SharedConstants
     public const int CountryMaxLength = 100;
     public const int CityMaxLength = 100;
     public const int StateMaxLength = 100;
-    public const int StreetMaxLength =200;
+    public const int StreetMaxLength = 200;
     public const int ZipCodeMaxLength = 20;
 
     // Pagination

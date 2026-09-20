@@ -8,6 +8,8 @@
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Asp.Versioning.Http" />
+        <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" />
+        <PackageReference Include="AspNetCore.HealthChecks.UI.Client" />
         <PackageReference Include="Carter" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />

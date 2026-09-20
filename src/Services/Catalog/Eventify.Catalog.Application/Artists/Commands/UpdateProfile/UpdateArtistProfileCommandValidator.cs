@@ -1,4 +1,5 @@
-﻿using Eventify.SharedKernel.Extensions;
+﻿using Eventify.SharedKernel.Application.Common;
+using Eventify.SharedKernel.Extensions;
 using FluentValidation;
 
 namespace Eventify.Catalog.Application.Artists.Commands.UpdateProfile;
@@ -11,7 +12,7 @@ public sealed class UpdateArtistProfileCommandValidator : AbstractValidator<Upda
             .NotEmpty();
 
         RuleFor(command => command.Name)
-            .ArtistName();
+            .EntityName();
 
         RuleFor(command => command.Bio)
             .ArtistBio()

@@ -6,23 +6,8 @@ namespace Eventify.Catalog.Application.Artists;
 
 static internal class ArtistValidationRules
 {
-    private const string NameRegex = @"^[\p{L}\p{N}\s\-'.]+$";
-
     private static readonly string[] AllowedImageExtensions =
         [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"];
-
-    extension<T>(IRuleBuilder<T, string> ruleBuilder)
-    {
-        public void ArtistName()
-        {
-            ruleBuilder
-                .NotEmpty()
-                .MinimumLength(SharedConstants.MinNameLength)
-                .MaximumLength(SharedConstants.MaxNameLength)
-                .Matches(NameRegex)
-                .Must(name => name.IsNotBlank);
-        }
-    }
 
     extension<T>(IRuleBuilder<T, string?> ruleBuilder)
     {

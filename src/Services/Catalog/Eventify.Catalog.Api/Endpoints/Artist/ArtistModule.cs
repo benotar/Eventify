@@ -1,5 +1,4 @@
-﻿using Asp.Versioning.Conventions;
-using Carter;
+﻿using Carter;
 using Eventify.Catalog.Application.Artists.Commands.Create;
 using Eventify.Catalog.Application.Artists.Commands.Delete;
 using Eventify.Catalog.Application.Artists.Commands.UpdateProfile;
@@ -13,41 +12,32 @@ using Eventify.SharedKernel.Extensions;
 
 namespace Eventify.Catalog.Api.Endpoints.Artist;
 
-internal sealed class ArtistModule : ICarterModule
+public sealed class ArtistModule : ICarterModule
 {
-    public sealed record GetArtistsRequest(int Page = 1, int PageSize = 20);
+    private sealed record GetArtistsRequest(int Page = 1, int PageSize = 20);
 
-    public sealed record CreateArtistRequest
+    private sealed record CreateArtistRequest
     {
         public required string Name { get; init; }
         public string? Bio { get; init; }
         public string? ImageUrl { get; init; }
     }
 
-    public sealed record UpdateArtistProfileRequest
+    private sealed record UpdateArtistProfileRequest
     {
         public required string Name { get; init; }
         public required string Bio { get; init; }
     }
 
-    public sealed record UpdateArtistImageUrlRequest
+    private sealed record UpdateArtistImageUrlRequest
     {
         public required string ImageUrl { get; init; }
     }
 
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        var versionSet = app.NewApiVersionSet()
-            .HasApiVersion(1, 0)
-            .Build();
-
-        var group = app.MapGroup("/v1/artists")
-            .WithTags("Artists")
-            .WithApiVersionSet(versionSet)
-            .HasApiVersion(1, 0);
-
         // Commands
-        group.MapPost("/", async (CreateArtistRequest request,
+        app.MapPost("artists", async (CreateArtistRequest request,
             ICommandHandler<CreateArtistCommand, Guid> handler,
             CancellationToken cancellationToken) =>
         {
@@ -55,10 +45,10 @@ internal sealed class ArtistModule : ICarterModule
 
             var result = await handler.HandleAsync(command, cancellationToken);
 
-            return result.Match(id => Results.Created($"/v1/artists/{id}", id), CustomResults.Problem);
+            return result.Match(id => Results.CreatedAtRoute("GetArtistById", new { id }, id), CustomResults.Problem);
         });
 
-        group.MapPut("/{id:guid}", async (Guid id,
+        app.MapPut("artists/{id:guid}", async (Guid id,
             UpdateArtistProfileRequest profileRequest,
             ICommandHandler<UpdateArtistProfileCommand> handler,
             CancellationToken cancellationToken) =>
@@ -70,7 +60,7 @@ internal sealed class ArtistModule : ICarterModule
             return result.Match(Results.NoContent, CustomResults.Problem);
         });
 
-        group.MapDelete("/{id:guid}", async (Guid id,
+        app.MapDelete("artists/{id:guid}", async (Guid id,
             ICommandHandler<DeleteArtistCommand> handler,
             CancellationToken cancellationToken) =>
         {
@@ -82,7 +72,7 @@ internal sealed class ArtistModule : ICarterModule
         });
 
         // Queries
-        group.MapGet("/", async ([AsParameters] GetArtistsRequest request,
+        app.MapGet("artists", async ([AsParameters] GetArtistsRequest request,
             IQueryHandler<GetArtistsQuery, PagedResult<ArtistResponse>> handler,
             CancellationToken cancellationToken) =>
         {
@@ -93,15 +83,16 @@ internal sealed class ArtistModule : ICarterModule
             return result.Match(Results.Ok, CustomResults.Problem);
         });
 
-        group.MapGet("/{id:guid}", async (Guid id,
-            IQueryHandler<GetArtistByIdQuery, ArtistResponse> handler,
-            CancellationToken cancellationToken) =>
-        {
-            var query = new GetArtistByIdQuery(id);
+        app.MapGet("artists/{id:guid}", async (Guid id,
+                IQueryHandler<GetArtistByIdQuery, ArtistResponse> handler,
+                CancellationToken cancellationToken) =>
+            {
+                var query = new GetArtistByIdQuery(id);
 
-            var result = await handler.HandleAsync(query, cancellationToken);
+                var result = await handler.HandleAsync(query, cancellationToken);
 
-            return result.Match(Results.Ok, CustomResults.Problem);
-        });
+                return result.Match(Results.Ok, CustomResults.Problem);
+            })
+            .WithName("GetArtistById");
     }
 }

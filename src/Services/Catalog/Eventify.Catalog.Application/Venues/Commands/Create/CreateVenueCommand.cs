@@ -2,5 +2,12 @@
 
 namespace Eventify.Catalog.Application.Venues.Commands.Create;
 
-// TODO Implement correct
-public sealed record CreateVenueCommand() : ICommand;
+public sealed record CreateVenueCommand : ICommand<Guid>
+{
+    public required string Name { get; init; }
+    public required string Country { get; init; }
+    public required string City { get; init; }
+    public string? State { get; init; }
+    public required string Street { get; init; }
+    public required string ZipCode { get; init; }
+}

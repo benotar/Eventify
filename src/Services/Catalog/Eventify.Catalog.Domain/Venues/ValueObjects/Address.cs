@@ -10,7 +10,7 @@ public record Address
     public string Street { get; private set; }
     public string ZipCode { get; private set; }
 
-    private Address(string country, string city, string state, string street, string zipCode)
+    private Address(string country, string city, string? state, string street, string zipCode)
     {
         Country = country;
         City = city;
@@ -19,7 +19,7 @@ public record Address
         ZipCode = zipCode;
     }
 
-    public static Address Create(string country, string city, string state, string street, string zipCode)
+    public static Address Create(string country, string city, string? state, string street, string zipCode)
     {
         DomainException.ThrowIfNullOrEmpty(country, "Country cannot be empty");
         DomainException.ThrowIfNullOrEmpty(city, "City cannot be empty");

@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 var builder = WebApplication.CreateBuilder(args);
 
 // DI
-builder.AddServiceDefaults();
+builder.Services.AddCommonPresentation();
 
 builder.Services.Configure<RequestLocalizationOptions>(options => options.ConfigureLocalizationOptions());
 
@@ -22,18 +22,12 @@ builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 
 var app = builder.Build();
 
-// // Middleware + routing
-// if (app.Environment.IsDevelopment())
-// {
-//     await app.MigrateDatabaseAsync<ApplicationDbContext>();
-//     await app.MigrateDatabaseAsync<ConfigurationDbContext>();
-//     await app.MigrateDatabaseAsync<PersistedGrantDbContext>();
-// }
-
 app.UseWhen(ctx => ctx.Request.Headers.Accept.ToString().Contains("text/html"),
     htmlBranch => htmlBranch.UseExceptionHandler("/Error"));
 
-app.MapDefaultEndpoints();
+app.UseExceptionHandler();
+
+app.MapEndpoints();
 
 app.UseStaticFiles();
 
