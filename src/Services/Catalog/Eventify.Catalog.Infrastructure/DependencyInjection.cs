@@ -21,23 +21,24 @@ public static class DependencyInjection
     {
         public IServiceCollection AddInfrastructure(IConfiguration configuration)
         {
-            return services.AddServices(configuration)
-                .AddDatabase(configuration);
+            return services.AddServices()
+                .AddDatabase(configuration)
+                .AddRedisCache(configuration);
         }
 
-        private IServiceCollection AddServices(IConfiguration configuration)
+        private IServiceCollection AddServices()
         {
-            return services.AddProviders(configuration)
+            return services.AddProviders()
                 .AddTransient<IDomainEventsDispatcher, DomainEventsDispatcher>()
-                .AddInterceptors(configuration);
+                .AddInterceptors();
         }
 
-        private IServiceCollection AddProviders(IConfiguration configuration)
+        private IServiceCollection AddProviders()
         {
             return services.AddSingleton<IDateTimeOffsetProvider, DateTimeOffsetProvider>();
         }
 
-        private IServiceCollection AddInterceptors(IConfiguration configuration)
+        private IServiceCollection AddInterceptors()
         {
             return services.AddScoped<ISaveChangesInterceptor, UpdateAuditableInterceptor>()
                 .AddScoped<ISaveChangesInterceptor, PublishDomainEventsInterceptor>();
@@ -54,6 +55,17 @@ public static class DependencyInjection
 
             services.AddScoped<IArtistDbContext>(sp => sp.GetRequiredService<CatalogDbContext>());
             services.AddScoped<IVenueDbContext>(sp => sp.GetRequiredService<CatalogDbContext>());
+
+            return services;
+        }
+
+        private IServiceCollection AddRedisCache(IConfiguration configuration)
+        {
+            services.AddOption<RedisOptions>(configuration, out var redisOption);
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = redisOption.ConnectionString;
+            });
 
             return services;
         }

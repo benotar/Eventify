@@ -2,9 +2,9 @@
 
 namespace Eventify.SharedKernel.Options;
 
-public sealed class DatabaseOptions : IOption
+public sealed class RedisOptions : IOption
 {
-    public static string SectionName { get; } = IOption.GetSectionName<DatabaseOptions>();
+    public static string SectionName { get; } = IOption.GetSectionName<RedisOptions>();
 
     [Required(AllowEmptyStrings = false)] public string ConnectionString { get; init; } = string.Empty;
 }
